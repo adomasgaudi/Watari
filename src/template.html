@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v28</title>
+<title>Adomas · v29</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -290,7 +290,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v28</span>
+    <span class="nav-ver">v29</span>
   </div>
 </nav>
 
@@ -303,6 +303,7 @@
   <div class="tab" data-tab="adhd">ADHD</div>
   <div class="tab" data-tab="finances">Finances</div>
   <div class="tab" data-tab="language">Language</div>
+  <div class="tab" data-tab="remember">Remember</div>
 </div>
 
 <!-- ══════════════ TASKS ══════════════ -->
@@ -638,10 +639,23 @@
   </div>
 </main></div>
 
+<!-- ══════════════ REMEMBER ══════════════ -->
+<div class="panel" id="panel-remember"><main>
+  <div class="sec">
+    <div class="sec-head"><span class="sec-label">Remember</span></div>
+    <div id="remember-list" style="margin-bottom:6px"></div>
+    <div class="inline-add">
+      <input type="text" id="remember-title" class="sel-input" placeholder="thing to remember…" style="flex:2">
+      <input type="text" id="remember-note" class="sel-input" placeholder="note / link (optional)" style="flex:3">
+      <button class="add-btn" id="remember-add-btn">+</button>
+    </div>
+  </div>
+</main></div>
+
 <!-- Version history FAB + popup: MUST be before the init script so it can wire them (PB-1) -->
 <div id="ver-overlay"></div>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v28</button>
+<button id="ver-fab">📋 v29</button>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -742,6 +756,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:29, title:"Remember tab (notes list)", sp:2, note:"New Remember tab: an editable list of things to keep around (title + note/link, inline add, delete). Links auto-detected and clickable. Seeded once into wat_remember_v1 with SearXNG (privacy metasearch) and the vivamokykla contacts page."},
   {v:28, title:"Seed 'Beyond the Basics · Claude Code' deck", sp:3, note:"Language tab ships a 19-card deck distilled from the agentic-engineering talk + the worktrees setup slide: Access/Memory/Tooling levers, in-context learning vs fine-tuning, the Bitter Lesson, Post-Tool-Use hooks, subagents, and the ~16-worktree no-cherry-picking setup. Seeded once into wat_lang_v1 (SC1–SC19); user cards untouched, deletions stick."},
   {v:27, title:"YT fetch: 3-proxy fallback chain", sp:1, note:"corsproxy.io returned 429 (rate-limited). Now tries corsproxy.io → allorigins.win/raw → thingproxy.freeboard.io in sequence; skips to next on 429/5xx/timeout. First proxy to respond 200 wins."},
   {v:26, title:"Fix YT transcript: page-scrape approach", sp:2, note:"Old approach guessed lang codes → empty JSON → parse error. New: fetch video page via proxy, extract all real captionTrack baseUrls YouTube embeds in HTML, pick best English track, fetch it. Handles JSON3 and XML formats. Falls back clearly on failure."},
@@ -826,6 +841,7 @@ function saveFinGoals(){lsSave("wat_fingoals_v1",finGoals);dbPush("wat_fingoals"
 function saveSleepLog(){lsSave("wat_sleep_v1",sleepLog);dbPush("wat_sleep",sleepLog)}
 function saveMeds(){lsSave("wat_meds_v1",meds);dbPush("wat_meds",meds)}
 function saveWins(){lsSave("wat_wins_v1",wins);dbPush("wat_wins",wins)}
+function saveRemember(){lsSave("wat_remember_v1",remember)}
 function saveWeightLog(){lsSave("wat_weight_v1",weightLog);dbPush("wat_weight",weightLog)}
 
 async function initSupabase(){
@@ -878,6 +894,13 @@ let sleepLog   = ls("wat_sleep_v1",   []);
 let meds       = ls("wat_meds_v1",    [{id:"M1",date:"2026-06-26",time:"08:00",med:"Vyvanse",taken:false}]);
 let wins       = ls("wat_wins_v1",    []);
 let weightLog  = ls("wat_weight_v1",  []);
+// Remember: a simple editable list of things to keep around. Seeded once.
+const REMEMBER_SEED = [
+  {id:"R1", title:"SearXNG", note:"Self-hosted, privacy-respecting metasearch engine — aggregates results from many engines with no tracking. Good for wiring an agent up to web search. github.com/searxng/searxng"},
+  {id:"R2", title:"Vivamokykla — contacts", note:"https://vivamokykla.lt/kontaktai-2/"},
+];
+let remember   = ls("wat_remember_v1", null);
+if(!Array.isArray(remember)){remember=REMEMBER_SEED.map(r=>({...r}));lsSave("wat_remember_v1",remember);}
 let foodFilter = "both";
 
 function nextId(arr,p){const n=arr.map(x=>parseInt(x.id.replace(/\D/g,""))||0);return p+(Math.max(0,...n)+1)}
@@ -1342,6 +1365,37 @@ document.addEventListener("click",e=>{
     const today=new Date().toISOString().slice(0,10);
     wins.push({id:nextId(wins,"W"),date:today,text});
     saveWins();document.getElementById("wins-text").value="";renderAdhdTab();
+  }
+});
+
+// Remember tab
+function rememberNoteHtml(note){
+  const s=esc(note||"");
+  return s.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:var(--blue)">$1</a>');
+}
+function renderRememberTab(){
+  const el=document.getElementById("remember-list");
+  if(!el)return;
+  el.innerHTML=remember.map(r=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+    <div style="flex:1;min-width:0">
+      <div style="font-weight:600;font-size:.9rem">${esc(r.title)}</div>
+      ${r.note?`<div style="font-size:.8rem;color:var(--muted);word-break:break-word;margin-top:2px">${rememberNoteHtml(r.note)}</div>`:""}
+    </div>
+    <button class="pill pill-sm" data-del-rem="${r.id}" style="padding:2px 8px">✕</button>
+  </div>`).join("")||`<div style="color:var(--muted);font-size:.82rem">Nothing to remember yet.</div>`;
+}
+document.addEventListener("click",e=>{
+  const dr=e.target.dataset.delRem;
+  if(dr){remember=remember.filter(x=>x.id!==dr);saveRemember();renderRememberTab();return;}
+  if(e.target.id==="remember-add-btn"){
+    const t=document.getElementById("remember-title").value.trim();
+    const n=document.getElementById("remember-note").value.trim();
+    if(!t&&!n)return;
+    remember.push({id:nextId(remember,"R"),title:t||n,note:t?n:""});
+    saveRemember();
+    document.getElementById("remember-title").value="";
+    document.getElementById("remember-note").value="";
+    renderRememberTab();
   }
 });
 
@@ -2062,6 +2116,7 @@ renderWardrobeTab();
 renderScheduleTab();
 renderFinancesTab();
 renderLanguageTab();
+renderRememberTab();
 // Connect to Supabase after local render (offline-first: local shows first)
 initSupabase();
 </script>
