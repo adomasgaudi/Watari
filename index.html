@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v3</title>
+<title>Adomas · v4</title>
 <style>
   :root {
     --bg: #0d0d0d;
@@ -163,7 +163,7 @@
   <span class="nav-name">Adomas</span>
   <div class="nav-right">
     <span class="nav-status">● Open to clients</span>
-    <span class="nav-ver">v3</span>
+    <span class="nav-ver">v4</span>
   </div>
 </nav>
 
@@ -207,15 +207,35 @@ const DEFAULT_TASKS = [
   { id: "T1", proj: "Colosseum", title: "Make usable by customers",
     detail: "Ship the features customers need to use it independently",
     status: "active", priority: "high" },
-  { id: "T2", proj: "VZ", title: "Finish new tasks",
-    detail: "Work through the open VZ backlog items",
-    status: "active", priority: "high" },
-  { id: "T3", proj: "Science curriculum", title: "Develop science curriculum",
+  { id: "T2", proj: "Science curriculum", title: "Develop science curriculum",
     detail: "Build personal science learning system in the language repo",
-    status: "active", priority: "med" }
+    status: "active", priority: "med" },
+  { id: "T3", proj: "Market analytics", title: "Supabase integration",
+    detail: "Connect VZ dashboard to Supabase for persistent data",
+    status: "active", priority: "high" },
+  { id: "T4", proj: "Market analytics", title: "LT translate",
+    detail: "Lithuanian translations for all user-facing text",
+    status: "active", priority: "high" },
+  { id: "T5", proj: "Market analytics", title: "All info checkable",
+    detail: "Every stat/number links to its source so it can be verified",
+    status: "active", priority: "med" },
+  { id: "T6", proj: "Market analytics", title: "Other sources of info",
+    detail: "Pull in additional data sources beyond the current export",
+    status: "active", priority: "med" },
+  { id: "T7", proj: "Market analytics", title: "Predicting values",
+    detail: "Forecast future financials based on historical trends",
+    status: "active", priority: "med" },
+  { id: "T8", proj: "Market analytics", title: "Error margins",
+    detail: "Show confidence intervals / uncertainty on all estimates",
+    status: "active", priority: "med" },
+  { id: "T9", proj: "Market analytics", title: "More grouping options",
+    detail: "Group by employee count, company age, or city",
+    status: "active", priority: "low" }
 ];
 
 const VERSIONS = [
+  { v: 4, title: "Market analytics tasks added", sp: 1,
+    note: "7 VZ/market-analytics tasks: Supabase, LT, sources, predictions, margins, grouping." },
   { v: 3, title: "Editable tasks + suggestion engine", sp: 4,
     note: "Inline edit, add/delete, localStorage persistence, smart suggestions." },
   { v: 2, title: "Personal assistant — profile, tasks, goals", sp: 3,
