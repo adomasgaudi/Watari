@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v13</title>
+<title>Adomas · v14</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -247,7 +247,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v13</span>
+    <span class="nav-ver">v14</span>
   </div>
 </nav>
 
@@ -550,6 +550,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:14, title:"Project pill + add-to-project", sp:2, note:"Task cards show tappable project pill (cycles through projects). Project headers have + button to add task to that project."},
   {v:13, title:"Version history popup bottom-right", sp:1,
    note:"Moved version history out of Tasks panel into a fixed bottom-right FAB popup."},
   {v:12, title:"Projects collapsed by default", sp:1,
@@ -751,7 +752,7 @@ function taskCard(t){
     <div class="task-pills">
       <button class="pill pill-sm ${SC[t.status]}" data-cycle="status" data-i="${i}">${SL[t.status]}</button>
       <button class="pill pill-sm ${PC[t.priority]}" data-cycle="priority" data-i="${i}">${PL[t.priority]}</button>
-      ${t.proj&&taskGroup==="flat"?`<span style="font-size:11px;color:var(--muted);margin-left:2px">${esc(t.proj)}</span>`:""}
+      <button class="pill pill-sm" style="background:var(--surface2);color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-cycle-proj="${i}" title="Change project">${esc(t.proj||"No project")}</button>
     </div>
   </div>`;
 }
@@ -800,6 +801,7 @@ function renderTasks(){
         <span class="proj-name">${esc(proj)}</span>
         <span class="proj-meta">${active}/${total} active</span>
         <span class="proj-arrow">▾</span>
+        <button class="pill pill-sm" style="margin-left:6px;padding:0 8px;font-size:13px;background:var(--surface2);color:var(--muted)" data-add-proj="${esc(proj)}" title="Add task to ${esc(proj)}">+</button>
       </div>
       <div class="proj-tasks">${list.map(taskCard).join("")}</div>
     </div>`;
@@ -845,7 +847,30 @@ document.getElementById("task-list").addEventListener("click",e=>{
   const cb=e.target.closest("[data-cycle]");
   if(cb){const f=cb.dataset.cycle,i=parseInt(cb.dataset.i);tasks[i][f]=cycle(f==="status"?STC:PRC,tasks[i][f]);saveTasks();renderTasksTab();return}
   const db=e.target.closest("[data-del]");
-  if(db){tasks.splice(parseInt(db.dataset.del),1);saveTasks();renderTasksTab()}
+  if(db){tasks.splice(parseInt(db.dataset.del),1);saveTasks();renderTasksTab();return}
+  // cycle project
+  const cp=e.target.closest("[data-cycle-proj]");
+  if(cp){
+    const i=parseInt(cp.dataset.cycleProj);
+    const projs=[...new Set(tasks.map(t=>t.proj||"").filter(Boolean))];
+    if(!projs.length)return;
+    const cur=tasks[i].proj||"";
+    const idx=projs.indexOf(cur);
+    tasks[i].proj=projs[(idx+1)%projs.length];
+    saveTasks();renderTasksTab();return;
+  }
+  // add task to project
+  const ap=e.target.closest("[data-add-proj]");
+  if(ap){
+    e.stopPropagation();
+    const proj=ap.dataset.addProj;
+    const title=prompt(`New task in "${proj}"`);
+    if(!title||!title.trim())return;
+    tasks.push({id:nextId(tasks,"T"),title:title.trim(),detail:"",proj,status:"active",priority:"med"});
+    // expand the group so user sees the new task
+    collapsedProjs.delete(proj);lsSave("wat_task_collapsed_v2",[...collapsedProjs]);
+    saveTasks();renderTasksTab();return;
+  }
 });
 function addTask(){const inp=document.getElementById("add-input"),t=inp.value.trim();if(!t)return;tasks.push({id:nextId(tasks,"T"),title:t,detail:"",proj:"",status:"active",priority:"med"});saveTasks();inp.value="";renderTasksTab()}
 document.getElementById("add-btn").addEventListener("click",addTask);
@@ -1207,6 +1232,6 @@ renderFinancesTab();
 initSupabase();
 </script>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v13</button>
+<button id="ver-fab">📋 v14</button>
 </body>
 </html>
