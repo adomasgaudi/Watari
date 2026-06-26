@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v21</title>
+<title>Adomas · v22</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -244,6 +244,41 @@
   #ver-popup{position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));right:16px;z-index:200;background:var(--surface);border:1px solid var(--border2);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);width:min(260px,calc(100vw - 32px));max-height:55vh;overflow-y:auto;padding:10px 12px;display:none}
   #ver-popup.open{display:block}
   input,select,textarea{min-width:0;max-width:100%}
+
+  /* LANGUAGE */
+  .lang-tabs{display:flex;gap:6px;margin-bottom:14px}
+  .lang-tab{height:28px;padding:0 12px;font-size:12px;font-weight:700;border-radius:var(--r);cursor:pointer;border:none;background:var(--surface2);color:var(--muted);user-select:none}
+  .lang-tab.on{background:var(--blue-dim);color:var(--blue)}
+  .lang-due-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--blue);color:#fff;font-size:10px;font-weight:700;margin-left:5px}
+  .flash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px 18px;margin-bottom:12px;text-align:center;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .flash-front{font-size:22px;font-weight:700;color:var(--text-hi);line-height:1.3}
+  .flash-back{font-size:15px;color:var(--text);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);width:100%}
+  .flash-note{font-size:12px;color:var(--muted);margin-top:6px}
+  .flash-meta{font-size:11px;color:var(--muted2);margin-bottom:8px}
+  .interval-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0}
+  .interval-label{font-size:12px;color:var(--muted);white-space:nowrap}
+  .interval-val{font-size:14px;font-weight:700;color:var(--blue);min-width:80px}
+  .band-btns{display:flex;gap:4px}
+  .band-btn{height:26px;padding:0 9px;font-size:11px;font-weight:600;border-radius:var(--r);border:none;cursor:pointer;background:var(--surface2);color:var(--muted)}
+  .band-btn.on{background:var(--blue-dim);color:var(--blue)}
+  .commit-btn{background:var(--blue);color:#fff;border:none;border-radius:var(--r);height:32px;padding:0 16px;font-size:13px;font-weight:700;cursor:pointer;margin-left:auto}
+  .commit-btn:active{opacity:.8}
+  .lang-card-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:7px;display:flex;gap:10px;align-items:flex-start}
+  .lang-card-body{flex:1;min-width:0}
+  .lang-card-front{font-size:13px;font-weight:600;background:none;border:none;color:var(--text);outline:none;font-family:inherit;width:100%;padding:0;margin-bottom:3px}
+  .lang-card-back{font-size:12px;background:none;border:none;color:var(--muted);outline:none;font-family:inherit;width:100%;padding:0}
+  .lang-card-back:focus,.lang-card-front:focus{color:var(--text)}
+  .lang-card-srs{font-size:10px;color:var(--muted2);margin-top:4px}
+  .lang-empty{text-align:center;color:var(--muted);font-size:14px;padding:40px 20px}
+  .import-area{width:100%;height:140px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font:13px/1.5 system-ui,sans-serif;padding:10px;resize:vertical;outline:none;box-sizing:border-box}
+  .import-area:focus{border-color:var(--border2)}
+  .import-preview{margin-top:10px}
+  .import-sent{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px;margin-bottom:5px;font-size:12px;display:flex;align-items:center;gap:8px}
+  .import-sent-txt{flex:1;color:var(--text)}
+  .import-sent-rm{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:0}
+  .import-sent-rm:hover{color:var(--red)}
+  .memory-map{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px}
+  .mm-dot{width:12px;height:12px;border-radius:3px;cursor:pointer;flex-shrink:0}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -255,7 +290,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v21</span>
+    <span class="nav-ver">v22</span>
   </div>
 </nav>
 
@@ -267,6 +302,7 @@
   <div class="tab" data-tab="sleep">Sleep</div>
   <div class="tab" data-tab="adhd">ADHD</div>
   <div class="tab" data-tab="finances">Finances</div>
+  <div class="tab" data-tab="language">Language</div>
 </div>
 
 <!-- ══════════════ TASKS ══════════════ -->
@@ -521,10 +557,83 @@
   </div>
 </main></div>
 
+<!-- ══════════════ LANGUAGE ══════════════ -->
+<div class="panel" id="panel-language"><main>
+  <div class="lang-tabs">
+    <button class="lang-tab on" id="ltab-study" onclick="showLangTab('study')">Study<span class="lang-due-badge" id="lang-due-badge">0</span></button>
+    <button class="lang-tab" id="ltab-cards" onclick="showLangTab('cards')">Cards</button>
+    <button class="lang-tab" id="ltab-import" onclick="showLangTab('import')">+ Import</button>
+  </div>
+
+  <!-- STUDY -->
+  <div id="lpanel-study">
+    <div id="lang-study-empty" class="lang-empty" style="display:none">🎉 Nothing due right now.</div>
+    <div id="lang-study-card" style="display:none">
+      <div class="flash-meta" id="flash-meta"></div>
+      <div class="flash-card" id="flash-card">
+        <div class="flash-front" id="flash-front"></div>
+        <div id="flash-answer" style="display:none">
+          <div class="flash-back" id="flash-back"></div>
+          <div class="flash-note" id="flash-note"></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+        <button class="pill" id="lang-prev">← Prev</button>
+        <button class="pill" id="lang-reveal" style="background:var(--blue-dim);color:var(--blue)">Show answer</button>
+        <button class="pill" id="lang-next">Next →</button>
+      </div>
+      <div id="lang-interval-ctrl" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:none">
+        <div class="interval-row">
+          <span class="interval-label">Next review in</span>
+          <span class="interval-val" id="interval-val">1h</span>
+          <div class="band-btns">
+            <button class="band-btn on" data-band="0" onclick="setLangBand(0)">Min</button>
+            <button class="band-btn" data-band="1" onclick="setLangBand(1)">Hr</button>
+            <button class="band-btn" data-band="2" onclick="setLangBand(2)">Day</button>
+          </div>
+          <button class="commit-btn" id="lang-commit">Commit ↵</button>
+        </div>
+        <input type="range" id="interval-slider" min="0" max="1000" value="500" style="width:100%;accent-color:var(--blue);touch-action:none">
+      </div>
+    </div>
+    <div id="lang-memmap" style="margin-top:14px">
+      <div style="font-size:11px;color:var(--muted2);margin-bottom:4px">Memory map</div>
+      <div class="memory-map" id="mm-dots"></div>
+    </div>
+  </div>
+
+  <!-- CARDS -->
+  <div id="lpanel-cards" style="display:none">
+    <div id="lang-cards-list"></div>
+    <div class="inline-add" style="margin-top:10px">
+      <input class="sel-input" id="lc-add-front" placeholder="Front…" style="flex:1"/>
+      <input class="sel-input" id="lc-add-back" placeholder="Back (translation)…" style="flex:1"/>
+      <button class="pill pill-sm add-btn" id="lc-add-btn">+ Add</button>
+    </div>
+  </div>
+
+  <!-- IMPORT -->
+  <div id="lpanel-import" style="display:none">
+    <div class="sec">
+      <div class="sec-head"><span class="sec-label">Paste transcript</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Paste any text (YouTube transcript, article, lyrics…) — each line/sentence becomes a card front. Fill in translations while studying.</div>
+      <textarea class="import-area" id="lang-import-text" placeholder="Paste text here…"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <button class="pill pill-sm add-btn" id="lang-import-split">Split into cards</button>
+        <button class="pill pill-sm" id="lang-import-clear" style="color:var(--muted)">Clear</button>
+      </div>
+    </div>
+    <div class="import-preview" id="lang-import-preview"></div>
+    <div id="lang-import-add-wrap" style="display:none;margin-top:10px">
+      <button class="pill add-btn" id="lang-import-add-all">Add all to deck</button>
+    </div>
+  </div>
+</main></div>
+
 <!-- Version history FAB + popup: MUST be before the init script so it can wire them (PB-1) -->
 <div id="ver-overlay"></div>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v21</button>
+<button id="ver-fab">📋 v22</button>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -621,6 +730,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:22, title:"Language tab + SRS + transcript import", sp:8, note:"New Language tab: SRS flashcard engine (manual interval slider), card list with inline edit, transcript import (paste text → split into cards), memory-map dots. Stored in localStorage wat_lang_v1."},
   {v:21, title:"Fix recursive save wrappers (add task)", sp:2, note:"saveTasks/Foods/Clothes/Laundry/Blocks/Events/Income/Expenses called themselves → stack overflow → add/edit/delete threw. Now call lsSave with the right key. Dormant until v20 made init actually run. Width confirmed clean, diagnostic removed."},
   {v:20, title:"PB-1 TRUE root: script-order bug + grid minmax", sp:3, note:"FAB/popup markup was AFTER the init script → getElementById null → threw → FAB listener never attached AND renderDiet/Schedule/Finances + initSupabase never ran. Moved markup before script. Grid 1fr→minmax(0,1fr) stops long URLs blowing out width. input min-width:0. On-screen width diagnostic banner added."},
   {v:19, title:"Add vivamokykla task + default merge", sp:1, note:"T17 analyse vivamokykla.lt added. initSupabase now merges new DEFAULT_TASKS not yet in DB so future default additions auto-push."},
@@ -1492,6 +1602,285 @@ document.getElementById("fg-add-btn").addEventListener("click",()=>{
 });
 
 // ══════════════════════════════════════════════════════════════════
+// LANGUAGE — SRS flashcard engine
+// ══════════════════════════════════════════════════════════════════
+const LANG_KEY = "wat_lang_v1";
+
+function langLoad(){
+  try{return JSON.parse(localStorage.getItem(LANG_KEY))||{cards:[],srs:{}};}
+  catch{return{cards:[],srs:{}};}
+}
+function langSave(d){try{localStorage.setItem(LANG_KEY,JSON.stringify(d));}catch{}}
+
+let langData = langLoad(); // {cards:[{id,front,back,note}], srs:{id:{status,due,last,interval,reps}}}
+
+function lsrs(id){
+  return langData.srs[id]||(langData.srs[id]={status:"new",due:0,last:null,interval:0,reps:0});
+}
+
+function langNextId(){
+  const ns=langData.cards.map(c=>parseInt(c.id.replace(/\D/g,""))||0);
+  return"LC"+(Math.max(0,...ns)+1);
+}
+
+const MINUTE_MS=60000;
+function langIsDue(rec,now){return rec.status==="new"||now>=rec.due;}
+
+function langCommitInterval(rec,minutes,now){
+  const interval=Math.max(0,minutes);
+  return{status:"scheduled",last:now,due:now+interval*MINUTE_MS,interval,reps:(rec.reps||0)+1};
+}
+
+function langFreshness(rec,now){
+  if(rec.last===null||rec.interval<=0)return 0;
+  const f=1-(now-rec.last)/(rec.interval*MINUTE_MS);
+  return f<0?0:f>1?1:f;
+}
+
+// Interval bands: [label, minMin, maxMin]
+const LANG_BANDS=[["Min",1,60],["Hr",60,60*24],["Day",60*24,60*24*30]];
+let langBand=1, langPos=0.4;
+let langCurrentIdx=0, langRevealed=false, langView="study";
+let langImportLines=[];
+
+function langMinutesFromPos(band,pos){
+  const[,lo,hi]=LANG_BANDS[band];
+  return Math.round(lo+pos*pos*(hi-lo));
+}
+
+function fmtMinutes(m){
+  if(m<60)return m+"m";
+  if(m<60*24)return Math.round(m/60)+"h";
+  return Math.round(m/(60*24))+"d";
+}
+
+function fmtDueLabel(m){
+  const now=Date.now(),due=now+m*MINUTE_MS;
+  const d=new Date(due);
+  if(m<120)return"soon";
+  if(m<60*24)return d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+  return d.toLocaleDateString([],{month:"short",day:"numeric"});
+}
+
+function getDueCards(){
+  const now=Date.now();
+  return langData.cards.filter(c=>langIsDue(lsrs(c.id),now));
+}
+
+function showLangTab(view){
+  langView=view;
+  ["study","cards","import"].forEach(v=>{
+    document.getElementById("lpanel-"+v).style.display=v===view?"block":"none";
+    document.getElementById("ltab-"+v).classList.toggle("on",v===view);
+  });
+  if(view==="study")renderLangStudy();
+  if(view==="cards")renderLangCards();
+}
+
+function updateLangDueBadge(){
+  const n=getDueCards().length;
+  const b=document.getElementById("lang-due-badge");
+  if(b)b.textContent=n;
+}
+
+function renderLangStudy(){
+  const due=getDueCards();
+  const empty=document.getElementById("lang-study-empty");
+  const card=document.getElementById("lang-study-card");
+  updateLangDueBadge();
+  if(!due.length&&!langData.cards.length){
+    empty.style.display="block";empty.textContent="No cards yet — add some in Cards or Import.";
+    card.style.display="none";renderMmDots();return;
+  }
+  if(!due.length){
+    empty.style.display="block";empty.textContent="🎉 Nothing due right now.";
+    card.style.display="none";renderMmDots();return;
+  }
+  empty.style.display="none";card.style.display="block";
+  if(langCurrentIdx>=due.length)langCurrentIdx=0;
+  const c=due[langCurrentIdx];
+  const rec=lsrs(c.id);
+  document.getElementById("flash-meta").textContent=`${langCurrentIdx+1}/${due.length} due · ${rec.reps>0?fmtMinutes(rec.interval)+" interval · rep "+rec.reps:"new"}`;
+  document.getElementById("flash-front").textContent=c.front;
+  document.getElementById("flash-back").textContent=c.back||"(no translation yet)";
+  document.getElementById("flash-note").textContent=c.note||"";
+  document.getElementById("flash-note").style.display=c.note?"block":"none";
+  langRevealed=false;
+  document.getElementById("flash-answer").style.display="none";
+  document.getElementById("lang-reveal").style.display="inline-flex";
+  document.getElementById("lang-interval-ctrl").style.display="none";
+  updateIntervalDisplay();
+  renderMmDots();
+}
+
+function setLangBand(b){
+  langBand=b;
+  document.querySelectorAll(".band-btn").forEach((btn,i)=>btn.classList.toggle("on",i===b));
+  updateIntervalDisplay();
+}
+
+function updateIntervalDisplay(){
+  const m=langMinutesFromPos(langBand,langPos);
+  const el=document.getElementById("interval-val");
+  if(el)el.textContent=fmtMinutes(m)+" · "+fmtDueLabel(m);
+}
+
+function renderMmDots(){
+  const now=Date.now();
+  const el=document.getElementById("mm-dots");
+  if(!el)return;
+  const due=getDueCards();
+  el.innerHTML=langData.cards.map((c,i)=>{
+    const rec=lsrs(c.id);
+    const f=langFreshness(rec,now);
+    const isDue=langIsDue(rec,now);
+    const bg=isDue?"var(--blue)":
+      f>0.6?"var(--green)":f>0.3?"var(--teal)":"var(--muted2)";
+    const title=esc(c.front.slice(0,30))+(isDue?" (due)":` fresh:${Math.round(f*100)}%`);
+    const cur=langView==="study"&&due[langCurrentIdx]&&due[langCurrentIdx].id===c.id;
+    return`<div class="mm-dot" style="background:${bg};${cur?"outline:2px solid var(--accent);outline-offset:1px":""}" title="${title}" data-mmpick="${i}"></div>`;
+  }).join("");
+}
+
+function renderLangCards(){
+  const el=document.getElementById("lang-cards-list");
+  if(!langData.cards.length){el.innerHTML=`<div class="lang-empty">No cards yet.</div>`;return;}
+  const now=Date.now();
+  el.innerHTML=langData.cards.map((c,i)=>{
+    const rec=lsrs(c.id);
+    const status=rec.status==="new"?"new":now>=rec.due?"due":fmtMinutes(rec.interval)+" · next "+fmtDueLabel(rec.interval);
+    return`<div class="lang-card-item">
+      <div class="lang-card-body">
+        <input class="lang-card-front" value="${esc(c.front)}" data-lcf="${i}" placeholder="Front…"/>
+        <input class="lang-card-back" value="${esc(c.back||"")}" data-lcb="${i}" placeholder="Translation…"/>
+        <div class="lang-card-srs">${status}</div>
+      </div>
+      <button class="pill pill-sm pill-icon pill-del" data-lcdel="${i}">✕</button>
+    </div>`;
+  }).join("");
+}
+
+function renderLanguageTab(){
+  updateLangDueBadge();
+  renderLangStudy();
+}
+
+// ── Language events ──────────────────────────────────────────────
+document.getElementById("lang-reveal").addEventListener("click",()=>{
+  langRevealed=true;
+  document.getElementById("flash-answer").style.display="block";
+  document.getElementById("lang-reveal").style.display="none";
+  document.getElementById("lang-interval-ctrl").style.display="block";
+});
+
+document.getElementById("lang-prev").addEventListener("click",()=>{
+  const due=getDueCards();if(!due.length)return;
+  langCurrentIdx=(langCurrentIdx-1+due.length)%due.length;
+  renderLangStudy();
+});
+document.getElementById("lang-next").addEventListener("click",()=>{
+  const due=getDueCards();if(!due.length)return;
+  langCurrentIdx=(langCurrentIdx+1)%due.length;
+  renderLangStudy();
+});
+
+document.getElementById("interval-slider").addEventListener("input",e=>{
+  langPos=parseInt(e.target.value)/1000;
+  updateIntervalDisplay();
+});
+
+document.getElementById("lang-commit").addEventListener("click",()=>{
+  const due=getDueCards();if(!due.length)return;
+  const c=due[langCurrentIdx];
+  const minutes=langMinutesFromPos(langBand,langPos);
+  langData.srs[c.id]=langCommitInterval(lsrs(c.id),minutes,Date.now());
+  langSave(langData);
+  const newDue=getDueCards();
+  langCurrentIdx=Math.min(langCurrentIdx,Math.max(0,newDue.length-1));
+  renderLangStudy();
+});
+
+document.getElementById("mm-dots").addEventListener("click",e=>{
+  const idx=parseInt(e.target.dataset.mmpick);
+  if(isNaN(idx))return;
+  // Navigate to clicked card in study view (find it among due, or go to cards)
+  const due=getDueCards();
+  const c=langData.cards[idx];
+  const di=due.findIndex(x=>x.id===c.id);
+  if(di>=0){langCurrentIdx=di;renderLangStudy();}
+});
+
+document.getElementById("lang-cards-list").addEventListener("input",e=>{
+  const fi=parseInt(e.target.dataset.lcf),bi=parseInt(e.target.dataset.lcb);
+  if(!isNaN(fi)){langData.cards[fi].front=e.target.value;langSave(langData);}
+  if(!isNaN(bi)){langData.cards[bi].back=e.target.value;langSave(langData);}
+});
+document.getElementById("lang-cards-list").addEventListener("click",e=>{
+  const del=e.target.closest("[data-lcdel]");
+  if(del){const i=parseInt(del.dataset.lcdel);langData.cards.splice(i,1);langSave(langData);renderLangCards();updateLangDueBadge();}
+});
+
+document.getElementById("lc-add-btn").addEventListener("click",()=>{
+  const f=document.getElementById("lc-add-front").value.trim();
+  const b=document.getElementById("lc-add-back").value.trim();
+  if(!f)return;
+  langData.cards.push({id:langNextId(),front:f,back:b,note:""});
+  langSave(langData);
+  document.getElementById("lc-add-front").value="";
+  document.getElementById("lc-add-back").value="";
+  renderLangCards();updateLangDueBadge();
+});
+
+// ── Import ────────────────────────────────────────────────────────
+function splitIntoSentences(text){
+  return text.split(/\n+/).map(l=>l.trim()).filter(l=>l.length>3&&l.length<400);
+}
+
+document.getElementById("lang-import-split").addEventListener("click",()=>{
+  const txt=document.getElementById("lang-import-text").value;
+  langImportLines=splitIntoSentences(txt);
+  const prev=document.getElementById("lang-import-preview");
+  const wrap=document.getElementById("lang-import-add-wrap");
+  if(!langImportLines.length){prev.innerHTML=`<div style="color:var(--muted);font-size:13px;margin-top:8px">No lines found.</div>`;wrap.style.display="none";return;}
+  prev.innerHTML=langImportLines.map((l,i)=>`<div class="import-sent">
+    <span class="import-sent-txt">${esc(l)}</span>
+    <button class="import-sent-rm" data-imrm="${i}">✕</button>
+  </div>`).join("");
+  wrap.style.display="block";
+});
+
+document.getElementById("lang-import-preview").addEventListener("click",e=>{
+  const rm=e.target.closest("[data-imrm]");
+  if(rm){langImportLines.splice(parseInt(rm.dataset.imrm),1);
+    rm.closest(".import-sent").remove();
+    if(!langImportLines.length)document.getElementById("lang-import-add-wrap").style.display="none";
+  }
+});
+
+document.getElementById("lang-import-clear").addEventListener("click",()=>{
+  document.getElementById("lang-import-text").value="";
+  document.getElementById("lang-import-preview").innerHTML="";
+  document.getElementById("lang-import-add-wrap").style.display="none";
+  langImportLines=[];
+});
+
+document.getElementById("lang-import-add-all").addEventListener("click",()=>{
+  langImportLines.forEach(line=>{
+    langData.cards.push({id:langNextId(),front:line,back:"",note:""});
+  });
+  langSave(langData);
+  langImportLines=[];
+  document.getElementById("lang-import-text").value="";
+  document.getElementById("lang-import-preview").innerHTML="";
+  document.getElementById("lang-import-add-wrap").style.display="none";
+  updateLangDueBadge();
+  // Flash feedback
+  const btn=document.getElementById("lang-import-add-all");
+  const orig=btn.textContent;btn.textContent="✓ Added!";
+  setTimeout(()=>btn.textContent=orig,1500);
+});
+
+// ══════════════════════════════════════════════════════════════════
 // TABS
 // ══════════════════════════════════════════════════════════════════
 document.querySelectorAll(".tab").forEach(tab=>{
@@ -1512,6 +1901,7 @@ renderDietTab();
 renderWardrobeTab();
 renderScheduleTab();
 renderFinancesTab();
+renderLanguageTab();
 // Connect to Supabase after local render (offline-first: local shows first)
 initSupabase();
 </script>
