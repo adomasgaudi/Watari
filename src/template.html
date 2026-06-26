@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watari v1</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --text: #e8e8e8;
+    --muted: #888;
+    --accent: #c8a84b;
+    --r-pill: 6px;
+    --tap-min: 32px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; min-height: 100vh; }
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; background: var(--surface); border-bottom: 1px solid #2a2a2a;
+  }
+  .nav-title { font-weight: 600; letter-spacing: .04em; }
+  .nav-version { font-size: 11px; color: var(--accent); background: #2a2200; border-radius: var(--r-pill); padding: 2px 7px; }
+  main { max-width: 900px; margin: 0 auto; padding: 32px 16px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  h1 .version { font-size: 12px; color: var(--muted); margin-left: 8px; font-weight: 400; }
+  p.lead { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+  .card {
+    background: var(--surface); border-radius: var(--r-pill);
+    padding: 16px; margin-bottom: 12px;
+  }
+  .card h2 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .card p { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-title">Watari</span>
+  <span class="nav-version">v1</span>
+</nav>
+
+<main>
+  <h1>Watari <span class="version">v1</span></h1>
+  <p class="lead">Project starter — edit src/template.html to build this out.</p>
+
+  <div class="card">
+    <h2>Getting started</h2>
+    <p>Edit <code>src/template.html</code>, then run <code>python3 src/build_site.py</code> to rebuild <code>index.html</code>.</p>
+  </div>
+
+  <div class="card">
+    <h2>Rules &amp; hooks</h2>
+    <p>See <code>CLAUDE.md</code> for all AI rules. Hooks live in <code>.claude/hooks/</code> and <code>.githooks/</code>.</p>
+  </div>
+</main>
+
+<script>
+// VERSIONS array — newest first. Format: { v, title, sp, note }
+const VERSIONS = [
+  { v: 1, title: "Initial scaffold", sp: 2, note: "Project skeleton with rules, hooks, and starter template." }
+];
+</script>
+
+</body>
+</html>
