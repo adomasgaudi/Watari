@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v14</title>
+<title>Adomas · v15</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -52,7 +52,7 @@
   main{max-width:900px;margin:0 auto;padding:18px 14px 60px}
 
   .cols{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
-  @media(max-width:640px){.cols{grid-template-columns:1fr}}
+  @media(max-width:760px){.cols{grid-template-columns:1fr}}
 
   .sec{margin-bottom:20px}
   .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -232,9 +232,9 @@
   .ver-n{color:var(--accent);font-weight:700;min-width:28px}
   .ver-title{flex:1}
   .ver-sp{color:var(--muted);font-size:11px}
-  #ver-fab{position:fixed;bottom:16px;right:16px;z-index:200;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--muted);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  #ver-fab{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));right:16px;z-index:200;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--muted);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
   #ver-fab:hover{color:var(--text)}
-  #ver-popup{position:fixed;bottom:48px;right:16px;z-index:201;background:var(--surface);border:1px solid var(--border2);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);width:260px;max-height:60vh;overflow-y:auto;padding:10px 12px;display:none}
+  #ver-popup{position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));right:16px;z-index:201;background:var(--surface);border:1px solid var(--border2);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);width:260px;max-height:55vh;overflow-y:auto;padding:10px 12px;display:none}
   #ver-popup.open{display:block}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -247,7 +247,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v14</span>
+    <span class="nav-ver">v15</span>
   </div>
 </nav>
 
@@ -550,6 +550,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:15, title:"Mobile layout + ver popup fix", sp:1, note:"Stack to single column below 760px; fix ver-popup close-on-open bug; safe-area insets for FAB."},
   {v:14, title:"Project pill + add-to-project", sp:2, note:"Task cards show tappable project pill (cycles through projects). Project headers have + button to add task to that project."},
   {v:13, title:"Version history popup bottom-right", sp:1,
    note:"Moved version history out of Tasks panel into a fixed bottom-right FAB popup."},
@@ -881,7 +882,7 @@ function renderVersions(){
   const fab=document.getElementById("ver-fab");
   const vpop=document.getElementById("ver-popup");
   fab.addEventListener("click",e=>{e.stopPropagation();vpop.classList.toggle("open")});
-  document.addEventListener("click",()=>vpop.classList.remove("open"));
+  document.addEventListener("click",e=>{if(!vpop.contains(e.target)&&e.target!==fab)vpop.classList.remove("open")});
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1232,6 +1233,6 @@ renderFinancesTab();
 initSupabase();
 </script>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v14</button>
+<button id="ver-fab">📋 v15</button>
 </body>
 </html>
