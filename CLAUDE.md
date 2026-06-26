@@ -46,7 +46,7 @@ Each rule = two rows: **description**, then *kind · type*. Sorted by theme, the
 | <br /> | Hooks [`commit_message_check.py`](.claude/hooks/commit_message_check.py) (Claude) + [`.githooks/commit-msg`](.githooks/commit-msg) (git) · verifiable · TOP |
 | **HOOK-01** Scripted checks, never gates | Back every strong warning with a scripted check, but it only ever emits data — never blocks; always `exit 0`. Enforce across CLI, VS Code, Cursor and plain terminal via `.githooks/` + `core.hooksPath`. |
 | <br /> | Hook [`.githooks/`](.githooks/) + SessionStart sets `core.hooksPath` · verifiable · TOP |
-| **REPO-02** Branch | work from `main`; merge back immediately — never strand work on a side branch |
+| **REPO-02** Branch | work from `main`; merge back immediately — never strand work on a side branch; **always deploy (rebuild) + push to `main` after every change** |
 | <br /> | Hook [`guard_main_push.py`](.claude/hooks/guard_main_push.py) · verifiable · MED |
 
 ---
