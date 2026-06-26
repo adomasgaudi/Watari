@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v18</title>
+<title>Adomas · v19</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -254,7 +254,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v18</span>
+    <span class="nav-ver">v19</span>
   </div>
 </nav>
 
@@ -542,7 +542,8 @@ const DEFAULT_TASKS = [
   {id:"T13",proj:"Colosseum",        title:"Merged exercises strength from both",           detail:"Combine strength scores across merged/equivalent exercises",          status:"active", priority:"med"},
   {id:"T14",proj:"Colosseum",        title:"Failed exercises don't register",               detail:"Exclude failed sets from PR and strength calculations",              status:"active", priority:"high"},
   {id:"T15",proj:"Colosseum",        title:"Convert all weights to RM in history",          detail:"Show historical sets as 1RM equivalents throughout",                 status:"active", priority:"med"},
-  {id:"T16",proj:"Colosseum",        title:"% CSA muscle gain — grams — looks",            detail:"Estimate muscle cross-sectional area gain as % / grams / visual",    status:"active", priority:"low"}
+  {id:"T16",proj:"Colosseum",        title:"% CSA muscle gain — grams — looks",            detail:"Estimate muscle cross-sectional area gain as % / grams / visual",    status:"active", priority:"low"},
+  {id:"T17",proj:"Market analytics", title:"Analyse vivamokykla.lt",                         detail:"https://vivamokykla.lt/kontaktai-2/",                                status:"active", priority:"med"}
 ];
 
 const DEFAULT_FOODS = [
@@ -614,6 +615,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:19, title:"Add vivamokykla task + default merge", sp:1, note:"T17 analyse vivamokykla.lt added. initSupabase now merges new DEFAULT_TASKS not yet in DB so future default additions auto-push."},
   {v:18, title:"PB-1 root fix: layout width + popup overlay", sp:2, note:"overflow-x:clip on html/body, all containers box-sizing:border-box width:100%, nav hides status on narrow phones, ver-popup uses overlay instead of document click."},
   {v:17, title:"PB-1 fix: no horizontal scroll", sp:1, note:"html/body overflow-x:hidden + min-width:0 on flex children. Root fix for recurring mobile horizontal overflow."},
   {v:16, title:"Sleep + ADHD tabs + weight tracking", sp:5, note:"New Sleep tab (log with duration/quality), ADHD tab (Pomodoro timer, meds log, daily wins), weight tracking section in Diet."},
@@ -701,8 +703,13 @@ async function initSupabase(){
       dbLoad("wat_income"),dbLoad("wat_expenses"),dbLoad("wat_fingoals"),
       dbLoad("wat_sleep"),dbLoad("wat_meds"),dbLoad("wat_wins"),dbLoad("wat_weight")
     ]);
-    // If DB has rows, use them; otherwise seed DB from localStorage defaults
-    if(t.length){tasks=t;          saveTasks()}      else dbPush("wat_tasks",tasks);
+    // If DB has rows, use them + merge any new DEFAULT_TASKS not yet in DB; otherwise seed DB
+    if(t.length){
+      tasks=t;
+      const ids=new Set(t.map(x=>x.id));
+      const newDefaults=DEFAULT_TASKS.filter(d=>!ids.has(d.id));
+      if(newDefaults.length){tasks=[...t,...newDefaults];saveTasks()}
+    } else dbPush("wat_tasks",tasks);
     if(f.length){foods=f;          saveFoods()}      else dbPush("wat_foods",foods);
     if(c.length){clothes=c;        saveClothes()}  else dbPush("wat_clothes",clothes);
     if(l.length){laundry=l;        saveLaundry()} else dbPush("wat_laundry",laundry);
@@ -1502,6 +1509,6 @@ initSupabase();
 </script>
 <div id="ver-overlay"></div>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v18</button>
+<button id="ver-fab">📋 v19</button>
 </body>
 </html>
