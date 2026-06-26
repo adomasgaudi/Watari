@@ -3,149 +3,174 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v5</title>
+<title>Adomas · v6</title>
 <style>
   :root {
-    --bg: #0d0d0d;
-    --surface: #181818;
-    --surface2: #222;
-    --border: #2a2a2a;
-    --border2: #333;
-    --text: #e4e4e4;
-    --muted: #777;
-    --muted2: #555;
-    --accent: #c8a84b;
-    --accent-dim: #2a2200;
-    --green: #4caf7d;
-    --green-dim: #0d2016;
-    --blue: #5b9bd5;
-    --blue-dim: #0d1a2a;
-    --red: #c0614a;
-    --red-dim: #2a0f0a;
-    --orange: #d4874a;
-    --orange-dim: #2a1800;
-    --purple: #9b7fd4;
-    --purple-dim: #1a1230;
-    --r: 6px;
-    --tap: 32px;
+    --bg: #0d0d0d; --surface: #181818; --surface2: #222; --surface3: #2a2a2a;
+    --border: #2a2a2a; --border2: #383838;
+    --text: #e4e4e4; --muted: #777; --muted2: #555;
+    --accent: #c8a84b; --accent-dim: #2a2200;
+    --green: #4caf7d; --green-dim: #0d2016;
+    --blue: #5b9bd5; --blue-dim: #0d1a2a;
+    --red: #c0614a; --red-dim: #2a0f0a;
+    --orange: #d4874a; --orange-dim: #2a1800;
+    --purple: #9b7fd4; --purple-dim: #1a1230;
+    --teal: #4db8a8; --teal-dim: #0d2420;
+    --r: 6px; --tap: 32px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, sans-serif; min-height: 100vh; }
 
   /* NAV */
-  nav {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 10;
-  }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; }
   .nav-name { font-weight: 700; font-size: 15px; }
   .nav-right { display: flex; align-items: center; gap: 8px; }
   .nav-status { font-size: 11px; color: var(--green); background: var(--green-dim); border-radius: var(--r); padding: 2px 8px; }
   .nav-ver { font-size: 11px; color: var(--muted); }
 
-  /* LAYOUT — two columns on wide, stack on narrow */
+  /* TABS */
+  .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 14px; position: sticky; top: 49px; z-index: 19; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; user-select: none; }
+  .tab.active { color: var(--text); border-color: var(--accent); }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
   main { max-width: 900px; margin: 0 auto; padding: 18px 14px 60px; }
+
+  /* TWO COL */
   .cols { display: grid; grid-template-columns: 1fr 300px; gap: 16px; align-items: start; }
   @media (max-width: 640px) { .cols { grid-template-columns: 1fr; } }
 
-  /* SECTION */
+  /* SEC */
   .sec { margin-bottom: 20px; }
-  .sec-head {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 10px;
-  }
+  .sec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .sec-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--muted2); text-transform: uppercase; }
 
   /* FOCUS */
-  .focus {
-    background: linear-gradient(135deg, #1a1600 0%, #181818 100%);
-    border: 1px solid #3a2e00; border-radius: var(--r); padding: 14px 16px; margin-bottom: 16px;
-  }
+  .focus { background: linear-gradient(135deg, #1a1600 0%, #181818 100%); border: 1px solid #3a2e00; border-radius: var(--r); padding: 14px 16px; margin-bottom: 16px; }
   .focus-lbl { font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; margin-bottom: 5px; }
   .focus-title { font-size: 17px; font-weight: 700; }
   .focus-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
 
   /* TASK CARD */
-  .task {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 10px 12px; margin-bottom: 8px;
-    position: relative;
-  }
+  .task { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; margin-bottom: 8px; }
   .task.is-done { opacity: .5; }
   .task-row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
   .task-title-wrap { flex: 1; min-width: 0; }
-  .task-title {
-    font-size: 14px; font-weight: 600; width: 100%;
-    background: none; border: none; color: var(--text); outline: none;
-    font-family: inherit; padding: 0;
-  }
+  .task-title { font-size: 14px; font-weight: 600; width: 100%; background: none; border: none; color: var(--text); outline: none; font-family: inherit; padding: 0; }
   .task-title:focus { color: #fff; }
-  .task-detail {
-    font-size: 12px; color: var(--muted); width: 100%;
-    background: none; border: none; outline: none; font-family: inherit; padding: 0;
-  }
+  .task-detail { font-size: 12px; color: var(--muted); width: 100%; background: none; border: none; outline: none; font-family: inherit; padding: 0; }
   .task-detail:focus { color: var(--text); }
   .task-detail::placeholder { color: var(--muted2); }
   .task-pills { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
 
   /* PILLS */
-  .pill {
-    display: inline-flex; align-items: center; justify-content: center;
-    height: var(--tap); padding: 0 12px; border-radius: var(--r);
-    font-size: 11px; font-weight: 700; letter-spacing: .04em;
-    cursor: pointer; border: none; user-select: none; white-space: nowrap;
-    transition: opacity .1s; background: var(--surface2); color: var(--muted);
-  }
+  .pill { display: inline-flex; align-items: center; justify-content: center; height: var(--tap); padding: 0 12px; border-radius: var(--r); font-size: 11px; font-weight: 700; letter-spacing: .04em; cursor: pointer; border: none; user-select: none; white-space: nowrap; transition: opacity .1s; background: var(--surface2); color: var(--muted); }
   .pill:active { opacity: .7; }
   .pill-sm { height: 22px; padding: 0 8px; font-size: 10px; }
   .pill-icon { padding: 0; width: var(--tap); }
-
   .s-active  { background: var(--blue-dim);   color: var(--blue);   }
   .s-done    { background: var(--green-dim);  color: var(--green);  }
   .s-blocked { background: var(--red-dim);    color: var(--red);    }
   .s-paused  { background: var(--surface2);   color: var(--muted);  }
-  .p-high    { background: var(--red-dim);    color: var(--red);    }
-  .p-med     { background: var(--orange-dim); color: var(--orange); }
-  .p-low     { background: var(--surface2);   color: var(--muted);  }
-  .pill-del  { background: none; color: var(--muted2); font-size: 14px; margin-left: auto; }
+  .p-high { background: var(--red-dim); color: var(--red); }
+  .p-med  { background: var(--orange-dim); color: var(--orange); }
+  .p-low  { background: var(--surface2); color: var(--muted); }
+  .pill-del { background: none; color: var(--muted2); font-size: 14px; margin-left: auto; }
   .pill-del:hover { color: var(--red); }
 
-  /* ADD TASK */
-  .add-row {
-    display: flex; gap: 8px; margin-top: 4px;
-  }
-  .add-input {
-    flex: 1; background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); color: var(--text); font: 14px/1 system-ui, sans-serif;
-    padding: 0 12px; height: var(--tap); outline: none;
-  }
+  /* ADD ROW */
+  .add-row { display: flex; gap: 8px; margin-top: 4px; }
+  .add-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); color: var(--text); font: 14px/1 system-ui, sans-serif; padding: 0 12px; height: var(--tap); outline: none; }
   .add-input:focus { border-color: var(--border2); }
   .add-input::placeholder { color: var(--muted2); }
   .add-btn { background: var(--surface2); color: var(--text); }
 
-  /* SUGGESTIONS */
-  .sugg-box {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 12px 14px;
-    position: sticky; top: 58px;
-  }
-  .sugg-item {
-    display: flex; gap: 10px; padding: 8px 0;
-    border-bottom: 1px solid var(--border); align-items: flex-start;
-  }
+  /* SUGGESTION BOX */
+  .sugg-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; position: sticky; top: 98px; }
+  .sugg-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
   .sugg-item:last-child { border-bottom: none; padding-bottom: 0; }
   .sugg-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
   .sugg-body { flex: 1; }
   .sugg-head { font-size: 13px; font-weight: 600; }
   .sugg-text { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .sugg-act {
-    display: inline-block; margin-top: 5px;
-    background: var(--surface2); border: none; border-radius: var(--r);
-    color: var(--blue); font: 11px/1 system-ui, sans-serif; font-weight: 600;
-    padding: 4px 8px; cursor: pointer; height: 24px;
-  }
-  .sugg-act:active { opacity: .7; }
   .sugg-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 12px 0; }
+
+  /* DIET — PROFILE CARDS */
+  .diet-profiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+  .diet-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; }
+  .diet-card-name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .diet-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .diet-tag { font-size: 11px; padding: 2px 8px; border-radius: var(--r); background: var(--surface2); color: var(--muted); }
+  .diet-tag.me  { background: var(--blue-dim);  color: var(--blue); }
+  .diet-tag.gf  { background: var(--purple-dim); color: var(--purple); }
+
+  /* FOOD ITEM */
+  .food-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 9px 12px; margin-bottom: 7px; display: flex; align-items: center; gap: 10px; }
+  .food-name-wrap { flex: 1; min-width: 0; }
+  .food-name { font-size: 13px; font-weight: 600; background: none; border: none; color: var(--text); outline: none; font-family: inherit; width: 100%; padding: 0; }
+  .food-name:focus { color: #fff; }
+  .food-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .food-who { display: flex; gap: 3px; }
+  .who-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .who-me  { background: var(--blue); }
+  .who-gf  { background: var(--purple); }
+  .food-qty { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .qty-btn { background: var(--surface2); border: none; color: var(--text); width: 26px; height: 26px; border-radius: var(--r); cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .qty-btn:active { opacity: .7; }
+  .qty-val { font-size: 13px; font-weight: 700; min-width: 28px; text-align: center; }
+  .qty-unit { font-size: 11px; color: var(--muted); }
+  .food-low .qty-val { color: var(--red); }
+  .food-out .qty-val { color: var(--muted2); }
+
+  /* SHOPPING LIST */
+  .shop-item { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .shop-item:last-child { border-bottom: none; }
+  .shop-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+  .shop-dot.out { background: var(--red); }
+  .shop-name { flex: 1; }
+  .shop-note { font-size: 11px; color: var(--muted); }
+
+  /* WHO FILTER */
+  .who-filter { display: flex; gap: 6px; margin-bottom: 12px; }
+  .who-pill { height: 26px; padding: 0 10px; font-size: 11px; }
+  .who-pill.on-me     { background: var(--blue-dim); color: var(--blue); }
+  .who-pill.on-gf     { background: var(--purple-dim); color: var(--purple); }
+  .who-pill.on-both   { background: var(--teal-dim); color: var(--teal); }
+  .who-pill.off { background: var(--surface2); color: var(--muted2); }
+
+  /* WARDROBE */
+  .cloth-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; margin-bottom: 7px; }
+  .cloth-row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .cloth-name-wrap { flex: 1; min-width: 0; }
+  .cloth-name { font-size: 13px; font-weight: 600; background: none; border: none; color: var(--text); outline: none; font-family: inherit; width: 100%; padding: 0; }
+  .cloth-name:focus { color: #fff; }
+  .cloth-cat { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .cloth-counts { display: flex; gap: 6px; align-items: center; }
+  .count-pill { display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: var(--r); font-size: 11px; font-weight: 700; cursor: pointer; border: none; user-select: none; }
+  .count-pill:active { opacity: .7; }
+  .cp-clean   { background: var(--green-dim);  color: var(--green); }
+  .cp-worn    { background: var(--orange-dim); color: var(--orange); }
+  .cp-laundry { background: var(--red-dim);    color: var(--red); }
+  .count-label { font-size: 10px; font-weight: 400; opacity: .7; }
+
+  /* LAUNDRY PLAN */
+  .laundry-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; margin-bottom: 7px; display: flex; align-items: center; gap: 10px; }
+  .laundry-date { font-size: 13px; font-weight: 700; min-width: 90px; }
+  .laundry-note { flex: 1; background: none; border: none; color: var(--muted); outline: none; font: 13px system-ui, sans-serif; }
+  .laundry-note:focus { color: var(--text); }
+  .laundry-done { background: var(--green-dim); color: var(--green); }
+
+  /* WARDROBE SUMMARY */
+  .ward-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+  .ward-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; text-align: center; }
+  .ward-stat-n { font-size: 22px; font-weight: 800; }
+  .ward-stat-l { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .ward-n-clean   { color: var(--green); }
+  .ward-n-worn    { color: var(--orange); }
+  .ward-n-laundry { color: var(--red); }
 
   /* VERSIONS */
   details { margin-top: 28px; }
@@ -155,6 +180,12 @@
   .ver-n { color: var(--accent); font-weight: 700; min-width: 28px; }
   .ver-title { flex: 1; }
   .ver-sp { color: var(--muted); font-size: 11px; }
+
+  /* INLINE ADD */
+  .inline-add { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .sel-input { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); color: var(--text); font: 13px system-ui, sans-serif; padding: 0 10px; height: 30px; outline: none; }
+  .sel-input:focus { border-color: var(--border2); }
+  .sel-input::placeholder { color: var(--muted2); }
 </style>
 </head>
 <body>
@@ -163,34 +194,32 @@
   <span class="nav-name">Adomas</span>
   <div class="nav-right">
     <span class="nav-status">● Open to clients</span>
-    <span class="nav-ver">v5</span>
+    <span class="nav-ver">v6</span>
   </div>
 </nav>
 
+<div class="tabs">
+  <div class="tab active" data-tab="tasks">Tasks</div>
+  <div class="tab" data-tab="diet">Diet & Food</div>
+  <div class="tab" data-tab="wardrobe">Wardrobe</div>
+</div>
+
+<!-- ═══════════════════════════ TASKS ═══════════════════════════ -->
+<div class="panel active" id="panel-tasks">
 <main>
   <div id="focus-wrap"></div>
-
   <div class="cols">
-    <!-- LEFT: tasks -->
     <div>
       <div class="sec">
-        <div class="sec-head">
-          <span class="sec-label">Tasks</span>
-        </div>
+        <div class="sec-head"><span class="sec-label">Tasks</span></div>
         <div id="task-list"></div>
         <div class="add-row">
           <input class="add-input" id="add-input" placeholder="New task…" />
           <button class="pill add-btn" id="add-btn">+ Add</button>
         </div>
       </div>
-
-      <details>
-        <summary>📋 Version history</summary>
-        <div id="ver-list" style="margin-top:8px"></div>
-      </details>
+      <details><summary>📋 Version history</summary><div id="ver-list" style="margin-top:8px"></div></details>
     </div>
-
-    <!-- RIGHT: suggestions -->
     <div>
       <div class="sec">
         <div class="sec-head"><span class="sec-label">Suggestions</span></div>
@@ -199,330 +228,508 @@
     </div>
   </div>
 </main>
+</div>
+
+<!-- ═══════════════════════════ DIET ═══════════════════════════ -->
+<div class="panel" id="panel-diet">
+<main>
+  <div class="diet-profiles">
+    <div class="diet-card">
+      <div class="diet-card-name" style="color:var(--blue)">● Adomas</div>
+      <div class="diet-tags">
+        <span class="diet-tag me">SIBO-friendly</span>
+        <span class="diet-tag me">Low calorie</span>
+        <span class="diet-tag me">High protein</span>
+      </div>
+    </div>
+    <div class="diet-card">
+      <div class="diet-card-name" style="color:var(--purple)">● GF</div>
+      <div class="diet-tags">
+        <span class="diet-tag gf">Acne-friendly</span>
+        <span class="diet-tag gf">Dermatologist diet</span>
+        <span class="diet-tag gf">Low glycemic</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="sec">
+        <div class="sec-head">
+          <span class="sec-label">Food at home</span>
+        </div>
+        <div class="who-filter" id="food-filter">
+          <button class="pill who-pill on-both" data-who="both">Both</button>
+          <button class="pill who-pill off" data-who="me">Adomas</button>
+          <button class="pill who-pill off" data-who="gf">GF</button>
+          <button class="pill who-pill off" data-who="all">All</button>
+        </div>
+        <div id="food-list"></div>
+        <div class="inline-add" id="food-add-row">
+          <input class="sel-input" id="food-add-name" placeholder="Food name…" style="flex:1;min-width:120px" />
+          <input class="sel-input" id="food-add-unit" placeholder="unit (e.g. portions)" style="width:130px" />
+          <button class="pill pill-sm add-btn" id="food-add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec">
+        <div class="sec-head"><span class="sec-label">Shopping list</span></div>
+        <div class="sugg-box" id="shop-list" style="position:sticky;top:98px"></div>
+      </div>
+      <div class="sec" style="margin-top:12px">
+        <div class="sec-head"><span class="sec-label">Meal ideas</span></div>
+        <div class="sugg-box" id="meal-ideas" style="position:static"></div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- ═══════════════════════════ WARDROBE ═══════════════════════════ -->
+<div class="panel" id="panel-wardrobe">
+<main>
+  <div class="ward-summary">
+    <div class="ward-stat"><div class="ward-stat-n ward-n-clean" id="w-clean-n">0</div><div class="ward-stat-l">Clean items</div></div>
+    <div class="ward-stat"><div class="ward-stat-n ward-n-worn"  id="w-worn-n">0</div><div class="ward-stat-l">Worn / unwashed</div></div>
+    <div class="ward-stat"><div class="ward-stat-n ward-n-laundry" id="w-laundry-n">0</div><div class="ward-stat-l">In laundry</div></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="sec">
+        <div class="sec-head"><span class="sec-label">Wardrobe</span></div>
+        <div id="cloth-list"></div>
+        <div class="inline-add">
+          <input class="sel-input" id="cloth-add-name" placeholder="Item name…" style="flex:1;min-width:120px" />
+          <input class="sel-input" id="cloth-add-cat" placeholder="category (e.g. tops)" style="width:140px" />
+          <button class="pill pill-sm add-btn" id="cloth-add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec">
+        <div class="sec-head"><span class="sec-label">Laundry plan</span></div>
+        <div class="sugg-box" id="laundry-plan" style="position:sticky;top:98px;margin-bottom:10px"></div>
+        <div class="inline-add" style="margin-top:8px">
+          <input class="sel-input" type="date" id="laundry-add-date" style="width:140px" />
+          <input class="sel-input" id="laundry-add-note" placeholder="What to wash…" style="flex:1" />
+          <button class="pill pill-sm add-btn" id="laundry-add-btn">+ Add</button>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-head"><span class="sec-label">Wardrobe tips</span></div>
+        <div class="sugg-box" id="ward-tips" style="position:static"></div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
 
 <script>
-// ── DEFAULT DATA (overridden by localStorage) ─────────────────────────────────
+// ═══════════════════════════ DATA DEFAULTS ════════════════════════════════════
 
 const DEFAULT_TASKS = [
-  { id: "T1", proj: "Colosseum", title: "Make usable by customers",
-    detail: "Ship the features customers need to use it independently",
-    status: "active", priority: "high" },
-  { id: "T2", proj: "Science curriculum", title: "Develop science curriculum",
-    detail: "Build personal science learning system in the language repo",
-    status: "active", priority: "med" },
-  { id: "T3", proj: "Market analytics", title: "Supabase integration",
-    detail: "Connect VZ dashboard to Supabase for persistent data",
-    status: "active", priority: "high" },
-  { id: "T4", proj: "Market analytics", title: "LT translate",
-    detail: "Lithuanian translations for all user-facing text",
-    status: "active", priority: "high" },
-  { id: "T5", proj: "Market analytics", title: "All info checkable",
-    detail: "Every stat/number links to its source so it can be verified",
-    status: "active", priority: "med" },
-  { id: "T6", proj: "Market analytics", title: "Other sources of info",
-    detail: "Pull in additional data sources beyond the current export",
-    status: "active", priority: "med" },
-  { id: "T7", proj: "Market analytics", title: "Predicting values",
-    detail: "Forecast future financials based on historical trends",
-    status: "active", priority: "med" },
-  { id: "T8", proj: "Market analytics", title: "Error margins",
-    detail: "Show confidence intervals / uncertainty on all estimates",
-    status: "active", priority: "med" },
-  { id: "T9", proj: "Market analytics", title: "More grouping options",
-    detail: "Group by employee count, company age, or city",
-    status: "active", priority: "low" },
-  { id: "T10", proj: "Colosseum", title: "Tags editable",
-    detail: "Let users create and edit exercise tags in the UI",
-    status: "active", priority: "med" },
-  { id: "T11", proj: "Colosseum", title: "Strength-based view: sets weight reps 1RM %",
-    detail: "View sets in terms of 1RM percentage alongside weight and reps",
-    status: "active", priority: "high" },
-  { id: "T12", proj: "Colosseum", title: "Projection curve — steepness, limit, drag, coefficient",
-    detail: "Show curve steepness and ceiling; top-drag control + coefficient view",
-    status: "active", priority: "med" },
-  { id: "T13", proj: "Colosseum", title: "Merged exercises strength from both",
-    detail: "Combine strength scores across merged/equivalent exercises",
-    status: "active", priority: "med" },
-  { id: "T14", proj: "Colosseum", title: "Failed exercises don't register",
-    detail: "Exclude failed sets from PR and strength calculations",
-    status: "active", priority: "high" },
-  { id: "T15", proj: "Colosseum", title: "Convert all weights to RM in history",
-    detail: "Show historical sets as 1RM equivalents throughout",
-    status: "active", priority: "med" },
-  { id: "T16", proj: "Colosseum", title: "% CSA muscle gain — grams — looks",
-    detail: "Estimate muscle cross-sectional area gain as % / grams / visual",
-    status: "active", priority: "low" }
+  { id:"T1",  proj:"Colosseum",        title:"Make usable by customers",             detail:"Ship the features customers need to use it independently",          status:"active", priority:"high" },
+  { id:"T2",  proj:"Science curriculum",title:"Develop science curriculum",           detail:"Build personal science learning system in the language repo",       status:"active", priority:"med"  },
+  { id:"T3",  proj:"Market analytics", title:"Supabase integration",                 detail:"Connect VZ dashboard to Supabase for persistent data",              status:"active", priority:"high" },
+  { id:"T4",  proj:"Market analytics", title:"LT translate",                         detail:"Lithuanian translations for all user-facing text",                  status:"active", priority:"high" },
+  { id:"T5",  proj:"Market analytics", title:"All info checkable",                   detail:"Every stat/number links to its source so it can be verified",       status:"active", priority:"med"  },
+  { id:"T6",  proj:"Market analytics", title:"Other sources of info",                detail:"Pull in additional data sources beyond the current export",          status:"active", priority:"med"  },
+  { id:"T7",  proj:"Market analytics", title:"Predicting values",                    detail:"Forecast future financials based on historical trends",              status:"active", priority:"med"  },
+  { id:"T8",  proj:"Market analytics", title:"Error margins",                        detail:"Show confidence intervals / uncertainty on all estimates",           status:"active", priority:"med"  },
+  { id:"T9",  proj:"Market analytics", title:"More grouping options",                detail:"Group by employee count, company age, or city",                     status:"active", priority:"low"  },
+  { id:"T10", proj:"Colosseum",        title:"Tags editable",                        detail:"Let users create and edit exercise tags in the UI",                 status:"active", priority:"med"  },
+  { id:"T11", proj:"Colosseum",        title:"Strength-based view: sets weight reps 1RM %", detail:"View sets in terms of 1RM percentage alongside weight and reps", status:"active", priority:"high" },
+  { id:"T12", proj:"Colosseum",        title:"Projection curve — steepness, limit, drag, coefficient", detail:"Show curve steepness and ceiling; top-drag control + coefficient view", status:"active", priority:"med" },
+  { id:"T13", proj:"Colosseum",        title:"Merged exercises strength from both",  detail:"Combine strength scores across merged/equivalent exercises",         status:"active", priority:"med"  },
+  { id:"T14", proj:"Colosseum",        title:"Failed exercises don't register",      detail:"Exclude failed sets from PR and strength calculations",             status:"active", priority:"high" },
+  { id:"T15", proj:"Colosseum",        title:"Convert all weights to RM in history", detail:"Show historical sets as 1RM equivalents throughout",               status:"active", priority:"med"  },
+  { id:"T16", proj:"Colosseum",        title:"% CSA muscle gain — grams — looks",   detail:"Estimate muscle cross-sectional area gain as % / grams / visual",   status:"active", priority:"low"  }
+];
+
+// who: "me" | "gf" | "both"
+// threshold: qty at which item appears in shopping list
+const DEFAULT_FOODS = [
+  { id:"F1",  name:"Chicken breast",      qty:2, unit:"portions", who:"both", threshold:2 },
+  { id:"F2",  name:"Eggs",                qty:6, unit:"eggs",     who:"both", threshold:4 },
+  { id:"F3",  name:"Salmon",              qty:1, unit:"fillets",  who:"both", threshold:1 },
+  { id:"F4",  name:"Greek yogurt (LF)",   qty:1, unit:"tubs",     who:"me",   threshold:1 },
+  { id:"F5",  name:"Oats",                qty:1, unit:"bags",     who:"me",   threshold:1 },
+  { id:"F6",  name:"Rice",                qty:1, unit:"bags",     who:"both", threshold:1 },
+  { id:"F7",  name:"Spinach",             qty:1, unit:"bags",     who:"both", threshold:1 },
+  { id:"F8",  name:"Zucchini",            qty:2, unit:"pcs",      who:"both", threshold:2 },
+  { id:"F9",  name:"Carrots",             qty:3, unit:"pcs",      who:"both", threshold:3 },
+  { id:"F10", name:"Potatoes",            qty:4, unit:"pcs",      who:"both", threshold:3 },
+  { id:"F11", name:"Cottage cheese (LF)", qty:1, unit:"tubs",     who:"me",   threshold:1 },
+  { id:"F12", name:"Olive oil",           qty:1, unit:"bottles",  who:"both", threshold:1 },
+  { id:"F13", name:"Blueberries",         qty:0, unit:"boxes",    who:"gf",   threshold:1 },
+  { id:"F14", name:"Lentils",             qty:0, unit:"cans",     who:"gf",   threshold:1 },
+  { id:"F15", name:"Tuna (canned)",       qty:2, unit:"cans",     who:"me",   threshold:2 }
+];
+
+// status: "clean" | "worn" | "laundry"
+// counts reflect how many of each item are in each state
+const DEFAULT_CLOTHES = [
+  { id:"C1", name:"White tee",       cat:"tops",    clean:3, worn:1, laundry:0 },
+  { id:"C2", name:"Black tee",       cat:"tops",    clean:2, worn:0, laundry:1 },
+  { id:"C3", name:"Hoodie",          cat:"tops",    clean:1, worn:1, laundry:0 },
+  { id:"C4", name:"Jeans",           cat:"bottoms", clean:1, worn:1, laundry:0 },
+  { id:"C5", name:"Sweatpants",      cat:"bottoms", clean:2, worn:0, laundry:0 },
+  { id:"C6", name:"Underwear",       cat:"underwear",clean:5,worn:0, laundry:2 },
+  { id:"C7", name:"Socks (pairs)",   cat:"socks",   clean:5, worn:0, laundry:2 },
+  { id:"C8", name:"Gym shorts",      cat:"gym",     clean:2, worn:1, laundry:0 },
+  { id:"C9", name:"Gym tee",         cat:"gym",     clean:1, worn:0, laundry:2 }
+];
+
+const DEFAULT_LAUNDRY = [
+  { id:"L1", date:"2026-06-29", note:"Gym clothes + underwear + socks", done:false },
+  { id:"L2", date:"2026-07-03", note:"Tops + bottoms full wash", done:false }
 ];
 
 const VERSIONS = [
-  { v: 5, title: "Colosseum tasks added", sp: 1,
-    note: "7 Colosseum tasks: tags, strength view, projection, merged, fails, RM history, CSA." },
-  { v: 4, title: "Market analytics tasks added", sp: 1,
-    note: "7 VZ/market-analytics tasks: Supabase, LT, sources, predictions, margins, grouping." },
-  { v: 3, title: "Editable tasks + suggestion engine", sp: 4,
-    note: "Inline edit, add/delete, localStorage persistence, smart suggestions." },
-  { v: 2, title: "Personal assistant — profile, tasks, goals", sp: 3,
-    note: "Full data layer: roles, traits, interests, tasks, goals." },
-  { v: 1, title: "Initial scaffold", sp: 2,
-    note: "Project skeleton with rules, hooks, starter template." }
+  { v:6, title:"Diet, food inventory, wardrobe + laundry", sp:6,
+    note:"Three-tab app: Tasks · Diet & Food (SIBO/acne diets, pantry, shopping) · Wardrobe (inventory, laundry plan)." },
+  { v:5, title:"Colosseum tasks added", sp:1, note:"7 Colosseum tasks." },
+  { v:4, title:"Market analytics tasks added", sp:1, note:"7 VZ market analytics tasks." },
+  { v:3, title:"Editable tasks + suggestion engine", sp:4, note:"Inline edit, add/delete, localStorage, suggestions." },
+  { v:2, title:"Personal assistant — profile, tasks, goals", sp:3, note:"Data layer: roles, traits, interests, tasks, goals." },
+  { v:1, title:"Initial scaffold", sp:2, note:"Project skeleton with rules, hooks, starter template." }
 ];
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════ STATE ═══════════════════════════════════════════
 
-const STORE_KEY = "watari_tasks_v1";
+function ls(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; } }
+function lsSave(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-function load() {
-  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch { return null; }
-}
-function save(tasks) {
-  localStorage.setItem(STORE_KEY, JSON.stringify(tasks));
-}
+let tasks   = ls("wat_tasks_v1",   DEFAULT_TASKS.map(t => ({...t})));
+let foods   = ls("wat_foods_v1",   DEFAULT_FOODS.map(f => ({...f})));
+let clothes = ls("wat_clothes_v1", DEFAULT_CLOTHES.map(c => ({...c})));
+let laundry = ls("wat_laundry_v1", DEFAULT_LAUNDRY.map(l => ({...l})));
+let foodFilter = "both";
 
-let tasks = load() || DEFAULT_TASKS.map(t => ({ ...t }));
-
-function nextId() {
-  const nums = tasks.map(t => parseInt(t.id.replace(/\D/g, "")) || 0);
-  return "T" + (Math.max(0, ...nums) + 1);
+function nextId(arr, prefix) {
+  const nums = arr.map(x => parseInt(x.id.replace(/\D/g,"")) || 0);
+  return prefix + (Math.max(0,...nums) + 1);
 }
 
-// ── CYCLES ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════ TASKS ═══════════════════════════════════════════
 
-const STATUS_CYCLE   = ["active", "paused", "blocked", "done"];
-const PRIORITY_CYCLE = ["high", "med", "low"];
+const STATUS_CYCLE   = ["active","paused","blocked","done"];
+const PRIORITY_CYCLE = ["high","med","low"];
+function cycle(arr,v){ return arr[(arr.indexOf(v)+1)%arr.length]; }
+const SL = { active:"ACTIVE", paused:"PAUSED", blocked:"BLOCKED", done:"DONE" };
+const SC = { active:"s-active", paused:"s-paused", blocked:"s-blocked", done:"s-done" };
+const PL = { high:"HIGH", med:"MED", low:"LOW" };
+const PC = { high:"p-high", med:"p-med", low:"p-low" };
 
-function cycle(arr, val) { return arr[(arr.indexOf(val) + 1) % arr.length]; }
-
-const STATUS_LABEL = { active:"ACTIVE", paused:"PAUSED", blocked:"BLOCKED", done:"DONE" };
-const STATUS_CLS   = { active:"s-active", paused:"s-paused", blocked:"s-blocked", done:"s-done" };
-const PRI_LABEL    = { high:"HIGH", med:"MED", low:"LOW" };
-const PRI_CLS      = { high:"p-high", med:"p-med", low:"p-low" };
-
-// ── SUGGESTIONS ENGINE ────────────────────────────────────────────────────────
-
-function suggest(tasks) {
-  const active   = tasks.filter(t => t.status === "active");
-  const blocked  = tasks.filter(t => t.status === "blocked");
-  const done     = tasks.filter(t => t.status === "done");
-  const highAct  = active.filter(t => t.priority === "high");
-  const paused   = tasks.filter(t => t.status === "paused");
-  const total    = tasks.length;
-  const suggs = [];
-
-  // 1 — nothing active
-  if (active.length === 0 && total > 0) {
-    suggs.push({
-      icon: "🎯", head: "Nothing is active",
-      text: "Pick one task and mark it active — ADHD needs a clear target.",
-      act: null
-    });
-  }
-
-  // 2 — blocked tasks need attention
-  if (blocked.length > 0) {
-    const names = blocked.map(t => t.title).join(", ");
-    suggs.push({
-      icon: "🚧", head: `${blocked.length} task${blocked.length>1?"s":""} blocked`,
-      text: names + " — unblock or park these before taking on new work.",
-      act: null
-    });
-  }
-
-  // 3 — too many high-priority tasks (ADHD paralysis)
-  if (highAct.length > 2) {
-    suggs.push({
-      icon: "⚡", head: "Too many HIGH tasks",
-      text: `${highAct.length} active HIGHs causes decision paralysis. Demote all but one.`,
-      act: null
-    });
-  }
-
-  // 4 — focus suggestion
-  const focus = highAct[0] || active[0];
-  if (focus) {
-    suggs.push({
-      icon: "▶", head: "Start here",
-      text: `"${focus.title}" (${focus.proj || focus.detail || ""}) is your highest-priority active task.`,
-      act: null
-    });
-  }
-
-  // 5 — paused tasks accumulating
-  if (paused.length >= 2) {
-    suggs.push({
-      icon: "🗄", head: `${paused.length} tasks paused`,
-      text: "Paused items are hidden debt. Resume, delete, or accept they're low priority.",
-      act: null
-    });
-  }
-
-  // 6 — looking for clients + Colosseum link
-  const hasColosseum = tasks.find(t => t.proj === "Colosseum" && t.status !== "done");
-  if (hasColosseum) {
-    suggs.push({
-      icon: "👥", head: "Client goal → Colosseum",
-      text: "Finishing Colosseum is your strongest portfolio piece for coaching/programming clients. Keep it active.",
-      act: null
-    });
-  }
-
-  // 7 — all done
-  if (done.length === total && total > 0) {
-    suggs.push({
-      icon: "🎉", head: "All tasks done!",
-      text: "Add your next set of tasks to keep momentum.",
-      act: null
-    });
-  }
-
-  // 8 — science curriculum last
-  const sci = tasks.find(t => t.proj === "Science curriculum" && t.status === "active");
-  if (sci && highAct.length > 1) {
-    suggs.push({
-      icon: "🔬", head: "Science curriculum: schedule it",
-      text: "With multiple HIGHs active, the curriculum will get squeezed. Block a specific time slot for it.",
-      act: null
-    });
-  }
-
-  return suggs.slice(0, 5); // max 5
-}
-
-// ── RENDER ────────────────────────────────────────────────────────────────────
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
 function renderFocus() {
-  const focus = tasks.find(t => t.status === "active" && t.priority === "high")
-             || tasks.find(t => t.status === "active");
+  const f = tasks.find(t=>t.status==="active"&&t.priority==="high") || tasks.find(t=>t.status==="active");
   const el = document.getElementById("focus-wrap");
-  if (!focus) { el.innerHTML = ""; return; }
-  el.innerHTML = `
-    <div class="focus">
-      <div class="focus-lbl">▶ Focus now</div>
-      <div class="focus-title">${esc(focus.title)}</div>
-      <div class="focus-sub">${esc(focus.proj || "")}${focus.proj && focus.detail ? " · " : ""}${esc(focus.detail || "")}</div>
-    </div>`;
+  if (!f) { el.innerHTML=""; return; }
+  el.innerHTML = `<div class="focus"><div class="focus-lbl">▶ Focus now</div><div class="focus-title">${esc(f.title)}</div><div class="focus-sub">${esc(f.proj||"")}${f.proj&&f.detail?" · ":""}${esc(f.detail||"")}</div></div>`;
 }
 
 function renderTasks() {
   const el = document.getElementById("task-list");
-  if (tasks.length === 0) {
-    el.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:12px 0">No tasks yet — add one below.</div>`;
-    return;
-  }
-  el.innerHTML = tasks.map((t, i) => `
-    <div class="task${t.status === "done" ? " is-done" : ""}" data-i="${i}">
+  if (!tasks.length) { el.innerHTML=`<div style="color:var(--muted);padding:12px 0;font-size:13px">No tasks.</div>`; return; }
+  el.innerHTML = tasks.map((t,i) => `
+    <div class="task${t.status==="done"?" is-done":""}" data-i="${i}">
       <div class="task-row1">
-        <div class="task-title-wrap">
-          <input class="task-title" value="${esc(t.title)}" placeholder="Task title"
-            data-field="title" data-i="${i}" />
-        </div>
-        <button class="pill pill-sm pill-icon pill-del" data-del="${i}" title="Delete">✕</button>
+        <div class="task-title-wrap"><input class="task-title" value="${esc(t.title)}" placeholder="Task title" data-field="title" data-i="${i}" /></div>
+        <button class="pill pill-sm pill-icon pill-del" data-del="${i}">✕</button>
       </div>
-      <input class="task-detail" value="${esc(t.detail||"")}" placeholder="Detail / project…"
-        data-field="detail" data-i="${i}" />
+      <input class="task-detail" value="${esc(t.detail||"")}" placeholder="Detail / project…" data-field="detail" data-i="${i}" />
       <div class="task-pills">
-        <button class="pill pill-sm ${STATUS_CLS[t.status]}" data-cycle="status" data-i="${i}">
-          ${STATUS_LABEL[t.status]}
-        </button>
-        <button class="pill pill-sm ${PRI_CLS[t.priority]}" data-cycle="priority" data-i="${i}">
-          ${PRI_LABEL[t.priority]}
-        </button>
-        ${t.proj ? `<span style="font-size:11px;color:var(--muted);margin-left:2px">${esc(t.proj)}</span>` : ""}
+        <button class="pill pill-sm ${SC[t.status]}" data-cycle="status" data-i="${i}">${SL[t.status]}</button>
+        <button class="pill pill-sm ${PC[t.priority]}" data-cycle="priority" data-i="${i}">${PL[t.priority]}</button>
+        ${t.proj?`<span style="font-size:11px;color:var(--muted);margin-left:2px">${esc(t.proj)}</span>`:""}
       </div>
     </div>`).join("");
+}
+
+function suggestTasks(tasks) {
+  const active=tasks.filter(t=>t.status==="active"), blocked=tasks.filter(t=>t.status==="blocked");
+  const highAct=active.filter(t=>t.priority==="high"), paused=tasks.filter(t=>t.status==="paused");
+  const s=[];
+  if (!active.length && tasks.length) s.push({icon:"🎯",head:"Nothing active",text:"Pick one task and mark it active."});
+  if (blocked.length) s.push({icon:"🚧",head:`${blocked.length} blocked`,text:blocked.map(t=>t.title).join(", ")+" — unblock or park."});
+  if (highAct.length>2) s.push({icon:"⚡",head:"Too many HIGHs",text:`${highAct.length} active HIGHs = decision paralysis. Demote all but one.`});
+  const f=highAct[0]||active[0]; if(f) s.push({icon:"▶",head:"Start here",text:`"${f.title}" (${f.proj||f.detail||""}).`});
+  if (paused.length>=2) s.push({icon:"🗄",head:`${paused.length} paused`,text:"Resume, delete, or accept they're low priority."});
+  const col=tasks.find(t=>t.proj==="Colosseum"&&t.status!=="done"); if(col) s.push({icon:"👥",head:"Colosseum → clients",text:"Finishing Colosseum is your strongest portfolio piece."});
+  return s.slice(0,5);
 }
 
 function renderSuggestions() {
-  const suggs = suggest(tasks);
-  const el = document.getElementById("sugg-box");
-  if (suggs.length === 0) {
-    el.innerHTML = `<div class="sugg-empty">Looks good — no issues detected.</div>`;
-    return;
-  }
-  el.innerHTML = suggs.map(s => `
-    <div class="sugg-item">
-      <div class="sugg-icon">${s.icon}</div>
-      <div class="sugg-body">
-        <div class="sugg-head">${s.head}</div>
-        <div class="sugg-text">${s.text}</div>
+  const suggs=suggestTasks(tasks);
+  document.getElementById("sugg-box").innerHTML = suggs.length
+    ? suggs.map(s=>`<div class="sugg-item"><div class="sugg-icon">${s.icon}</div><div class="sugg-body"><div class="sugg-head">${s.head}</div><div class="sugg-text">${s.text}</div></div></div>`).join("")
+    : `<div class="sugg-empty">No issues detected.</div>`;
+}
+
+function renderVersions() {
+  document.getElementById("ver-list").innerHTML = VERSIONS.map(v=>`<div class="ver-row"><span class="ver-n">v${v.v}</span><span class="ver-title">${v.title}</span><span class="ver-sp">${v.sp} sp</span></div>`).join("");
+}
+
+function renderTasksTab() { renderFocus(); renderTasks(); renderSuggestions(); }
+
+document.getElementById("task-list").addEventListener("input", e=>{
+  const f=e.target.dataset.field, i=parseInt(e.target.dataset.i);
+  if (!f||isNaN(i)) return;
+  tasks[i][f]=e.target.value; lsSave("wat_tasks_v1",tasks);
+  requestAnimationFrame(()=>{ renderFocus(); renderSuggestions(); });
+});
+document.getElementById("task-list").addEventListener("click", e=>{
+  const cb=e.target.closest("[data-cycle]");
+  if (cb) { const f=cb.dataset.cycle,i=parseInt(cb.dataset.i); tasks[i][f]=cycle(f==="status"?STATUS_CYCLE:PRIORITY_CYCLE,tasks[i][f]); lsSave("wat_tasks_v1",tasks); renderTasksTab(); return; }
+  const db=e.target.closest("[data-del]");
+  if (db) { tasks.splice(parseInt(db.dataset.del),1); lsSave("wat_tasks_v1",tasks); renderTasksTab(); }
+});
+function addTask(){ const inp=document.getElementById("add-input"),t=inp.value.trim(); if(!t) return; tasks.push({id:nextId(tasks,"T"),title:t,detail:"",proj:"",status:"active",priority:"med"}); lsSave("wat_tasks_v1",tasks); inp.value=""; renderTasksTab(); }
+document.getElementById("add-btn").addEventListener("click",addTask);
+document.getElementById("add-input").addEventListener("keydown",e=>{ if(e.key==="Enter") addTask(); });
+
+// ═══════════════════════════ DIET ════════════════════════════════════════════
+
+const WHO_LABEL = { me:"Adomas", gf:"GF", both:"Both" };
+
+function whoMatch(food, filter) {
+  if (filter==="all") return true;
+  if (filter==="both") return food.who==="both";
+  if (filter==="me")   return food.who==="me"||food.who==="both";
+  if (filter==="gf")   return food.who==="gf"||food.who==="both";
+  return true;
+}
+
+function renderFoods() {
+  const visible = foods.filter(f=>whoMatch(f,foodFilter));
+  const el = document.getElementById("food-list");
+  if (!visible.length) { el.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:12px 0">No food items for this filter.</div>`; return; }
+  el.innerHTML = visible.map(f => {
+    const idx = foods.indexOf(f);
+    const low = f.qty>0 && f.qty<=f.threshold;
+    const out = f.qty===0;
+    const whoColor = f.who==="me"?"var(--blue)":f.who==="gf"?"var(--purple)":"var(--teal)";
+    return `<div class="food-item${low?" food-low":""}${out?" food-out":""}" data-fi="${idx}">
+      <div class="food-name-wrap">
+        <input class="food-name" value="${esc(f.name)}" data-fi="${idx}" data-ff="name" />
+        <div class="food-sub">${WHO_LABEL[f.who]||f.who} · <span style="cursor:pointer;color:${whoColor}" data-who-cycle="${idx}">${f.who}</span></div>
+      </div>
+      <div class="food-qty">
+        <button class="qty-btn" data-fdec="${idx}">−</button>
+        <span class="qty-val">${f.qty}</span>
+        <span class="qty-unit">${esc(f.unit)}</span>
+        <button class="qty-btn" data-finc="${idx}">+</button>
+      </div>
+      <button class="pill pill-sm pill-icon pill-del" data-fdel="${idx}">✕</button>
+    </div>`;
+  }).join("");
+}
+
+function renderShopList() {
+  const low = foods.filter(f=>f.qty<=f.threshold);
+  const el = document.getElementById("shop-list");
+  if (!low.length) { el.innerHTML=`<div class="sugg-empty">Pantry looks good — nothing needed.</div>`; return; }
+  el.innerHTML = low.map(f=>`
+    <div class="shop-item">
+      <div class="shop-dot${f.qty===0?" out":""}"></div>
+      <span class="shop-name">${esc(f.name)}</span>
+      <span class="shop-note">${f.qty===0?"OUT":"low"} · ${WHO_LABEL[f.who]}</span>
+    </div>`).join("");
+}
+
+const MEAL_IDEAS = [
+  { icon:"🍗", head:"Chicken + rice bowl", text:"Lean protein + SIBO-safe carb. Add zucchini or carrots. Works for both." },
+  { icon:"🥚", head:"Egg scramble", text:"Eggs + spinach + olive oil. High protein, low FODMAP, acne-safe." },
+  { icon:"🐟", head:"Salmon + potatoes", text:"Omega-3 (anti-inflammatory for acne), filling, SIBO-friendly." },
+  { icon:"🥣", head:"Oats + blueberries", text:"Adomas: oats for morning. GF: blueberries are low-GI and antioxidant-rich." },
+  { icon:"🥗", head:"Tuna + greens", text:"High protein, near-zero carb. SIBO and acne safe." }
+];
+
+function renderMealIdeas() {
+  document.getElementById("meal-ideas").innerHTML = MEAL_IDEAS.map(m=>`
+    <div class="sugg-item"><div class="sugg-icon">${m.icon}</div><div class="sugg-body"><div class="sugg-head">${m.head}</div><div class="sugg-text">${m.text}</div></div></div>`).join("");
+}
+
+function renderDietTab() { renderFoods(); renderShopList(); renderMealIdeas(); }
+
+// food filter pills
+document.getElementById("food-filter").addEventListener("click", e=>{
+  const btn=e.target.closest("[data-who]"); if(!btn) return;
+  foodFilter=btn.dataset.who;
+  document.querySelectorAll("#food-filter [data-who]").forEach(b=>{
+    const w=b.dataset.who;
+    b.className=`pill who-pill ${foodFilter===w?"on-"+w:"off"}`;
+    if(w==="both"&&foodFilter===w) b.className="pill who-pill on-both";
+  });
+  renderFoods();
+});
+
+document.getElementById("food-list").addEventListener("input", e=>{
+  const fi=parseInt(e.target.dataset.fi), ff=e.target.dataset.ff;
+  if(isNaN(fi)||!ff) return;
+  foods[fi][ff]=e.target.value; lsSave("wat_foods_v1",foods);
+  requestAnimationFrame(()=>renderShopList());
+});
+
+document.getElementById("food-list").addEventListener("click", e=>{
+  const inc=e.target.closest("[data-finc]"); if(inc){ const i=parseInt(inc.dataset.finc); foods[i].qty++; lsSave("wat_foods_v1",foods); renderDietTab(); return; }
+  const dec=e.target.closest("[data-fdec]"); if(dec){ const i=parseInt(dec.dataset.fdec); if(foods[i].qty>0) foods[i].qty--; lsSave("wat_foods_v1",foods); renderDietTab(); return; }
+  const del=e.target.closest("[data-fdel]"); if(del){ foods.splice(parseInt(del.dataset.fdel),1); lsSave("wat_foods_v1",foods); renderDietTab(); return; }
+  const wc=e.target.closest("[data-who-cycle]"); if(wc){ const i=parseInt(wc.dataset.whoHycle||wc.getAttribute("data-who-cycle")); const W=["both","me","gf"]; foods[i].who=W[(W.indexOf(foods[i].who)+1)%W.length]; lsSave("wat_foods_v1",foods); renderDietTab(); }
+});
+
+document.getElementById("food-add-btn").addEventListener("click",()=>{
+  const n=document.getElementById("food-add-name").value.trim();
+  const u=document.getElementById("food-add-unit").value.trim()||"pcs";
+  if(!n) return;
+  foods.push({id:nextId(foods,"F"),name:n,qty:1,unit:u,who:"both",threshold:1});
+  lsSave("wat_foods_v1",foods);
+  document.getElementById("food-add-name").value="";
+  document.getElementById("food-add-unit").value="";
+  renderDietTab();
+});
+
+// ═══════════════════════════ WARDROBE ════════════════════════════════════════
+
+function wardSummary() {
+  let clean=0,worn=0,wash=0;
+  clothes.forEach(c=>{ clean+=c.clean; worn+=c.worn; wash+=c.laundry; });
+  document.getElementById("w-clean-n").textContent=clean;
+  document.getElementById("w-worn-n").textContent=worn;
+  document.getElementById("w-laundry-n").textContent=wash;
+}
+
+function renderClothes() {
+  const el=document.getElementById("cloth-list");
+  if(!clothes.length){ el.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:12px 0">No items — add below.</div>`; return; }
+  el.innerHTML=clothes.map((c,i)=>`
+    <div class="cloth-item">
+      <div class="cloth-row1">
+        <div class="cloth-name-wrap">
+          <input class="cloth-name" value="${esc(c.name)}" data-ci="${i}" data-cf="name" />
+          <div class="cloth-cat"><input style="background:none;border:none;color:var(--muted);font:11px system-ui;outline:none;width:100%;padding:0" value="${esc(c.cat)}" data-ci="${i}" data-cf="cat" placeholder="category" /></div>
+        </div>
+        <button class="pill pill-sm pill-icon pill-del" data-cdel="${i}">✕</button>
+      </div>
+      <div class="cloth-counts">
+        <button class="count-pill cp-clean" data-cuse="${i}" title="Tap to move one clean → worn">
+          <span>${c.clean}</span><span class="count-label"> clean</span>
+        </button>
+        <button class="count-pill cp-worn" data-cwash="${i}" title="Tap to move one worn → laundry">
+          <span>${c.worn}</span><span class="count-label"> worn</span>
+        </button>
+        <button class="count-pill cp-laundry" data-cdone="${i}" title="Tap to move one laundry → clean">
+          <span>${c.laundry}</span><span class="count-label"> laundry</span>
+        </button>
+        <button class="pill pill-sm" style="margin-left:auto;background:var(--surface2);color:var(--muted2)" data-cadd="${i}" title="Add +1 clean item">+1 clean</button>
       </div>
     </div>`).join("");
 }
 
-function renderVersions() {
-  document.getElementById("ver-list").innerHTML = VERSIONS.map(v => `
-    <div class="ver-row">
-      <span class="ver-n">v${v.v}</span>
-      <span class="ver-title">${v.title}</span>
-      <span class="ver-sp">${v.sp} sp</span>
-    </div>`).join("");
+function wardTips() {
+  const tips=[];
+  let totalWorn=0, totalLaundry=0;
+  clothes.forEach(c=>{ totalWorn+=c.worn; totalLaundry+=c.laundry; });
+  if(totalLaundry>=5) tips.push({icon:"🧺",head:"Laundry pile building",text:`${totalLaundry} items waiting — schedule a wash soon.`});
+  const lowClean=clothes.filter(c=>c.clean<2&&c.cat!=="socks"&&c.cat!=="underwear");
+  if(lowClean.length) tips.push({icon:"👕",head:"Running low on clean",text:lowClean.map(c=>c.name).join(", ")+" — wash or add more."});
+  const gymLow=clothes.filter(c=>c.cat==="gym"&&c.clean<1);
+  if(gymLow.length) tips.push({icon:"🏋️",head:"No clean gym wear",text:"Wash your gym clothes before the next workout."});
+  const nextWash=laundry.filter(l=>!l.done).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  if(nextWash) tips.push({icon:"📅",head:"Next laundry",text:`${nextWash.date} — ${nextWash.note}`});
+  if(!tips.length) tips.push({icon:"✅",head:"Wardrobe in order",text:"Everything looks clean and organised."});
+  document.getElementById("ward-tips").innerHTML=tips.map(t=>`<div class="sugg-item"><div class="sugg-icon">${t.icon}</div><div class="sugg-body"><div class="sugg-head">${t.head}</div><div class="sugg-text">${t.text}</div></div></div>`).join("");
 }
 
-function esc(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function renderLaundryPlan() {
+  const sorted=[...laundry].sort((a,b)=>a.date.localeCompare(b.date));
+  const el=document.getElementById("laundry-plan");
+  if(!sorted.length){ el.innerHTML=`<div class="sugg-empty">No laundry planned.</div>`; return; }
+  el.innerHTML=sorted.map(l=>{
+    const idx=laundry.indexOf(l);
+    return `<div class="laundry-item${l.done?" laundry-done":""}">
+      <span class="laundry-date">${l.date}</span>
+      <input class="laundry-note" value="${esc(l.note)}" placeholder="What to wash…" data-li="${idx}" />
+      <button class="pill pill-sm ${l.done?"s-done":"s-paused"}" data-ltoggle="${idx}">${l.done?"DONE":"TODO"}</button>
+      <button class="pill pill-sm pill-icon pill-del" data-ldel="${idx}">✕</button>
+    </div>`;
+  }).join("");
 }
 
-function fullRender() {
-  renderFocus();
-  renderTasks();
-  renderSuggestions();
-}
+function renderWardrobeTab() { wardSummary(); renderClothes(); renderLaundryPlan(); wardTips(); }
 
-// ── EVENTS ────────────────────────────────────────────────────────────────────
+document.getElementById("cloth-list").addEventListener("input", e=>{
+  const ci=parseInt(e.target.dataset.ci), cf=e.target.dataset.cf;
+  if(isNaN(ci)||!cf) return;
+  clothes[ci][cf]=e.target.value; lsSave("wat_clothes_v1",clothes);
+});
 
-document.getElementById("task-list").addEventListener("input", e => {
-  const field = e.target.dataset.field;
-  const i = parseInt(e.target.dataset.i);
-  if (!field || isNaN(i)) return;
-  tasks[i][field] = e.target.value;
-  save(tasks);
-  // defer focus+suggestions refresh so typing stays snappy
-  requestAnimationFrame(() => {
-    renderFocus();
-    renderSuggestions();
+document.getElementById("cloth-list").addEventListener("click", e=>{
+  const use=e.target.closest("[data-cuse]");
+  if(use){ const i=parseInt(use.dataset.cuse); if(clothes[i].clean>0){ clothes[i].clean--; clothes[i].worn++; } lsSave("wat_clothes_v1",clothes); renderWardrobeTab(); return; }
+  const wash=e.target.closest("[data-cwash]");
+  if(wash){ const i=parseInt(wash.dataset.cwash); if(clothes[i].worn>0){ clothes[i].worn--; clothes[i].laundry++; } lsSave("wat_clothes_v1",clothes); renderWardrobeTab(); return; }
+  const done=e.target.closest("[data-cdone]");
+  if(done){ const i=parseInt(done.dataset.cdone); if(clothes[i].laundry>0){ clothes[i].laundry--; clothes[i].clean++; } lsSave("wat_clothes_v1",clothes); renderWardrobeTab(); return; }
+  const add=e.target.closest("[data-cadd]");
+  if(add){ const i=parseInt(add.dataset.cadd); clothes[i].clean++; lsSave("wat_clothes_v1",clothes); renderWardrobeTab(); return; }
+  const del=e.target.closest("[data-cdel]");
+  if(del){ clothes.splice(parseInt(del.dataset.cdel),1); lsSave("wat_clothes_v1",clothes); renderWardrobeTab(); }
+});
+
+document.getElementById("cloth-add-btn").addEventListener("click",()=>{
+  const n=document.getElementById("cloth-add-name").value.trim();
+  const c=document.getElementById("cloth-add-cat").value.trim()||"misc";
+  if(!n) return;
+  clothes.push({id:nextId(clothes,"C"),name:n,cat:c,clean:1,worn:0,laundry:0});
+  lsSave("wat_clothes_v1",clothes);
+  document.getElementById("cloth-add-name").value="";
+  document.getElementById("cloth-add-cat").value="";
+  renderWardrobeTab();
+});
+
+document.getElementById("laundry-plan").addEventListener("input", e=>{
+  const li=parseInt(e.target.dataset.li); if(isNaN(li)) return;
+  laundry[li].note=e.target.value; lsSave("wat_laundry_v1",laundry);
+});
+document.getElementById("laundry-plan").addEventListener("click", e=>{
+  const tog=e.target.closest("[data-ltoggle]"); if(tog){ const i=parseInt(tog.dataset.ltoggle); laundry[i].done=!laundry[i].done; lsSave("wat_laundry_v1",laundry); renderWardrobeTab(); return; }
+  const del=e.target.closest("[data-ldel]"); if(del){ laundry.splice(parseInt(del.dataset.ldel),1); lsSave("wat_laundry_v1",laundry); renderWardrobeTab(); }
+});
+document.getElementById("laundry-add-btn").addEventListener("click",()=>{
+  const d=document.getElementById("laundry-add-date").value;
+  const n=document.getElementById("laundry-add-note").value.trim();
+  if(!d) return;
+  laundry.push({id:nextId(laundry,"L"),date:d,note:n||"Laundry",done:false});
+  lsSave("wat_laundry_v1",laundry);
+  document.getElementById("laundry-add-date").value="";
+  document.getElementById("laundry-add-note").value="";
+  renderWardrobeTab();
+});
+
+// ═══════════════════════════ TABS ════════════════════════════════════════════
+
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById("panel-"+tab.dataset.tab).classList.add("active");
   });
 });
 
-document.getElementById("task-list").addEventListener("click", e => {
-  // cycle status/priority
-  const cycleBtn = e.target.closest("[data-cycle]");
-  if (cycleBtn) {
-    const field = cycleBtn.dataset.cycle;
-    const i = parseInt(cycleBtn.dataset.i);
-    tasks[i][field] = cycle(field === "status" ? STATUS_CYCLE : PRIORITY_CYCLE, tasks[i][field]);
-    save(tasks);
-    fullRender();
-    return;
-  }
-  // delete
-  const delBtn = e.target.closest("[data-del]");
-  if (delBtn) {
-    const i = parseInt(delBtn.dataset.del);
-    tasks.splice(i, 1);
-    save(tasks);
-    fullRender();
-  }
-});
+// ═══════════════════════════ INIT ════════════════════════════════════════════
 
-// add task
-function addTask() {
-  const inp = document.getElementById("add-input");
-  const title = inp.value.trim();
-  if (!title) return;
-  tasks.push({ id: nextId(), title, detail: "", proj: "", status: "active", priority: "med" });
-  save(tasks);
-  inp.value = "";
-  fullRender();
-}
-document.getElementById("add-btn").addEventListener("click", addTask);
-document.getElementById("add-input").addEventListener("keydown", e => {
-  if (e.key === "Enter") addTask();
-});
-
-// ── INIT ──────────────────────────────────────────────────────────────────────
-
-fullRender();
+renderTasksTab();
 renderVersions();
+renderDietTab();
+renderWardrobeTab();
 </script>
-
 </body>
 </html>
