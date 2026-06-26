@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v25</title>
+<title>Adomas · v26</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -290,7 +290,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v25</span>
+    <span class="nav-ver">v26</span>
   </div>
 </nav>
 
@@ -641,7 +641,7 @@
 <!-- Version history FAB + popup: MUST be before the init script so it can wire them (PB-1) -->
 <div id="ver-overlay"></div>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v25</button>
+<button id="ver-fab">📋 v26</button>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -742,6 +742,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:26, title:"Fix YT transcript: page-scrape approach", sp:2, note:"Old approach guessed lang codes → empty JSON → parse error. New: fetch video page via proxy, extract all real captionTrack baseUrls YouTube embeds in HTML, pick best English track, fetch it. Handles JSON3 and XML formats. Falls back clearly on failure."},
   {v:25, title:"YouTube transcript auto-fetch", sp:3, note:"Language → Import now has a YouTube URL/ID field. Fetches captions via corsproxy.io → YouTube's timedtext JSON3 API. Tries lang=en then a.en (auto-generated). On success dumps lines into the paste area for review before splitting. Falls back gracefully to manual paste on CORS/proxy failure."},
   {v:24, title:"Add Ningyo no Kuni task", sp:0.5, note:"T21 Read Ningyo no Kuni by Tsutomu Nihei added to Reading project."},
   {v:23, title:"Add Reading + Create manga tasks", sp:1, note:"T18 Read Blame! by Tsutomu Nihei (PewDiePie's favourite). T19–T20 new 'Create manga' project: concept + first chapter script."},
@@ -1882,7 +1883,6 @@ document.getElementById("lang-import-clear").addEventListener("click",()=>{
 // ── YouTube transcript fetch ──────────────────────────────────────
 function ytExtractId(input){
   input=input.trim();
-  // youtu.be/ID or youtube.com/watch?v=ID or youtube.com/shorts/ID or bare ID
   let m=input.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/);
   if(m)return m[1];
   if(/^[A-Za-z0-9_-]{11}$/.test(input))return input;
@@ -1890,14 +1890,20 @@ function ytExtractId(input){
 }
 
 function ytParseJson3(json){
-  // YouTube json3 caption format: {events:[{segs:[{utf8:"..."}],...}]}
   const lines=[];
   (json.events||[]).forEach(ev=>{
     if(!ev.segs)return;
     const text=ev.segs.map(s=>s.utf8||"").join("").replace(/\n/g," ").trim();
-    if(text&&text!=="\n")lines.push(text);
+    if(text)lines.push(text);
   });
   return lines;
+}
+
+function ytParseXml(text){
+  const doc=new DOMParser().parseFromString(text,"text/xml");
+  return Array.from(doc.querySelectorAll("text")).map(n=>{
+    return n.textContent.replace(/&#39;/g,"'").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").trim();
+  }).filter(Boolean);
 }
 
 function ytSetStatus(msg,color){
@@ -1907,13 +1913,32 @@ function ytSetStatus(msg,color){
   el.textContent=msg;
 }
 
-async function ytFetch(videoId,lang){
-  const target=`https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}&fmt=json3`;
-  const proxy=`https://corsproxy.io/?url=${encodeURIComponent(target)}`;
-  const r=await fetch(proxy,{signal:AbortSignal.timeout(10000)});
-  if(!r.ok)throw new Error("proxy "+r.status);
-  const json=await r.json();
-  return ytParseJson3(json);
+function ytProxy(url){return`https://corsproxy.io/?url=${encodeURIComponent(url)}`;}
+
+async function ytGetCaptionUrls(videoId){
+  // Fetch the video page — YouTube embeds all caption track URLs in the HTML
+  const r=await fetch(ytProxy(`https://www.youtube.com/watch?v=${videoId}`),{signal:AbortSignal.timeout(15000)});
+  if(!r.ok)throw new Error("page HTTP "+r.status);
+  const html=await r.text();
+  if(!html.includes("captionTracks"))throw new Error("no captions on this video");
+  // Extract all timedtext baseUrl values (JSON-encoded in the page)
+  const re=/"baseUrl":"(https:\\\/\\\/www\.youtube\.com\\\/api\\\/timedtext[^"]+)"/g;
+  const urls=[];
+  let m;
+  while((m=re.exec(html))!==null){
+    try{urls.push(JSON.parse('"'+m[1]+'"'));}catch{}
+  }
+  if(!urls.length)throw new Error("couldn't extract caption track URLs");
+  return urls;
+}
+
+async function ytFetchCaption(url){
+  const r=await fetch(ytProxy(url+"&fmt=json3"),{signal:AbortSignal.timeout(10000)});
+  if(!r.ok)throw new Error("caption HTTP "+r.status);
+  const text=await r.text();
+  if(!text.trim())throw new Error("empty caption response");
+  if(text.trim().startsWith("{")){return ytParseJson3(JSON.parse(text));}
+  return ytParseXml(text);
 }
 
 document.getElementById("yt-fetch-btn").addEventListener("click",async()=>{
@@ -1922,17 +1947,21 @@ document.getElementById("yt-fetch-btn").addEventListener("click",async()=>{
   if(!videoId){ytSetStatus("⚠ Couldn't find a video ID in that URL","var(--orange)");return;}
   const btn=document.getElementById("yt-fetch-btn");
   btn.textContent="Fetching…";btn.disabled=true;
-  ytSetStatus("Connecting to YouTube via proxy…");
+  ytSetStatus("Loading video page to find captions…");
   try{
-    // Try manual captions (en), then auto-generated (a.en), then auto (a.fr/a.de common)
-    let lines=await ytFetch(videoId,"en");
-    if(!lines.length)lines=await ytFetch(videoId,"a.en");
-    if(!lines.length){ytSetStatus("⚠ No English captions found. Try pasting the transcript manually.","var(--orange)");return;}
-    // Dump into the textarea so user can see + edit before splitting
+    const urls=await ytGetCaptionUrls(videoId);
+    // Prefer English manual, then English auto, then anything
+    const pick=
+      urls.find(u=>u.includes("lang=en")&&!u.includes("kind=asr"))||
+      urls.find(u=>u.includes("lang=en"))||
+      urls[0];
+    ytSetStatus("Fetching captions…");
+    const lines=await ytFetchCaption(pick);
+    if(!lines.length){ytSetStatus("⚠ Captions were empty. Try pasting manually.","var(--orange)");return;}
     document.getElementById("lang-import-text").value=lines.join("\n");
-    ytSetStatus(`✓ Got ${lines.length} lines — check below, then click Split into cards.`,"var(--green)");
+    ytSetStatus(`✓ ${lines.length} lines — review below, then Split into cards.`,"var(--green)");
   }catch(e){
-    ytSetStatus("✗ Fetch failed ("+e.message+"). Try pasting the transcript manually.","var(--red)");
+    ytSetStatus("✗ "+e.message+". Try pasting the transcript manually.","var(--red)");
   }finally{
     btn.textContent="Fetch transcript";btn.disabled=false;
   }
