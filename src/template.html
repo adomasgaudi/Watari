@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v17</title>
+<title>Adomas · v18</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -35,23 +35,26 @@
     --pink:#d46b8a; --pink-dim:#2a0d18;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html{overflow-x:hidden}
-  body{background:var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif;min-height:100vh;overflow-x:hidden;max-width:100%}
+  html,body{overflow-x:clip;width:100%;max-width:100vw}
+  body{background:var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif;min-height:100vh}
 
-  nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
-  .nav-name{font-weight:700;font-size:15px}
-  .nav-right{display:flex;align-items:center;gap:8px}
-  .nav-status{font-size:11px;color:var(--green);background:var(--green-dim);border-radius:var(--r);padding:2px 8px}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;width:100%;box-sizing:border-box;overflow:hidden}
+  .nav-name{font-weight:700;font-size:15px;flex-shrink:0}
+  .nav-right{display:flex;align-items:center;gap:6px;flex-shrink:0;min-width:0}
+  .nav-status{font-size:11px;color:var(--green);background:var(--green-dim);border-radius:var(--r);padding:2px 6px;white-space:nowrap}
+  @media(max-width:480px){.nav-status{display:none}}
   .nav-ver{font-size:11px;color:var(--muted)}
 
-  .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 14px;position:sticky;top:49px;z-index:19;overflow-x:auto;scrollbar-width:none}
+  .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 14px;position:sticky;top:49px;z-index:19;overflow-x:auto;scrollbar-width:none;width:100%;box-sizing:border-box}
   .tabs::-webkit-scrollbar{display:none}
-  .tab{padding:10px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;user-select:none}
+  .tab{padding:10px 12px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;user-select:none}
   .tab.active{color:var(--text);border-color:var(--accent)}
 
-  .panel{display:none}.panel.active{display:block;max-width:100%;overflow-x:hidden}
-  main{max-width:900px;margin:0 auto;padding:18px 14px 60px;width:100%}
-  .sec,.add-row,.inline-add,.task,.food-row,.cloth-row,.laundry-row,.sched-row,.fin-row{max-width:100%;min-width:0}
+  .panel{display:none}.panel.active{display:block;width:100%;box-sizing:border-box}
+  main{max-width:900px;margin:0 auto;padding:18px 14px 60px;width:100%;box-sizing:border-box}
+  .sec,.task,.food-row,.cloth-row,.laundry-row,.sched-row,.fin-row{width:100%;box-sizing:border-box;min-width:0}
+  .add-row,.inline-add{display:flex;gap:6px;margin-top:6px;width:100%;box-sizing:border-box;flex-wrap:wrap}
+  .proj-group,.proj-header,.proj-tasks{width:100%;box-sizing:border-box;min-width:0}
 
   .cols{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
   @media(max-width:760px){.cols{grid-template-columns:1fr}}
@@ -93,7 +96,7 @@
   .pill-del{background:none;color:var(--muted2);font-size:14px;margin-left:auto}
   .pill-del:hover{color:var(--red)}
 
-  .add-row{display:flex;gap:8px;margin-top:4px;width:100%}
+  .add-row{margin-top:4px}
   .add-input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font:14px/1 system-ui,sans-serif;padding:0 12px;height:var(--tap);outline:none}
   .add-input:focus{border-color:var(--border2)}
   .add-input::placeholder{color:var(--muted2)}
@@ -211,7 +214,7 @@
   .fin-goal-text{font-size:11px;color:var(--muted);margin-top:4px}
 
   /* SHARED */
-  .inline-add{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .inline-add{margin-top:8px}
   .sel-input{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font:13px system-ui,sans-serif;padding:0 10px;height:30px;outline:none}
   .sel-input:focus{border-color:var(--border2)}
   .sel-input::placeholder{color:var(--muted2)}
@@ -234,9 +237,11 @@
   .ver-n{color:var(--accent);font-weight:700;min-width:28px}
   .ver-title{flex:1}
   .ver-sp{color:var(--muted);font-size:11px}
-  #ver-fab{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));right:16px;z-index:200;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--muted);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  #ver-overlay{display:none;position:fixed;inset:0;z-index:199}
+  #ver-overlay.open{display:block}
+  #ver-fab{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));right:16px;z-index:201;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--muted);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
   #ver-fab:hover{color:var(--text)}
-  #ver-popup{position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));right:16px;z-index:201;background:var(--surface);border:1px solid var(--border2);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);width:260px;max-height:55vh;overflow-y:auto;padding:10px 12px;display:none}
+  #ver-popup{position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));right:16px;z-index:200;background:var(--surface);border:1px solid var(--border2);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);width:min(260px,calc(100vw - 32px));max-height:55vh;overflow-y:auto;padding:10px 12px;display:none}
   #ver-popup.open{display:block}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -249,7 +254,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v17</span>
+    <span class="nav-ver">v18</span>
   </div>
 </nav>
 
@@ -609,6 +614,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:18, title:"PB-1 root fix: layout width + popup overlay", sp:2, note:"overflow-x:clip on html/body, all containers box-sizing:border-box width:100%, nav hides status on narrow phones, ver-popup uses overlay instead of document click."},
   {v:17, title:"PB-1 fix: no horizontal scroll", sp:1, note:"html/body overflow-x:hidden + min-width:0 on flex children. Root fix for recurring mobile horizontal overflow."},
   {v:16, title:"Sleep + ADHD tabs + weight tracking", sp:5, note:"New Sleep tab (log with duration/quality), ADHD tab (Pomodoro timer, meds log, daily wins), weight tracking section in Diet."},
   {v:15, title:"Mobile layout + ver popup fix", sp:1, note:"Stack to single column below 760px; fix ver-popup close-on-open bug; safe-area insets for FAB."},
@@ -956,8 +962,11 @@ function renderVersions(){
   document.getElementById("ver-list").innerHTML=VERSIONS.map(v=>`<div class="ver-row"><span class="ver-n">v${v.v}</span><span class="ver-title">${v.title}</span><span class="ver-sp">${v.sp} sp</span></div>`).join("");
   const fab=document.getElementById("ver-fab");
   const vpop=document.getElementById("ver-popup");
-  fab.addEventListener("click",e=>{e.stopPropagation();vpop.classList.toggle("open")});
-  document.addEventListener("click",e=>{if(!vpop.contains(e.target)&&e.target!==fab)vpop.classList.remove("open")});
+  const vov=document.getElementById("ver-overlay");
+  function closeVer(){vpop.classList.remove("open");vov.classList.remove("open")}
+  function openVer(){vpop.classList.add("open");vov.classList.add("open")}
+  fab.addEventListener("click",()=>vpop.classList.contains("open")?closeVer():openVer());
+  vov.addEventListener("click",closeVer);
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1491,7 +1500,8 @@ renderFinancesTab();
 // Connect to Supabase after local render (offline-first: local shows first)
 initSupabase();
 </script>
+<div id="ver-overlay"></div>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v17</button>
+<button id="ver-fab">📋 v18</button>
 </body>
 </html>
