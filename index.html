@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v23</title>
+<title>Adomas · v24</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -290,7 +290,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v23</span>
+    <span class="nav-ver">v24</span>
   </div>
 </nav>
 
@@ -633,7 +633,7 @@
 <!-- Version history FAB + popup: MUST be before the init script so it can wire them (PB-1) -->
 <div id="ver-overlay"></div>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v23</button>
+<button id="ver-fab">📋 v24</button>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -661,7 +661,8 @@ const DEFAULT_TASKS = [
   {id:"T17",proj:"Market analytics", title:"Analyse vivamokykla.lt",                         detail:"https://vivamokykla.lt/kontaktai-2/",                                status:"active", priority:"med"},
   {id:"T18",proj:"Reading",          title:"Read Blame! by Tsutomu Nihei",                   detail:"PewDiePie's favourite manga — dystopian sci-fi",                     status:"active", priority:"med"},
   {id:"T19",proj:"Create manga",     title:"Develop story concept",                           detail:"Characters, world, plot arc — what is the manga about?",             status:"active", priority:"med"},
-  {id:"T20",proj:"Create manga",     title:"Write first chapter script",                      detail:"Panel-by-panel script for chapter 1",                               status:"active", priority:"low"}
+  {id:"T20",proj:"Create manga",     title:"Write first chapter script",                      detail:"Panel-by-panel script for chapter 1",                               status:"active", priority:"low"},
+  {id:"T21",proj:"Reading",          title:"Read Ningyo no Kuni by Tsutomu Nihei",            detail:"Mermaid's Forest — another Nihei manga",                            status:"active", priority:"med"}
 ];
 
 const DEFAULT_FOODS = [
@@ -733,6 +734,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:24, title:"Add Ningyo no Kuni task", sp:0.5, note:"T21 Read Ningyo no Kuni by Tsutomu Nihei added to Reading project."},
   {v:23, title:"Add Reading + Create manga tasks", sp:1, note:"T18 Read Blame! by Tsutomu Nihei (PewDiePie's favourite). T19–T20 new 'Create manga' project: concept + first chapter script."},
   {v:22, title:"Language tab + SRS + transcript import", sp:8, note:"New Language tab: SRS flashcard engine (manual interval slider), card list with inline edit, transcript import (paste text → split into cards), memory-map dots. Stored in localStorage wat_lang_v1."},
   {v:21, title:"Fix recursive save wrappers (add task)", sp:2, note:"saveTasks/Foods/Clothes/Laundry/Blocks/Events/Income/Expenses called themselves → stack overflow → add/edit/delete threw. Now call lsSave with the right key. Dormant until v20 made init actually run. Width confirmed clean, diagnostic removed."},
