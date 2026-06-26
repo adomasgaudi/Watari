@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v2</title>
+<title>Adomas · v3</title>
 <style>
   :root {
     --bg: #0d0d0d;
     --surface: #181818;
     --surface2: #222;
     --border: #2a2a2a;
+    --border2: #333;
     --text: #e4e4e4;
     --muted: #777;
     --muted2: #555;
@@ -23,6 +24,8 @@
     --red-dim: #2a0f0a;
     --orange: #d4874a;
     --orange-dim: #2a1800;
+    --purple: #9b7fd4;
+    --purple-dim: #1a1230;
     --r: 6px;
     --tap: 32px;
   }
@@ -35,91 +38,119 @@
     padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border);
     position: sticky; top: 0; z-index: 10;
   }
-  .nav-left { display: flex; align-items: center; gap: 10px; }
   .nav-name { font-weight: 700; font-size: 15px; }
+  .nav-right { display: flex; align-items: center; gap: 8px; }
   .nav-status { font-size: 11px; color: var(--green); background: var(--green-dim); border-radius: var(--r); padding: 2px 8px; }
   .nav-ver { font-size: 11px; color: var(--muted); }
 
-  /* LAYOUT */
-  main { max-width: 680px; margin: 0 auto; padding: 20px 14px 60px; }
+  /* LAYOUT — two columns on wide, stack on narrow */
+  main { max-width: 900px; margin: 0 auto; padding: 18px 14px 60px; }
+  .cols { display: grid; grid-template-columns: 1fr 300px; gap: 16px; align-items: start; }
+  @media (max-width: 640px) { .cols { grid-template-columns: 1fr; } }
 
   /* SECTION */
-  .section { margin-bottom: 28px; }
-  .section-label {
-    font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--muted2);
-    text-transform: uppercase; margin-bottom: 10px;
+  .sec { margin-bottom: 20px; }
+  .sec-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
   }
+  .sec-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--muted2); text-transform: uppercase; }
 
-  /* FOCUS CARD — the NOW */
-  .focus-card {
+  /* FOCUS */
+  .focus {
     background: linear-gradient(135deg, #1a1600 0%, #181818 100%);
-    border: 1px solid #3a2e00;
-    border-radius: var(--r); padding: 14px 16px; margin-bottom: 10px;
+    border: 1px solid #3a2e00; border-radius: var(--r); padding: 14px 16px; margin-bottom: 16px;
   }
-  .focus-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; }
-  .focus-task { font-size: 16px; font-weight: 700; }
-  .focus-proj { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .focus-lbl { font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; margin-bottom: 5px; }
+  .focus-title { font-size: 17px; font-weight: 700; }
+  .focus-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
 
-  /* TASK CARDS */
+  /* TASK CARD */
   .task {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 12px 14px; margin-bottom: 8px;
-    display: flex; align-items: flex-start; gap: 12px;
+    border-radius: var(--r); padding: 10px 12px; margin-bottom: 8px;
+    position: relative;
   }
-  .task-left { flex: 1; min-width: 0; }
-  .task-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .task-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .task-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+  .task.is-done { opacity: .5; }
+  .task-row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .task-title-wrap { flex: 1; min-width: 0; }
+  .task-title {
+    font-size: 14px; font-weight: 600; width: 100%;
+    background: none; border: none; color: var(--text); outline: none;
+    font-family: inherit; padding: 0;
+  }
+  .task-title:focus { color: #fff; }
+  .task-detail {
+    font-size: 12px; color: var(--muted); width: 100%;
+    background: none; border: none; outline: none; font-family: inherit; padding: 0;
+  }
+  .task-detail:focus { color: var(--text); }
+  .task-detail::placeholder { color: var(--muted2); }
+  .task-pills { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+
+  /* PILLS */
   .pill {
     display: inline-flex; align-items: center; justify-content: center;
-    height: var(--tap); min-height: var(--tap); padding: 0 10px;
-    border-radius: var(--r); font-size: 11px; font-weight: 600;
+    height: var(--tap); padding: 0 12px; border-radius: var(--r);
+    font-size: 11px; font-weight: 700; letter-spacing: .04em;
     cursor: pointer; border: none; user-select: none; white-space: nowrap;
-    transition: opacity .12s;
+    transition: opacity .1s; background: var(--surface2); color: var(--muted);
   }
   .pill:active { opacity: .7; }
-  .pill-status { height: 22px; min-height: 22px; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
-  .s-active    { background: var(--blue-dim);   color: var(--blue);   }
-  .s-done      { background: var(--green-dim);  color: var(--green);  }
-  .s-blocked   { background: var(--red-dim);    color: var(--red);    }
-  .s-paused    { background: var(--surface2);   color: var(--muted);  }
-  .p-high  { background: var(--red-dim);    color: var(--red);    }
-  .p-med   { background: var(--orange-dim); color: var(--orange); }
-  .p-low   { background: var(--surface2);   color: var(--muted);  }
+  .pill-sm { height: 22px; padding: 0 8px; font-size: 10px; }
+  .pill-icon { padding: 0; width: var(--tap); }
 
-  /* GOALS */
-  .goal {
+  .s-active  { background: var(--blue-dim);   color: var(--blue);   }
+  .s-done    { background: var(--green-dim);  color: var(--green);  }
+  .s-blocked { background: var(--red-dim);    color: var(--red);    }
+  .s-paused  { background: var(--surface2);   color: var(--muted);  }
+  .p-high    { background: var(--red-dim);    color: var(--red);    }
+  .p-med     { background: var(--orange-dim); color: var(--orange); }
+  .p-low     { background: var(--surface2);   color: var(--muted);  }
+  .pill-del  { background: none; color: var(--muted2); font-size: 14px; margin-left: auto; }
+  .pill-del:hover { color: var(--red); }
+
+  /* ADD TASK */
+  .add-row {
+    display: flex; gap: 8px; margin-top: 4px;
+  }
+  .add-input {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); color: var(--text); font: 14px/1 system-ui, sans-serif;
+    padding: 0 12px; height: var(--tap); outline: none;
+  }
+  .add-input:focus { border-color: var(--border2); }
+  .add-input::placeholder { color: var(--muted2); }
+  .add-btn { background: var(--surface2); color: var(--text); }
+
+  /* SUGGESTIONS */
+  .sugg-box {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 11px 14px; margin-bottom: 8px;
-    display: flex; align-items: center; gap: 10px;
+    border-radius: var(--r); padding: 12px 14px;
+    position: sticky; top: 58px;
   }
-  .goal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .dot-now    { background: var(--red); }
-  .dot-soon   { background: var(--orange); }
-  .dot-later  { background: var(--muted2); }
-  .goal-text { flex: 1; }
-  .goal-title { font-size: 13px; font-weight: 600; }
-  .goal-detail { font-size: 11px; color: var(--muted); margin-top: 1px; }
-  .goal-when { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: var(--r); flex-shrink: 0; }
-  .when-now   { background: var(--red-dim);    color: var(--red); }
-  .when-soon  { background: var(--orange-dim); color: var(--orange); }
-  .when-later { background: var(--surface2);   color: var(--muted); }
-
-  /* PROFILE CHIPS */
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--r); font-size: 12px; padding: 4px 10px; color: var(--text);
+  .sugg-item {
+    display: flex; gap: 10px; padding: 8px 0;
+    border-bottom: 1px solid var(--border); align-items: flex-start;
   }
-  .chip-role  { border-color: var(--blue-dim); color: var(--blue); background: var(--blue-dim); }
-  .chip-trait { border-color: var(--border); color: var(--muted); }
-  .chip-interest { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-dim); }
+  .sugg-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .sugg-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .sugg-body { flex: 1; }
+  .sugg-head { font-size: 13px; font-weight: 600; }
+  .sugg-text { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .sugg-act {
+    display: inline-block; margin-top: 5px;
+    background: var(--surface2); border: none; border-radius: var(--r);
+    color: var(--blue); font: 11px/1 system-ui, sans-serif; font-weight: 600;
+    padding: 4px 8px; cursor: pointer; height: 24px;
+  }
+  .sugg-act:active { opacity: .7; }
+  .sugg-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 12px 0; }
 
   /* VERSIONS */
-  details { margin-top: 32px; }
+  details { margin-top: 28px; }
   summary { font-size: 11px; color: var(--muted2); cursor: pointer; list-style: none; }
   summary::-webkit-details-marker { display: none; }
-  .ver-list { margin-top: 8px; }
   .ver-row { display: flex; gap: 8px; align-items: baseline; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
   .ver-n { color: var(--accent); font-weight: 700; min-width: 28px; }
   .ver-title { flex: 1; }
@@ -129,185 +160,252 @@
 <body>
 
 <nav>
-  <div class="nav-left">
-    <span class="nav-name">Adomas</span>
+  <span class="nav-name">Adomas</span>
+  <div class="nav-right">
     <span class="nav-status">● Open to clients</span>
+    <span class="nav-ver">v3</span>
   </div>
-  <span class="nav-ver">v2</span>
 </nav>
 
 <main>
+  <div id="focus-wrap"></div>
 
-  <!-- FOCUS NOW -->
-  <div class="section">
-    <div class="section-label">Focus now</div>
-    <div class="focus-card">
-      <div class="focus-label">▶ Active</div>
-      <div class="focus-task" id="focus-task">Make Colosseum customer-ready</div>
-      <div class="focus-proj" id="focus-proj">Colosseum · highest leverage on getting clients</div>
+  <div class="cols">
+    <!-- LEFT: tasks -->
+    <div>
+      <div class="sec">
+        <div class="sec-head">
+          <span class="sec-label">Tasks</span>
+        </div>
+        <div id="task-list"></div>
+        <div class="add-row">
+          <input class="add-input" id="add-input" placeholder="New task…" />
+          <button class="pill add-btn" id="add-btn">+ Add</button>
+        </div>
+      </div>
+
+      <details>
+        <summary>📋 Version history</summary>
+        <div id="ver-list" style="margin-top:8px"></div>
+      </details>
+    </div>
+
+    <!-- RIGHT: suggestions -->
+    <div>
+      <div class="sec">
+        <div class="sec-head"><span class="sec-label">Suggestions</span></div>
+        <div class="sugg-box" id="sugg-box"></div>
+      </div>
     </div>
   </div>
-
-  <!-- TASKS -->
-  <div class="section">
-    <div class="section-label">Tasks</div>
-    <div id="tasks-list"></div>
-  </div>
-
-  <!-- GOALS -->
-  <div class="section">
-    <div class="section-label">Goals</div>
-    <div id="goals-list"></div>
-  </div>
-
-  <!-- PROFILE -->
-  <div class="section">
-    <div class="section-label">Roles</div>
-    <div class="chips" id="roles-chips"></div>
-  </div>
-
-  <div class="section">
-    <div class="section-label">Traits</div>
-    <div class="chips" id="traits-chips"></div>
-  </div>
-
-  <div class="section">
-    <div class="section-label">Interests</div>
-    <div class="chips" id="interests-chips"></div>
-  </div>
-
-  <!-- VERSION HISTORY -->
-  <details>
-    <summary>📋 Version history</summary>
-    <div class="ver-list" id="ver-list"></div>
-  </details>
-
 </main>
 
 <script>
-// ── DATA ──────────────────────────────────────────────────────────────────────
+// ── DEFAULT DATA (overridden by localStorage) ─────────────────────────────────
 
-const ME = {
-  roles:     ["Coach", "Teacher", "Programmer"],
-  traits:    ["Scientific", "ADHD", "Social anxiety"],
-  interests: ["Science", "Learning", "Systems thinking", "Strength training",
-              "Curriculum design", "Data visualisation", "Psychology"]
-};
-
-// status: active | done | blocked | paused
-// priority: high | med | low
-const TASKS = [
-  {
-    id: "T1", proj: "Colosseum", priority: "high", status: "active",
-    title: "Make usable by customers",
-    detail: "Ship the features customers need to use it independently"
-  },
-  {
-    id: "T2", proj: "VZ", priority: "high", status: "active",
-    title: "Finish new tasks",
-    detail: "Work through the open VZ backlog items"
-  },
-  {
-    id: "T3", proj: "Science curriculum", priority: "med", status: "active",
-    title: "Develop science curriculum",
-    detail: "Build personal science learning system in the language repo"
-  }
-];
-
-// urgency: now | soon | later
-const GOALS = [
-  {
-    title: "Find clients",
-    detail: "Coaching · teaching · programming",
-    urgency: "now"
-  },
-  {
-    title: "Ship Colosseum v1 for customers",
-    detail: "Strength dashboard ready for real users",
-    urgency: "now"
-  },
-  {
-    title: "Complete VZ project",
-    detail: "All planned features shipped and live",
-    urgency: "soon"
-  },
-  {
-    title: "Launch science curriculum",
-    detail: "Personal structured learning system live",
-    urgency: "later"
-  }
+const DEFAULT_TASKS = [
+  { id: "T1", proj: "Colosseum", title: "Make usable by customers",
+    detail: "Ship the features customers need to use it independently",
+    status: "active", priority: "high" },
+  { id: "T2", proj: "VZ", title: "Finish new tasks",
+    detail: "Work through the open VZ backlog items",
+    status: "active", priority: "high" },
+  { id: "T3", proj: "Science curriculum", title: "Develop science curriculum",
+    detail: "Build personal science learning system in the language repo",
+    status: "active", priority: "med" }
 ];
 
 const VERSIONS = [
+  { v: 3, title: "Editable tasks + suggestion engine", sp: 4,
+    note: "Inline edit, add/delete, localStorage persistence, smart suggestions." },
   { v: 2, title: "Personal assistant — profile, tasks, goals", sp: 3,
     note: "Full data layer: roles, traits, interests, tasks, goals." },
   { v: 1, title: "Initial scaffold", sp: 2,
     note: "Project skeleton with rules, hooks, starter template." }
 ];
 
-// ── RENDER ────────────────────────────────────────────────────────────────────
+// ── STATE ─────────────────────────────────────────────────────────────────────
 
-function statusPill(s) {
-  const map = { active:"s-active", done:"s-done", blocked:"s-blocked", paused:"s-paused" };
-  const label = { active:"ACTIVE", done:"DONE", blocked:"BLOCKED", paused:"PAUSED" };
-  return `<span class="pill pill-status ${map[s]||'s-paused'}">${label[s]||s.toUpperCase()}</span>`;
+const STORE_KEY = "watari_tasks_v1";
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch { return null; }
 }
-function priorityPill(p) {
-  const map = { high:"p-high", med:"p-med", low:"p-low" };
-  const label = { high:"HIGH", med:"MED", low:"LOW" };
-  return `<span class="pill pill-status ${map[p]||'p-low'}">${label[p]||p.toUpperCase()}</span>`;
-}
-function urgencyBadge(u) {
-  const cls = { now:"when-now", soon:"when-soon", later:"when-later" };
-  return `<span class="goal-when ${cls[u]||'when-later'}">${u.toUpperCase()}</span>`;
-}
-function dotClass(u) {
-  return { now:"dot-now", soon:"dot-soon", later:"dot-later" }[u] || "dot-later";
+function save(tasks) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(tasks));
 }
 
-function render() {
-  // focus — first high-priority active task
-  const focus = TASKS.find(t => t.status === "active" && t.priority === "high")
-             || TASKS.find(t => t.status === "active")
-             || TASKS[0];
-  if (focus) {
-    document.getElementById("focus-task").textContent = focus.title;
-    document.getElementById("focus-proj").textContent = focus.proj + " · " + focus.detail;
+let tasks = load() || DEFAULT_TASKS.map(t => ({ ...t }));
+
+function nextId() {
+  const nums = tasks.map(t => parseInt(t.id.replace(/\D/g, "")) || 0);
+  return "T" + (Math.max(0, ...nums) + 1);
+}
+
+// ── CYCLES ────────────────────────────────────────────────────────────────────
+
+const STATUS_CYCLE   = ["active", "paused", "blocked", "done"];
+const PRIORITY_CYCLE = ["high", "med", "low"];
+
+function cycle(arr, val) { return arr[(arr.indexOf(val) + 1) % arr.length]; }
+
+const STATUS_LABEL = { active:"ACTIVE", paused:"PAUSED", blocked:"BLOCKED", done:"DONE" };
+const STATUS_CLS   = { active:"s-active", paused:"s-paused", blocked:"s-blocked", done:"s-done" };
+const PRI_LABEL    = { high:"HIGH", med:"MED", low:"LOW" };
+const PRI_CLS      = { high:"p-high", med:"p-med", low:"p-low" };
+
+// ── SUGGESTIONS ENGINE ────────────────────────────────────────────────────────
+
+function suggest(tasks) {
+  const active   = tasks.filter(t => t.status === "active");
+  const blocked  = tasks.filter(t => t.status === "blocked");
+  const done     = tasks.filter(t => t.status === "done");
+  const highAct  = active.filter(t => t.priority === "high");
+  const paused   = tasks.filter(t => t.status === "paused");
+  const total    = tasks.length;
+  const suggs = [];
+
+  // 1 — nothing active
+  if (active.length === 0 && total > 0) {
+    suggs.push({
+      icon: "🎯", head: "Nothing is active",
+      text: "Pick one task and mark it active — ADHD needs a clear target.",
+      act: null
+    });
   }
 
-  // tasks
-  document.getElementById("tasks-list").innerHTML = TASKS.map(t => `
-    <div class="task">
-      <div class="task-left">
-        <div class="task-title">${t.title}</div>
-        <div class="task-meta">${t.proj} · ${t.detail}</div>
+  // 2 — blocked tasks need attention
+  if (blocked.length > 0) {
+    const names = blocked.map(t => t.title).join(", ");
+    suggs.push({
+      icon: "🚧", head: `${blocked.length} task${blocked.length>1?"s":""} blocked`,
+      text: names + " — unblock or park these before taking on new work.",
+      act: null
+    });
+  }
+
+  // 3 — too many high-priority tasks (ADHD paralysis)
+  if (highAct.length > 2) {
+    suggs.push({
+      icon: "⚡", head: "Too many HIGH tasks",
+      text: `${highAct.length} active HIGHs causes decision paralysis. Demote all but one.`,
+      act: null
+    });
+  }
+
+  // 4 — focus suggestion
+  const focus = highAct[0] || active[0];
+  if (focus) {
+    suggs.push({
+      icon: "▶", head: "Start here",
+      text: `"${focus.title}" (${focus.proj || focus.detail || ""}) is your highest-priority active task.`,
+      act: null
+    });
+  }
+
+  // 5 — paused tasks accumulating
+  if (paused.length >= 2) {
+    suggs.push({
+      icon: "🗄", head: `${paused.length} tasks paused`,
+      text: "Paused items are hidden debt. Resume, delete, or accept they're low priority.",
+      act: null
+    });
+  }
+
+  // 6 — looking for clients + Colosseum link
+  const hasColosseum = tasks.find(t => t.proj === "Colosseum" && t.status !== "done");
+  if (hasColosseum) {
+    suggs.push({
+      icon: "👥", head: "Client goal → Colosseum",
+      text: "Finishing Colosseum is your strongest portfolio piece for coaching/programming clients. Keep it active.",
+      act: null
+    });
+  }
+
+  // 7 — all done
+  if (done.length === total && total > 0) {
+    suggs.push({
+      icon: "🎉", head: "All tasks done!",
+      text: "Add your next set of tasks to keep momentum.",
+      act: null
+    });
+  }
+
+  // 8 — science curriculum last
+  const sci = tasks.find(t => t.proj === "Science curriculum" && t.status === "active");
+  if (sci && highAct.length > 1) {
+    suggs.push({
+      icon: "🔬", head: "Science curriculum: schedule it",
+      text: "With multiple HIGHs active, the curriculum will get squeezed. Block a specific time slot for it.",
+      act: null
+    });
+  }
+
+  return suggs.slice(0, 5); // max 5
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+
+function renderFocus() {
+  const focus = tasks.find(t => t.status === "active" && t.priority === "high")
+             || tasks.find(t => t.status === "active");
+  const el = document.getElementById("focus-wrap");
+  if (!focus) { el.innerHTML = ""; return; }
+  el.innerHTML = `
+    <div class="focus">
+      <div class="focus-lbl">▶ Focus now</div>
+      <div class="focus-title">${esc(focus.title)}</div>
+      <div class="focus-sub">${esc(focus.proj || "")}${focus.proj && focus.detail ? " · " : ""}${esc(focus.detail || "")}</div>
+    </div>`;
+}
+
+function renderTasks() {
+  const el = document.getElementById("task-list");
+  if (tasks.length === 0) {
+    el.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:12px 0">No tasks yet — add one below.</div>`;
+    return;
+  }
+  el.innerHTML = tasks.map((t, i) => `
+    <div class="task${t.status === "done" ? " is-done" : ""}" data-i="${i}">
+      <div class="task-row1">
+        <div class="task-title-wrap">
+          <input class="task-title" value="${esc(t.title)}" placeholder="Task title"
+            data-field="title" data-i="${i}" />
+        </div>
+        <button class="pill pill-sm pill-icon pill-del" data-del="${i}" title="Delete">✕</button>
       </div>
-      <div class="task-right">
-        ${statusPill(t.status)}
-        ${priorityPill(t.priority)}
+      <input class="task-detail" value="${esc(t.detail||"")}" placeholder="Detail / project…"
+        data-field="detail" data-i="${i}" />
+      <div class="task-pills">
+        <button class="pill pill-sm ${STATUS_CLS[t.status]}" data-cycle="status" data-i="${i}">
+          ${STATUS_LABEL[t.status]}
+        </button>
+        <button class="pill pill-sm ${PRI_CLS[t.priority]}" data-cycle="priority" data-i="${i}">
+          ${PRI_LABEL[t.priority]}
+        </button>
+        ${t.proj ? `<span style="font-size:11px;color:var(--muted);margin-left:2px">${esc(t.proj)}</span>` : ""}
       </div>
     </div>`).join("");
+}
 
-  // goals
-  document.getElementById("goals-list").innerHTML = GOALS.map(g => `
-    <div class="goal">
-      <div class="goal-dot ${dotClass(g.urgency)}"></div>
-      <div class="goal-text">
-        <div class="goal-title">${g.title}</div>
-        <div class="goal-detail">${g.detail}</div>
+function renderSuggestions() {
+  const suggs = suggest(tasks);
+  const el = document.getElementById("sugg-box");
+  if (suggs.length === 0) {
+    el.innerHTML = `<div class="sugg-empty">Looks good — no issues detected.</div>`;
+    return;
+  }
+  el.innerHTML = suggs.map(s => `
+    <div class="sugg-item">
+      <div class="sugg-icon">${s.icon}</div>
+      <div class="sugg-body">
+        <div class="sugg-head">${s.head}</div>
+        <div class="sugg-text">${s.text}</div>
       </div>
-      ${urgencyBadge(g.urgency)}
     </div>`).join("");
+}
 
-  // chips
-  document.getElementById("roles-chips").innerHTML =
-    ME.roles.map(r => `<span class="chip chip-role">${r}</span>`).join("");
-  document.getElementById("traits-chips").innerHTML =
-    ME.traits.map(t => `<span class="chip chip-trait">${t}</span>`).join("");
-  document.getElementById("interests-chips").innerHTML =
-    ME.interests.map(i => `<span class="chip chip-interest">${i}</span>`).join("");
-
-  // versions
+function renderVersions() {
   document.getElementById("ver-list").innerHTML = VERSIONS.map(v => `
     <div class="ver-row">
       <span class="ver-n">v${v.v}</span>
@@ -316,7 +414,71 @@ function render() {
     </div>`).join("");
 }
 
-render();
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function fullRender() {
+  renderFocus();
+  renderTasks();
+  renderSuggestions();
+}
+
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+
+document.getElementById("task-list").addEventListener("input", e => {
+  const field = e.target.dataset.field;
+  const i = parseInt(e.target.dataset.i);
+  if (!field || isNaN(i)) return;
+  tasks[i][field] = e.target.value;
+  save(tasks);
+  // defer focus+suggestions refresh so typing stays snappy
+  requestAnimationFrame(() => {
+    renderFocus();
+    renderSuggestions();
+  });
+});
+
+document.getElementById("task-list").addEventListener("click", e => {
+  // cycle status/priority
+  const cycleBtn = e.target.closest("[data-cycle]");
+  if (cycleBtn) {
+    const field = cycleBtn.dataset.cycle;
+    const i = parseInt(cycleBtn.dataset.i);
+    tasks[i][field] = cycle(field === "status" ? STATUS_CYCLE : PRIORITY_CYCLE, tasks[i][field]);
+    save(tasks);
+    fullRender();
+    return;
+  }
+  // delete
+  const delBtn = e.target.closest("[data-del]");
+  if (delBtn) {
+    const i = parseInt(delBtn.dataset.del);
+    tasks.splice(i, 1);
+    save(tasks);
+    fullRender();
+  }
+});
+
+// add task
+function addTask() {
+  const inp = document.getElementById("add-input");
+  const title = inp.value.trim();
+  if (!title) return;
+  tasks.push({ id: nextId(), title, detail: "", proj: "", status: "active", priority: "med" });
+  save(tasks);
+  inp.value = "";
+  fullRender();
+}
+document.getElementById("add-btn").addEventListener("click", addTask);
+document.getElementById("add-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") addTask();
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+
+fullRender();
+renderVersions();
 </script>
 
 </body>
