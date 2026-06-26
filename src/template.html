@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v11</title>
+<title>Adomas · v12</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -246,7 +246,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v11</span>
+    <span class="nav-ver">v12</span>
   </div>
 </nav>
 
@@ -550,6 +550,8 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:12, title:"Projects collapsed by default", sp:1,
+   note:"Tasks open grouped by project, all collapsed — tap a project to expand. Resets old flat/open localStorage state."},
   {v:11, title:"Watari Supabase project", sp:1,
    note:"Switched to dedicated Watari Supabase project (ibgkayhwbjkeiuphkewg, eu-central-1)."},
   {v:10, title:"Supabase cloud sync", sp:5,
@@ -717,9 +719,11 @@ const PRIORITY_ORD={high:0,med:1,low:2};
 const STATUS_ORD={active:0,paused:1,blocked:2,done:3};
 
 let taskSort   = ls("wat_task_sort","priority");  // priority | status | added
-let taskGroup  = ls("wat_task_group","project");  // flat | project
+let taskGroup  = ls("wat_task_group_v2","project"); // flat | project — v2 resets to grouped default
 let taskFilter = ls("wat_task_filter","all");     // all | active | paused | blocked | done
-let collapsedProjs = new Set(ls("wat_task_collapsed",[]));
+// default: all groups collapsed — user expands the one they want to work on
+const DEFAULT_COLLAPSED = [...new Set(DEFAULT_TASKS.map(t=>t.proj||"No project"))];
+let collapsedProjs = new Set(ls("wat_task_collapsed_v2", DEFAULT_COLLAPSED));
 
 function sortedTasks(list){
   const s=[...list];
@@ -821,7 +825,7 @@ function renderTasksTab(){renderFocus();renderTaskControls();renderTasks();rende
 document.getElementById("task-controls").addEventListener("click",e=>{
   const tf=e.target.closest("[data-tf]");
   if(tf){taskFilter=tf.dataset.tf;lsSave("wat_task_filter",taskFilter);renderTaskControls();renderTasks();return}
-  if(e.target.id==="tc-group"){taskGroup=taskGroup==="project"?"flat":"project";lsSave("wat_task_group",taskGroup);renderTaskControls();renderTasks();return}
+  if(e.target.id==="tc-group"){taskGroup=taskGroup==="project"?"flat":"project";lsSave("wat_task_group_v2",taskGroup);renderTaskControls();renderTasks();return}
   if(e.target.id==="tc-sort"){taskSort=cycle(["priority","status","added"],taskSort);lsSave("wat_task_sort",taskSort);renderTaskControls();renderTasks()}
 });
 
@@ -835,7 +839,7 @@ document.getElementById("task-list").addEventListener("input",e=>{
 document.getElementById("task-list").addEventListener("click",e=>{
   // group collapse toggle
   const tog=e.target.closest("[data-toggle-proj]");
-  if(tog){const p=tog.dataset.toggleProj;collapsedProjs.has(p)?collapsedProjs.delete(p):collapsedProjs.add(p);lsSave("wat_task_collapsed",[...collapsedProjs]);renderTasks();return}
+  if(tog){const p=tog.dataset.toggleProj;collapsedProjs.has(p)?collapsedProjs.delete(p):collapsedProjs.add(p);lsSave("wat_task_collapsed_v2",[...collapsedProjs]);renderTasks();return}
   const cb=e.target.closest("[data-cycle]");
   if(cb){const f=cb.dataset.cycle,i=parseInt(cb.dataset.i);tasks[i][f]=cycle(f==="status"?STC:PRC,tasks[i][f]);saveTasks();renderTasksTab();return}
   const db=e.target.closest("[data-del]");
