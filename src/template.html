@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v29</title>
+<title>Adomas · v30</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -279,6 +279,21 @@
   .import-sent-rm:hover{color:var(--red)}
   .memory-map{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px}
   .mm-dot{width:12px;height:12px;border-radius:3px;cursor:pointer;flex-shrink:0}
+  /* Top-level page switcher (Notes | Other) */
+  .pageswitch{display:flex;gap:6px;padding:10px 14px 2px}
+  .page-btn{font-family:inherit;font-size:14px;font-weight:600;padding:5px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--muted);cursor:pointer}
+  .page-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+  /* Notes — minimalist nested outline */
+  #notes-wrap{max-width:720px;margin:0 auto;padding:14px}
+  .notes-title{font-size:1.4rem;font-weight:700;margin-bottom:10px;outline:none}
+  .notes-title:empty:before{content:attr(data-ph);color:var(--muted2);pointer-events:none}
+  #notes-editor{font-size:15px}
+  .note-row{display:flex;align-items:flex-start;gap:7px;line-height:1.55}
+  .note-bullet{color:var(--muted2);user-select:none;font-size:15px;line-height:1.55;flex-shrink:0;cursor:default}
+  .note-text{flex:1;min-width:0;min-height:1.55em;outline:none;padding:1px 3px;border-radius:4px;white-space:pre-wrap;word-break:break-word}
+  .note-text:focus{background:var(--surface)}
+  .note-text:empty:before{content:attr(data-ph);color:var(--muted2);pointer-events:none}
+  .notes-hint{color:var(--muted2);font-size:11px;margin-top:14px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -290,10 +305,26 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v29</span>
+    <span class="nav-ver">v30</span>
   </div>
 </nav>
 
+<div class="pageswitch">
+  <button class="page-btn active" data-page="notes">Notes</button>
+  <button class="page-btn" data-page="other">Other</button>
+</div>
+
+<!-- ══════════════ NOTES (Notion-style nested outline) ══════════════ -->
+<div id="page-notes" class="page-view"><main>
+  <div id="notes-wrap">
+    <div class="notes-title" id="notes-title" contenteditable="true" data-ph="Untitled"></div>
+    <div id="notes-editor"></div>
+    <div class="notes-hint">Enter: new line · Tab / Shift+Tab: nest / unnest · Backspace on empty: delete</div>
+  </div>
+</main></div>
+
+<!-- ══════════════ OTHER (the original dashboard) ══════════════ -->
+<div id="page-other" class="page-view" style="display:none">
 <div class="tabs">
   <div class="tab active" data-tab="tasks">Tasks</div>
   <div class="tab" data-tab="diet">Diet & Food</div>
@@ -651,11 +682,12 @@
     </div>
   </div>
 </main></div>
+</div><!-- /#page-other -->
 
 <!-- Version history FAB + popup: MUST be before the init script so it can wire them (PB-1) -->
 <div id="ver-overlay"></div>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v29</button>
+<button id="ver-fab">📋 v30</button>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -756,6 +788,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:30, title:"Notes & Other pages — Notion-style nested outline", sp:6, note:"New top-level page switcher: Notes | Other. The entire previous dashboard (all tabs) now lives under 'Other'. 'Notes' is a minimalist Notion-style nested outline — type to write, Enter for a new line, Tab/Shift+Tab to nest/unnest, Backspace on an empty line to delete/merge, arrows to move between lines. Title + body persist to localStorage (wat_notes_v1 / wat_notes_title_v1). Notes is the default landing page."},
   {v:29, title:"Remember tab (notes list)", sp:2, note:"New Remember tab: an editable list of things to keep around (title + note/link, inline add, delete). Links auto-detected and clickable. Seeded once into wat_remember_v1 with SearXNG (privacy metasearch) and the vivamokykla contacts page."},
   {v:28, title:"Seed 'Beyond the Basics · Claude Code' deck", sp:3, note:"Language tab ships a 19-card deck distilled from the agentic-engineering talk + the worktrees setup slide: Access/Memory/Tooling levers, in-context learning vs fine-tuning, the Bitter Lesson, Post-Tool-Use hooks, subagents, and the ~16-worktree no-cherry-picking setup. Seeded once into wat_lang_v1 (SC1–SC19); user cards untouched, deletions stick."},
   {v:27, title:"YT fetch: 3-proxy fallback chain", sp:1, note:"corsproxy.io returned 429 (rate-limited). Now tries corsproxy.io → allorigins.win/raw → thingproxy.freeboard.io in sequence; skips to next on 429/5xx/timeout. First proxy to respond 200 wins."},
@@ -901,6 +934,12 @@ const REMEMBER_SEED = [
 ];
 let remember   = ls("wat_remember_v1", null);
 if(!Array.isArray(remember)){remember=REMEMBER_SEED.map(r=>({...r}));lsSave("wat_remember_v1",remember);}
+// Notes: a flat ordered outline; each node {id,text,depth}. depth gives nesting.
+let notesTitle = ls("wat_notes_title_v1", "");
+let notes = ls("wat_notes_v1", null);
+if(!Array.isArray(notes)||!notes.length) notes=[{id:"N1",text:"",depth:0}];
+function saveNotes(){lsSave("wat_notes_v1",notes)}
+function saveNotesTitle(){lsSave("wat_notes_title_v1",notesTitle)}
 let foodFilter = "both";
 
 function nextId(arr,p){const n=arr.map(x=>parseInt(x.id.replace(/\D/g,""))||0);return p+(Math.max(0,...n)+1)}
@@ -1398,6 +1437,112 @@ document.addEventListener("click",e=>{
     renderRememberTab();
   }
 });
+
+// ══════════════════════════════════════════════════════════════════
+// NOTES — minimalist Notion-style nested outline
+// ══════════════════════════════════════════════════════════════════
+const noteIndex = id => notes.findIndex(n=>n.id===id);
+// Keep depths valid: a node can be at most one deeper than the one above it.
+function normalizeNotes(){
+  for(let i=0;i<notes.length;i++){
+    const max = i===0 ? 0 : notes[i-1].depth+1;
+    notes[i].depth = Math.max(0, Math.min(notes[i].depth, max));
+  }
+}
+// End (exclusive) of the block i..j whose followers are deeper than notes[i].
+function blockEnd(i){let j=i+1;const d=notes[i].depth;while(j<notes.length&&notes[j].depth>d)j++;return j;}
+function indentNote(i){
+  if(i===0) return;
+  if(notes[i].depth >= notes[i-1].depth+1) return;
+  const end=blockEnd(i); for(let k=i;k<end;k++) notes[k].depth++;
+}
+function outdentNote(i){
+  if(notes[i].depth===0) return;
+  const end=blockEnd(i); for(let k=i;k<end;k++) notes[k].depth=Math.max(0,notes[k].depth-1);
+}
+function caretOffset(el){
+  const sel=window.getSelection();
+  if(!sel.rangeCount) return 0;
+  const r=sel.getRangeAt(0); return r.startOffset;
+}
+function caretAtStart(){
+  const sel=window.getSelection();
+  if(!sel.rangeCount) return false;
+  const r=sel.getRangeAt(0); return r.collapsed && r.startOffset===0;
+}
+function focusNote(id,caret){
+  const el=document.querySelector(`.note-text[data-id="${id}"]`);
+  if(!el) return;
+  el.focus();
+  const sel=window.getSelection(), range=document.createRange();
+  const len=el.textContent.length;
+  const pos = caret==="start"?0 : caret==="end"?len : Math.min(caret,len);
+  if(el.firstChild){range.setStart(el.firstChild,pos);} else {range.setStart(el,0);}
+  range.collapse(true); sel.removeAllRanges(); sel.addRange(range);
+}
+function renderNotes(focusId,caret){
+  const ed=document.getElementById("notes-editor");
+  if(!ed) return;
+  normalizeNotes();
+  ed.innerHTML=notes.map(n=>`<div class="note-row" style="padding-left:${n.depth*22}px">`
+    +`<span class="note-bullet">•</span>`
+    +`<div class="note-text" contenteditable="true" data-id="${n.id}" data-ph="${noteIndex(n.id)===0?"Type an idea… (Tab to nest)":""}">${esc(n.text)}</div>`
+    +`</div>`).join("");
+  const t=document.getElementById("notes-title");
+  if(t && t.textContent!==notesTitle) t.textContent=notesTitle;
+  if(focusId) focusNote(focusId,caret);
+}
+let notesSaveTimer=null;
+function debouncedSaveNotes(){clearTimeout(notesSaveTimer);notesSaveTimer=setTimeout(saveNotes,400);}
+function wireNotes(){
+  const ed=document.getElementById("notes-editor");
+  if(!ed) return;
+  const titleEl=document.getElementById("notes-title");
+  if(titleEl){
+    titleEl.textContent=notesTitle;
+    titleEl.addEventListener("input",()=>{notesTitle=titleEl.textContent;saveNotesTitle();});
+    titleEl.addEventListener("keydown",e=>{
+      if(e.key==="Enter"){e.preventDefault();focusNote(notes[0].id,"start");}
+    });
+  }
+  ed.addEventListener("input",e=>{
+    const t=e.target.closest(".note-text"); if(!t) return;
+    const i=noteIndex(t.dataset.id); if(i<0) return;
+    notes[i].text=t.textContent; debouncedSaveNotes();
+  });
+  ed.addEventListener("keydown",e=>{
+    const t=e.target.closest(".note-text"); if(!t) return;
+    const id=t.dataset.id, i=noteIndex(id); if(i<0) return;
+    if(e.key==="Enter" && !e.shiftKey){
+      e.preventDefault();
+      notes[i].text=t.textContent;
+      const newId=nextId(notes,"N");
+      notes.splice(i+1,0,{id:newId,text:"",depth:notes[i].depth});
+      saveNotes(); renderNotes(newId,"start"); return;
+    }
+    if(e.key==="Tab"){
+      e.preventDefault();
+      notes[i].text=t.textContent; const c=caretOffset(t);
+      e.shiftKey?outdentNote(i):indentNote(i);
+      saveNotes(); renderNotes(id,c); return;
+    }
+    if(e.key==="Backspace" && caretAtStart()){
+      if(notes.length===1 && notes[0].text==="") {e.preventDefault();return;}
+      if(i>0){
+        e.preventDefault();
+        notes[i].text=t.textContent;
+        const prev=notes[i-1], junction=prev.text.length;
+        prev.text=prev.text+notes[i].text;
+        notes.splice(i,1);
+        saveNotes(); renderNotes(prev.id,junction); return;
+      }
+    }
+    if((e.key==="ArrowUp"||e.key==="ArrowDown")){
+      const ni = e.key==="ArrowUp" ? i-1 : i+1;
+      if(ni>=0 && ni<notes.length){e.preventDefault();focusNote(notes[ni].id,"end");}
+    }
+  });
+}
 
 document.getElementById("food-filter").addEventListener("click",e=>{
   const btn=e.target.closest("[data-who]");if(!btn)return;
@@ -2106,6 +2251,18 @@ document.querySelectorAll(".tab").forEach(tab=>{
   });
 });
 
+// Top-level page switcher: Notes | Other
+document.querySelectorAll(".page-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".page-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    const p=btn.dataset.page;
+    document.getElementById("page-notes").style.display = p==="notes"?"block":"none";
+    document.getElementById("page-other").style.display = p==="other"?"block":"none";
+    if(p==="notes") renderNotes();
+  });
+});
+
 // ══════════════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════════════════
@@ -2117,6 +2274,8 @@ renderScheduleTab();
 renderFinancesTab();
 renderLanguageTab();
 renderRememberTab();
+wireNotes();
+renderNotes();
 // Connect to Supabase after local render (offline-first: local shows first)
 initSupabase();
 </script>
