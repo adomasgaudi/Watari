@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v15</title>
+<title>Adomas · v16</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -247,7 +247,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v15</span>
+    <span class="nav-ver">v16</span>
   </div>
 </nav>
 
@@ -256,6 +256,8 @@
   <div class="tab" data-tab="diet">Diet & Food</div>
   <div class="tab" data-tab="wardrobe">Wardrobe</div>
   <div class="tab" data-tab="schedule">Schedule</div>
+  <div class="tab" data-tab="sleep">Sleep</div>
+  <div class="tab" data-tab="adhd">ADHD</div>
   <div class="tab" data-tab="finances">Finances</div>
 </div>
 
@@ -330,6 +332,61 @@
         <div class="sec-head"><span class="sec-label">Meal ideas</span></div>
         <div class="sugg-box" id="meal-ideas" style="position:static"></div>
       </div>
+    </div>
+  </div>
+  <div class="sec" style="margin-top:14px">
+    <div class="sec-head"><span class="sec-label">Weight log</span><span id="weight-summary" style="font-size:.78rem;color:var(--muted);margin-left:8px"></span></div>
+    <div id="weight-list" style="margin-bottom:6px"></div>
+    <div class="inline-add">
+      <input type="date" id="weight-date" class="sel-input" style="width:130px">
+      <input type="number" id="weight-kg" class="sel-input" placeholder="kg" step="0.1" style="width:72px">
+      <input type="text" id="weight-note" class="sel-input" placeholder="note" style="flex:1">
+      <button class="add-btn" id="weight-add-btn">+</button>
+    </div>
+  </div>
+</main></div>
+
+<!-- ══════════════ SLEEP ══════════════ -->
+<div class="panel" id="panel-sleep"><main>
+  <div class="sec">
+    <div class="sec-head"><span class="sec-label">Sleep log</span><span id="sleep-summary" style="font-size:.78rem;color:var(--muted);margin-left:8px"></span></div>
+    <div id="sleep-list" style="margin-bottom:6px"></div>
+    <div class="inline-add">
+      <input type="date" id="sleep-date" class="sel-input" style="width:130px">
+      <input type="time" id="sleep-bed" class="sel-input" style="width:100px" placeholder="bed">
+      <input type="time" id="sleep-wake" class="sel-input" style="width:100px" placeholder="wake">
+      <input type="text" id="sleep-note" class="sel-input" placeholder="note" style="flex:1">
+      <button class="add-btn" id="sleep-add-btn">+</button>
+    </div>
+  </div>
+</main></div>
+
+<!-- ══════════════ ADHD ══════════════ -->
+<div class="panel" id="panel-adhd"><main>
+  <div class="sec">
+    <div class="sec-head"><span class="sec-label">Focus timer</span></div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span id="pomo-display" style="font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums">25:00</span>
+      <button class="pill" id="pomo-toggle">Start</button>
+      <button class="pill" id="pomo-reset">Reset</button>
+      <span id="pomo-done" style="display:none;font-size:.9rem">🎉 Done! Take a break.</span>
+    </div>
+  </div>
+  <div class="sec" style="margin-top:14px">
+    <div class="sec-head"><span class="sec-label">Meds</span></div>
+    <div id="meds-list" style="margin-bottom:6px"></div>
+    <div class="inline-add">
+      <input type="text" id="meds-name" class="sel-input" placeholder="med name" style="flex:1">
+      <input type="time" id="meds-time" class="sel-input" style="width:100px">
+      <button class="add-btn" id="meds-add-btn">+</button>
+    </div>
+  </div>
+  <div class="sec" style="margin-top:14px">
+    <div class="sec-head"><span class="sec-label">Daily wins</span></div>
+    <div id="wins-list" style="margin-bottom:6px"></div>
+    <div class="inline-add">
+      <input type="text" id="wins-text" class="sel-input" placeholder="win…" style="flex:1">
+      <button class="add-btn" id="wins-add-btn">+</button>
     </div>
   </div>
 </main></div>
@@ -550,6 +607,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:16, title:"Sleep + ADHD tabs + weight tracking", sp:5, note:"New Sleep tab (log with duration/quality), ADHD tab (Pomodoro timer, meds log, daily wins), weight tracking section in Diet."},
   {v:15, title:"Mobile layout + ver popup fix", sp:1, note:"Stack to single column below 760px; fix ver-popup close-on-open bug; safe-area insets for FAB."},
   {v:14, title:"Project pill + add-to-project", sp:2, note:"Task cards show tappable project pill (cycles through projects). Project headers have + button to add task to that project."},
   {v:13, title:"Version history popup bottom-right", sp:1,
@@ -617,30 +675,40 @@ function saveBlocks()  {saveBlocks();dbPush("wat_blocks",weekBlocks)}
 function saveEvents()  {saveEvents(); dbPush("wat_events",events)}
 function saveIncome()  {saveIncome(); dbPush("wat_income",income)}
 function saveExpenses(){saveExpenses();dbPush("wat_expenses",expenses)}
-function saveFinGoals(){saveFinGoals();dbPush("wat_fingoals",finGoals)}
+function saveFinGoals(){lsSave("wat_fingoals_v1",finGoals);dbPush("wat_fingoals",finGoals)}
+function saveSleepLog(){lsSave("wat_sleep_v1",sleepLog);dbPush("wat_sleep",sleepLog)}
+function saveMeds(){lsSave("wat_meds_v1",meds);dbPush("wat_meds",meds)}
+function saveWins(){lsSave("wat_wins_v1",wins);dbPush("wat_wins",wins)}
+function saveWeightLog(){lsSave("wat_weight_v1",weightLog);dbPush("wat_weight",weightLog)}
 
 async function initSupabase(){
   setSyncStatus("syncing");
   try{
     db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
     // Load all tables in parallel; DB wins over localStorage if it has data
-    const [t,f,c,l,b,e,inc,exp,fg]=await Promise.all([
+    const [t,f,c,l,b,e,inc,exp,fg,sl,md,wn,wt]=await Promise.all([
       dbLoad("wat_tasks"),dbLoad("wat_foods"),dbLoad("wat_clothes"),
       dbLoad("wat_laundry"),dbLoad("wat_blocks"),dbLoad("wat_events"),
-      dbLoad("wat_income"),dbLoad("wat_expenses"),dbLoad("wat_fingoals")
+      dbLoad("wat_income"),dbLoad("wat_expenses"),dbLoad("wat_fingoals"),
+      dbLoad("wat_sleep"),dbLoad("wat_meds"),dbLoad("wat_wins"),dbLoad("wat_weight")
     ]);
     // If DB has rows, use them; otherwise seed DB from localStorage defaults
-    if(t.length){tasks=t;      saveTasks()}      else dbPush("wat_tasks",tasks);
-    if(f.length){foods=f;      saveFoods()}      else dbPush("wat_foods",foods);
-    if(c.length){clothes=c;    saveClothes()}  else dbPush("wat_clothes",clothes);
-    if(l.length){laundry=l;    saveLaundry()} else dbPush("wat_laundry",laundry);
-    if(b.length){weekBlocks=b; saveBlocks()}else dbPush("wat_blocks",weekBlocks);
-    if(e.length){events=e;     saveEvents()}    else dbPush("wat_events",events);
-    if(inc.length){income=inc; saveIncome()}    else dbPush("wat_income",income);
-    if(exp.length){expenses=exp;saveExpenses()}else dbPush("wat_expenses",expenses);
-    if(fg.length){finGoals=fg; saveFinGoals()}else dbPush("wat_fingoals",finGoals);
+    if(t.length){tasks=t;          saveTasks()}      else dbPush("wat_tasks",tasks);
+    if(f.length){foods=f;          saveFoods()}      else dbPush("wat_foods",foods);
+    if(c.length){clothes=c;        saveClothes()}  else dbPush("wat_clothes",clothes);
+    if(l.length){laundry=l;        saveLaundry()} else dbPush("wat_laundry",laundry);
+    if(b.length){weekBlocks=b;     saveBlocks()}else dbPush("wat_blocks",weekBlocks);
+    if(e.length){events=e;         saveEvents()}    else dbPush("wat_events",events);
+    if(inc.length){income=inc;     saveIncome()}    else dbPush("wat_income",income);
+    if(exp.length){expenses=exp;   saveExpenses()}else dbPush("wat_expenses",expenses);
+    if(fg.length){finGoals=fg;     saveFinGoals()}else dbPush("wat_fingoals",finGoals);
+    if(sl.length){sleepLog=sl;     saveSleepLog()}else dbPush("wat_sleep",sleepLog);
+    if(md.length){meds=md;         saveMeds()}    else dbPush("wat_meds",meds);
+    if(wn.length){wins=wn;         saveWins()}    else dbPush("wat_wins",wins);
+    if(wt.length){weightLog=wt;    saveWeightLog()}else dbPush("wat_weight",weightLog);
     // Re-render everything with cloud data
     renderTasksTab();renderDietTab();renderWardrobeTab();renderScheduleTab();renderFinancesTab();
+    renderSleepTab();renderAdhdTab();
     setSyncStatus("synced");
   }catch(e){setSyncStatus("error");console.warn("Supabase init failed:",e.message)}
 }
@@ -654,6 +722,10 @@ let events     = ls("wat_events_v1",  DEFAULT_EVENTS.map(e=>({...e})));
 let income     = ls("wat_income_v1",  DEFAULT_INCOME.map(i=>({...i})));
 let expenses   = ls("wat_expenses_v1",DEFAULT_EXPENSES.map(x=>({...x})));
 let finGoals   = ls("wat_fingoals_v1",DEFAULT_FIN_GOALS.map(g=>({...g})));
+let sleepLog   = ls("wat_sleep_v1",   []);
+let meds       = ls("wat_meds_v1",    [{id:"M1",date:"2026-06-26",time:"08:00",med:"Vyvanse",taken:false}]);
+let wins       = ls("wat_wins_v1",    []);
+let weightLog  = ls("wat_weight_v1",  []);
 let foodFilter = "both";
 
 function nextId(arr,p){const n=arr.map(x=>parseInt(x.id.replace(/\D/g,""))||0);return p+(Math.max(0,...n)+1)}
@@ -1233,6 +1305,6 @@ renderFinancesTab();
 initSupabase();
 </script>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v15</button>
+<button id="ver-fab">📋 v16</button>
 </body>
 </html>
