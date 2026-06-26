@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v10</title>
+<title>Adomas · v11</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -246,7 +246,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v10</span>
+    <span class="nav-ver">v11</span>
   </div>
 </nav>
 
@@ -550,6 +550,8 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:11, title:"Watari Supabase project", sp:1,
+   note:"Switched to dedicated Watari Supabase project (ibgkayhwbjkeiuphkewg, eu-central-1)."},
   {v:10, title:"Supabase cloud sync", sp:5,
    note:"Offline-first: localStorage loads instantly, Supabase syncs in background. Dot in nav = green synced / amber syncing / red offline. All 9 data types persisted. Seeds DB from localStorage on first run."},
   {v:9, title:"Task grouping, sort, filter", sp:3,
@@ -573,8 +575,8 @@ function ls(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch{return 
 function lsSave(k,v){localStorage.setItem(k,JSON.stringify(v))}
 
 // ── SUPABASE ───────────────────────────────────────────────────────
-const SUPA_URL="https://nbjgwqytwkkuarxlkmnj.supabase.co";
-const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iamd3cXl0d2trdWFyeGxrbW5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjgxMDMsImV4cCI6MjA5Njc0NDEwM30.ipByiSzhYQWd12LjwD1twavR1YkoU0vEGaxjpJMH5ko";
+const SUPA_URL="https://ibgkayhwbjkeiuphkewg.supabase.co";
+const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImliZ2theWh3YmprZWl1cGhrZXdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NDAzNjAsImV4cCI6MjA5ODAxNjM2MH0.ybpOr0cefgaBJLLsVsZtgaSSIhD6w0206QA6lNFaEW8";
 const DB_USER="adomas"; // single-user personal assistant
 let db=null;
 
