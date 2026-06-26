@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v24</title>
+<title>Adomas · v25</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -290,7 +290,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v24</span>
+    <span class="nav-ver">v25</span>
   </div>
 </nav>
 
@@ -615,8 +615,16 @@
   <!-- IMPORT -->
   <div id="lpanel-import" style="display:none">
     <div class="sec">
-      <div class="sec-head"><span class="sec-label">Paste transcript</span></div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Paste any text (YouTube transcript, article, lyrics…) — each line/sentence becomes a card front. Fill in translations while studying.</div>
+      <div class="sec-head"><span class="sec-label">YouTube auto-fetch</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input class="sel-input" id="yt-url-input" placeholder="YouTube URL or video ID…" style="flex:1;min-width:160px"/>
+        <button class="pill pill-sm add-btn" id="yt-fetch-btn">Fetch transcript</button>
+      </div>
+      <div id="yt-fetch-status" style="font-size:12px;color:var(--muted);margin-top:6px;display:none"></div>
+    </div>
+    <div class="sec" style="margin-top:12px">
+      <div class="sec-head"><span class="sec-label">Or paste text</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Article, lyrics, subtitle file — each line becomes a card front.</div>
       <textarea class="import-area" id="lang-import-text" placeholder="Paste text here…"></textarea>
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         <button class="pill pill-sm add-btn" id="lang-import-split">Split into cards</button>
@@ -633,7 +641,7 @@
 <!-- Version history FAB + popup: MUST be before the init script so it can wire them (PB-1) -->
 <div id="ver-overlay"></div>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v24</button>
+<button id="ver-fab">📋 v25</button>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -734,6 +742,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:25, title:"YouTube transcript auto-fetch", sp:3, note:"Language → Import now has a YouTube URL/ID field. Fetches captions via corsproxy.io → YouTube's timedtext JSON3 API. Tries lang=en then a.en (auto-generated). On success dumps lines into the paste area for review before splitting. Falls back gracefully to manual paste on CORS/proxy failure."},
   {v:24, title:"Add Ningyo no Kuni task", sp:0.5, note:"T21 Read Ningyo no Kuni by Tsutomu Nihei added to Reading project."},
   {v:23, title:"Add Reading + Create manga tasks", sp:1, note:"T18 Read Blame! by Tsutomu Nihei (PewDiePie's favourite). T19–T20 new 'Create manga' project: concept + first chapter script."},
   {v:22, title:"Language tab + SRS + transcript import", sp:8, note:"New Language tab: SRS flashcard engine (manual interval slider), card list with inline edit, transcript import (paste text → split into cards), memory-map dots. Stored in localStorage wat_lang_v1."},
@@ -1868,6 +1877,65 @@ document.getElementById("lang-import-clear").addEventListener("click",()=>{
   document.getElementById("lang-import-preview").innerHTML="";
   document.getElementById("lang-import-add-wrap").style.display="none";
   langImportLines=[];
+});
+
+// ── YouTube transcript fetch ──────────────────────────────────────
+function ytExtractId(input){
+  input=input.trim();
+  // youtu.be/ID or youtube.com/watch?v=ID or youtube.com/shorts/ID or bare ID
+  let m=input.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/);
+  if(m)return m[1];
+  if(/^[A-Za-z0-9_-]{11}$/.test(input))return input;
+  return null;
+}
+
+function ytParseJson3(json){
+  // YouTube json3 caption format: {events:[{segs:[{utf8:"..."}],...}]}
+  const lines=[];
+  (json.events||[]).forEach(ev=>{
+    if(!ev.segs)return;
+    const text=ev.segs.map(s=>s.utf8||"").join("").replace(/\n/g," ").trim();
+    if(text&&text!=="\n")lines.push(text);
+  });
+  return lines;
+}
+
+function ytSetStatus(msg,color){
+  const el=document.getElementById("yt-fetch-status");
+  el.style.display=msg?"block":"none";
+  el.style.color=color||"var(--muted)";
+  el.textContent=msg;
+}
+
+async function ytFetch(videoId,lang){
+  const target=`https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}&fmt=json3`;
+  const proxy=`https://corsproxy.io/?url=${encodeURIComponent(target)}`;
+  const r=await fetch(proxy,{signal:AbortSignal.timeout(10000)});
+  if(!r.ok)throw new Error("proxy "+r.status);
+  const json=await r.json();
+  return ytParseJson3(json);
+}
+
+document.getElementById("yt-fetch-btn").addEventListener("click",async()=>{
+  const input=document.getElementById("yt-url-input").value;
+  const videoId=ytExtractId(input);
+  if(!videoId){ytSetStatus("⚠ Couldn't find a video ID in that URL","var(--orange)");return;}
+  const btn=document.getElementById("yt-fetch-btn");
+  btn.textContent="Fetching…";btn.disabled=true;
+  ytSetStatus("Connecting to YouTube via proxy…");
+  try{
+    // Try manual captions (en), then auto-generated (a.en), then auto (a.fr/a.de common)
+    let lines=await ytFetch(videoId,"en");
+    if(!lines.length)lines=await ytFetch(videoId,"a.en");
+    if(!lines.length){ytSetStatus("⚠ No English captions found. Try pasting the transcript manually.","var(--orange)");return;}
+    // Dump into the textarea so user can see + edit before splitting
+    document.getElementById("lang-import-text").value=lines.join("\n");
+    ytSetStatus(`✓ Got ${lines.length} lines — check below, then click Split into cards.`,"var(--green)");
+  }catch(e){
+    ytSetStatus("✗ Fetch failed ("+e.message+"). Try pasting the transcript manually.","var(--red)");
+  }finally{
+    btn.textContent="Fetch transcript";btn.disabled=false;
+  }
 });
 
 document.getElementById("lang-import-add-all").addEventListener("click",()=>{
