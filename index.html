@@ -3,189 +3,224 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v6</title>
+<title>Adomas · v8</title>
 <style>
   :root {
-    --bg: #0d0d0d; --surface: #181818; --surface2: #222; --surface3: #2a2a2a;
-    --border: #2a2a2a; --border2: #383838;
-    --text: #e4e4e4; --muted: #777; --muted2: #555;
-    --accent: #c8a84b; --accent-dim: #2a2200;
-    --green: #4caf7d; --green-dim: #0d2016;
-    --blue: #5b9bd5; --blue-dim: #0d1a2a;
-    --red: #c0614a; --red-dim: #2a0f0a;
-    --orange: #d4874a; --orange-dim: #2a1800;
-    --purple: #9b7fd4; --purple-dim: #1a1230;
-    --teal: #4db8a8; --teal-dim: #0d2420;
-    --r: 6px; --tap: 32px;
+    --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
+    --border:#ddd; --border2:#ccc;
+    --text:#1a1a1a; --muted:#888; --muted2:#bbb;
+    --text-hi:#111; --focus-bg1:#fffbf0; --focus-bg2:#fff; --focus-border:#e8d48a;
+    --accent:#b8920e; --accent-dim:#fff8e0;
+    --green:#2e8a58; --green-dim:#e8f5ee;
+    --blue:#3a7dc2; --blue-dim:#e8f0fa;
+    --red:#b04434; --red-dim:#faeae8;
+    --orange:#c06830; --orange-dim:#fdf3e8;
+    --purple:#7856c2; --purple-dim:#f0ecfa;
+    --teal:#2a9888; --teal-dim:#e8f6f4;
+    --pink:#b84870; --pink-dim:#faeef3;
+    --r:6px; --tap:32px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, sans-serif; min-height: 100vh; }
+  body.dark {
+    --bg:#0d0d0d; --surface:#181818; --surface2:#222; --surface3:#2a2a2a;
+    --border:#2a2a2a; --border2:#383838;
+    --text:#e4e4e4; --muted:#777; --muted2:#555;
+    --text-hi:#fff; --focus-bg1:#1a1600; --focus-bg2:#181818; --focus-border:#3a2e00;
+    --accent:#c8a84b; --accent-dim:#2a2200;
+    --green:#4caf7d; --green-dim:#0d2016;
+    --blue:#5b9bd5; --blue-dim:#0d1a2a;
+    --red:#c0614a; --red-dim:#2a0f0a;
+    --orange:#d4874a; --orange-dim:#2a1800;
+    --purple:#9b7fd4; --purple-dim:#1a1230;
+    --teal:#4db8a8; --teal-dim:#0d2420;
+    --pink:#d46b8a; --pink-dim:#2a0d18;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif;min-height:100vh}
 
-  /* NAV */
-  nav { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; }
-  .nav-name { font-weight: 700; font-size: 15px; }
-  .nav-right { display: flex; align-items: center; gap: 8px; }
-  .nav-status { font-size: 11px; color: var(--green); background: var(--green-dim); border-radius: var(--r); padding: 2px 8px; }
-  .nav-ver { font-size: 11px; color: var(--muted); }
+  nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+  .nav-name{font-weight:700;font-size:15px}
+  .nav-right{display:flex;align-items:center;gap:8px}
+  .nav-status{font-size:11px;color:var(--green);background:var(--green-dim);border-radius:var(--r);padding:2px 8px}
+  .nav-ver{font-size:11px;color:var(--muted)}
 
-  /* TABS */
-  .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 14px; position: sticky; top: 49px; z-index: 19; overflow-x: auto; scrollbar-width: none; }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab { padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; user-select: none; }
-  .tab.active { color: var(--text); border-color: var(--accent); }
+  .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 14px;position:sticky;top:49px;z-index:19;overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{padding:10px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;user-select:none}
+  .tab.active{color:var(--text);border-color:var(--accent)}
 
-  /* PANELS */
-  .panel { display: none; }
-  .panel.active { display: block; }
-  main { max-width: 900px; margin: 0 auto; padding: 18px 14px 60px; }
+  .panel{display:none}.panel.active{display:block}
+  main{max-width:900px;margin:0 auto;padding:18px 14px 60px}
 
-  /* TWO COL */
-  .cols { display: grid; grid-template-columns: 1fr 300px; gap: 16px; align-items: start; }
-  @media (max-width: 640px) { .cols { grid-template-columns: 1fr; } }
+  .cols{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
+  @media(max-width:640px){.cols{grid-template-columns:1fr}}
 
-  /* SEC */
-  .sec { margin-bottom: 20px; }
-  .sec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .sec-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--muted2); text-transform: uppercase; }
+  .sec{margin-bottom:20px}
+  .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .sec-label{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--muted2);text-transform:uppercase}
 
   /* FOCUS */
-  .focus { background: linear-gradient(135deg, #1a1600 0%, #181818 100%); border: 1px solid #3a2e00; border-radius: var(--r); padding: 14px 16px; margin-bottom: 16px; }
-  .focus-lbl { font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; margin-bottom: 5px; }
-  .focus-title { font-size: 17px; font-weight: 700; }
-  .focus-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .focus{background:linear-gradient(135deg,var(--focus-bg1) 0%,var(--focus-bg2) 100%);border:1px solid var(--focus-border);border-radius:var(--r);padding:14px 16px;margin-bottom:16px}
+  .focus-lbl{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:5px}
+  .focus-title{font-size:17px;font-weight:700}
+  .focus-sub{font-size:12px;color:var(--muted);margin-top:3px}
 
-  /* TASK CARD */
-  .task { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; margin-bottom: 8px; }
-  .task.is-done { opacity: .5; }
-  .task-row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
-  .task-title-wrap { flex: 1; min-width: 0; }
-  .task-title { font-size: 14px; font-weight: 600; width: 100%; background: none; border: none; color: var(--text); outline: none; font-family: inherit; padding: 0; }
-  .task-title:focus { color: #fff; }
-  .task-detail { font-size: 12px; color: var(--muted); width: 100%; background: none; border: none; outline: none; font-family: inherit; padding: 0; }
-  .task-detail:focus { color: var(--text); }
-  .task-detail::placeholder { color: var(--muted2); }
-  .task-pills { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+  /* TASK */
+  .task{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:8px}
+  .task.is-done{opacity:.5}
+  .task-row1{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .task-title-wrap{flex:1;min-width:0}
+  .task-title{font-size:14px;font-weight:600;width:100%;background:none;border:none;color:var(--text);outline:none;font-family:inherit;padding:0}
+  .task-title:focus{color:var(--text-hi)}
+  .task-detail{font-size:12px;color:var(--muted);width:100%;background:none;border:none;outline:none;font-family:inherit;padding:0}
+  .task-detail:focus{color:var(--text)}
+  .task-detail::placeholder{color:var(--muted2)}
+  .task-pills{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:5px}
 
   /* PILLS */
-  .pill { display: inline-flex; align-items: center; justify-content: center; height: var(--tap); padding: 0 12px; border-radius: var(--r); font-size: 11px; font-weight: 700; letter-spacing: .04em; cursor: pointer; border: none; user-select: none; white-space: nowrap; transition: opacity .1s; background: var(--surface2); color: var(--muted); }
-  .pill:active { opacity: .7; }
-  .pill-sm { height: 22px; padding: 0 8px; font-size: 10px; }
-  .pill-icon { padding: 0; width: var(--tap); }
-  .s-active  { background: var(--blue-dim);   color: var(--blue);   }
-  .s-done    { background: var(--green-dim);  color: var(--green);  }
-  .s-blocked { background: var(--red-dim);    color: var(--red);    }
-  .s-paused  { background: var(--surface2);   color: var(--muted);  }
-  .p-high { background: var(--red-dim); color: var(--red); }
-  .p-med  { background: var(--orange-dim); color: var(--orange); }
-  .p-low  { background: var(--surface2); color: var(--muted); }
-  .pill-del { background: none; color: var(--muted2); font-size: 14px; margin-left: auto; }
-  .pill-del:hover { color: var(--red); }
+  .pill{display:inline-flex;align-items:center;justify-content:center;height:var(--tap);padding:0 12px;border-radius:var(--r);font-size:11px;font-weight:700;letter-spacing:.04em;cursor:pointer;border:none;user-select:none;white-space:nowrap;transition:opacity .1s;background:var(--surface2);color:var(--muted)}
+  .pill:active{opacity:.7}
+  .pill-sm{height:22px;padding:0 8px;font-size:10px}
+  .pill-icon{padding:0;width:var(--tap)}
+  .s-active{background:var(--blue-dim);color:var(--blue)}
+  .s-done{background:var(--green-dim);color:var(--green)}
+  .s-blocked{background:var(--red-dim);color:var(--red)}
+  .s-paused{background:var(--surface2);color:var(--muted)}
+  .p-high{background:var(--red-dim);color:var(--red)}
+  .p-med{background:var(--orange-dim);color:var(--orange)}
+  .p-low{background:var(--surface2);color:var(--muted)}
+  .pill-del{background:none;color:var(--muted2);font-size:14px;margin-left:auto}
+  .pill-del:hover{color:var(--red)}
 
-  /* ADD ROW */
-  .add-row { display: flex; gap: 8px; margin-top: 4px; }
-  .add-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); color: var(--text); font: 14px/1 system-ui, sans-serif; padding: 0 12px; height: var(--tap); outline: none; }
-  .add-input:focus { border-color: var(--border2); }
-  .add-input::placeholder { color: var(--muted2); }
-  .add-btn { background: var(--surface2); color: var(--text); }
+  .add-row{display:flex;gap:8px;margin-top:4px}
+  .add-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font:14px/1 system-ui,sans-serif;padding:0 12px;height:var(--tap);outline:none}
+  .add-input:focus{border-color:var(--border2)}
+  .add-input::placeholder{color:var(--muted2)}
+  .add-btn{background:var(--surface2);color:var(--text)}
 
-  /* SUGGESTION BOX */
-  .sugg-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; position: sticky; top: 98px; }
-  .sugg-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
-  .sugg-item:last-child { border-bottom: none; padding-bottom: 0; }
-  .sugg-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-  .sugg-body { flex: 1; }
-  .sugg-head { font-size: 13px; font-weight: 600; }
-  .sugg-text { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .sugg-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 12px 0; }
+  .sugg-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;position:sticky;top:98px}
+  .sugg-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+  .sugg-item:last-child{border-bottom:none;padding-bottom:0}
+  .sugg-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+  .sugg-body{flex:1}
+  .sugg-head{font-size:13px;font-weight:600}
+  .sugg-text{font-size:12px;color:var(--muted);margin-top:2px}
+  .sugg-empty{font-size:13px;color:var(--muted);text-align:center;padding:12px 0}
 
-  /* DIET — PROFILE CARDS */
-  .diet-profiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
-  .diet-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; }
-  .diet-card-name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-  .diet-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-  .diet-tag { font-size: 11px; padding: 2px 8px; border-radius: var(--r); background: var(--surface2); color: var(--muted); }
-  .diet-tag.me  { background: var(--blue-dim);  color: var(--blue); }
-  .diet-tag.gf  { background: var(--purple-dim); color: var(--purple); }
+  /* DIET */
+  .diet-profiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+  .diet-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+  .diet-card-name{font-size:13px;font-weight:700;margin-bottom:6px}
+  .diet-tags{display:flex;flex-wrap:wrap;gap:4px}
+  .diet-tag{font-size:11px;padding:2px 8px;border-radius:var(--r);background:var(--surface2);color:var(--muted)}
+  .diet-tag.me{background:var(--blue-dim);color:var(--blue)}
+  .diet-tag.gf{background:var(--purple-dim);color:var(--purple)}
 
-  /* FOOD ITEM */
-  .food-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 9px 12px; margin-bottom: 7px; display: flex; align-items: center; gap: 10px; }
-  .food-name-wrap { flex: 1; min-width: 0; }
-  .food-name { font-size: 13px; font-weight: 600; background: none; border: none; color: var(--text); outline: none; font-family: inherit; width: 100%; padding: 0; }
-  .food-name:focus { color: #fff; }
-  .food-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
-  .food-who { display: flex; gap: 3px; }
-  .who-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .who-me  { background: var(--blue); }
-  .who-gf  { background: var(--purple); }
-  .food-qty { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
-  .qty-btn { background: var(--surface2); border: none; color: var(--text); width: 26px; height: 26px; border-radius: var(--r); cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-  .qty-btn:active { opacity: .7; }
-  .qty-val { font-size: 13px; font-weight: 700; min-width: 28px; text-align: center; }
-  .qty-unit { font-size: 11px; color: var(--muted); }
-  .food-low .qty-val { color: var(--red); }
-  .food-out .qty-val { color: var(--muted2); }
+  .food-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+  .food-name-wrap{flex:1;min-width:0}
+  .food-name{font-size:13px;font-weight:600;background:none;border:none;color:var(--text);outline:none;font-family:inherit;width:100%;padding:0}
+  .food-name:focus{color:var(--text-hi)}
+  .food-sub{font-size:11px;color:var(--muted);margin-top:1px}
+  .food-qty{display:flex;align-items:center;gap:5px;flex-shrink:0}
+  .qty-btn{background:var(--surface2);border:none;color:var(--text);width:26px;height:26px;border-radius:var(--r);cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .qty-btn:active{opacity:.7}
+  .qty-val{font-size:13px;font-weight:700;min-width:28px;text-align:center}
+  .qty-unit{font-size:11px;color:var(--muted)}
+  .food-low .qty-val{color:var(--red)}
+  .food-out .qty-val{color:var(--muted2)}
 
-  /* SHOPPING LIST */
-  .shop-item { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .shop-item:last-child { border-bottom: none; }
-  .shop-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
-  .shop-dot.out { background: var(--red); }
-  .shop-name { flex: 1; }
-  .shop-note { font-size: 11px; color: var(--muted); }
+  .shop-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .shop-item:last-child{border-bottom:none}
+  .shop-dot{width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0}
+  .shop-dot.out{background:var(--red)}
+  .shop-name{flex:1}
+  .shop-note{font-size:11px;color:var(--muted)}
 
-  /* WHO FILTER */
-  .who-filter { display: flex; gap: 6px; margin-bottom: 12px; }
-  .who-pill { height: 26px; padding: 0 10px; font-size: 11px; }
-  .who-pill.on-me     { background: var(--blue-dim); color: var(--blue); }
-  .who-pill.on-gf     { background: var(--purple-dim); color: var(--purple); }
-  .who-pill.on-both   { background: var(--teal-dim); color: var(--teal); }
-  .who-pill.off { background: var(--surface2); color: var(--muted2); }
+  .who-filter{display:flex;gap:6px;margin-bottom:12px}
+  .who-pill{height:26px;padding:0 10px;font-size:11px}
+  .who-pill.on-both{background:var(--teal-dim);color:var(--teal)}
+  .who-pill.on-me{background:var(--blue-dim);color:var(--blue)}
+  .who-pill.on-gf{background:var(--purple-dim);color:var(--purple)}
+  .who-pill.on-all{background:var(--surface3);color:var(--text)}
+  .who-pill.off{background:var(--surface2);color:var(--muted2)}
 
   /* WARDROBE */
-  .cloth-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; margin-bottom: 7px; }
-  .cloth-row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
-  .cloth-name-wrap { flex: 1; min-width: 0; }
-  .cloth-name { font-size: 13px; font-weight: 600; background: none; border: none; color: var(--text); outline: none; font-family: inherit; width: 100%; padding: 0; }
-  .cloth-name:focus { color: #fff; }
-  .cloth-cat { font-size: 11px; color: var(--muted); margin-top: 1px; }
-  .cloth-counts { display: flex; gap: 6px; align-items: center; }
-  .count-pill { display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: var(--r); font-size: 11px; font-weight: 700; cursor: pointer; border: none; user-select: none; }
-  .count-pill:active { opacity: .7; }
-  .cp-clean   { background: var(--green-dim);  color: var(--green); }
-  .cp-worn    { background: var(--orange-dim); color: var(--orange); }
-  .cp-laundry { background: var(--red-dim);    color: var(--red); }
-  .count-label { font-size: 10px; font-weight: 400; opacity: .7; }
+  .cloth-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:7px}
+  .cloth-row1{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .cloth-name-wrap{flex:1;min-width:0}
+  .cloth-name{font-size:13px;font-weight:600;background:none;border:none;color:var(--text);outline:none;font-family:inherit;width:100%;padding:0}
+  .cloth-name:focus{color:var(--text-hi)}
+  .cloth-counts{display:flex;gap:6px;align-items:center}
+  .count-pill{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--r);font-size:11px;font-weight:700;cursor:pointer;border:none;user-select:none}
+  .count-pill:active{opacity:.7}
+  .cp-clean{background:var(--green-dim);color:var(--green)}
+  .cp-worn{background:var(--orange-dim);color:var(--orange)}
+  .cp-laundry{background:var(--red-dim);color:var(--red)}
+  .count-label{font-size:10px;font-weight:400;opacity:.7}
+  .ward-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+  .ward-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;text-align:center}
+  .ward-stat-n{font-size:22px;font-weight:800}
+  .ward-stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+  .ward-n-clean{color:var(--green)}
+  .ward-n-worn{color:var(--orange)}
+  .ward-n-laundry{color:var(--red)}
+  .laundry-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+  .laundry-date{font-size:13px;font-weight:700;min-width:90px}
+  .laundry-note{flex:1;background:none;border:none;color:var(--muted);outline:none;font:13px system-ui,sans-serif}
+  .laundry-note:focus{color:var(--text)}
 
-  /* LAUNDRY PLAN */
-  .laundry-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; margin-bottom: 7px; display: flex; align-items: center; gap: 10px; }
-  .laundry-date { font-size: 13px; font-weight: 700; min-width: 90px; }
-  .laundry-note { flex: 1; background: none; border: none; color: var(--muted); outline: none; font: 13px system-ui, sans-serif; }
-  .laundry-note:focus { color: var(--text); }
-  .laundry-done { background: var(--green-dim); color: var(--green); }
+  /* SCHEDULE */
+  .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px}
+  @media(max-width:600px){.week-grid{grid-template-columns:repeat(4,1fr)}}
+  .day-col{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:8px 6px;min-height:80px}
+  .day-col.today{border-color:var(--accent)}
+  .day-head{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--muted2);text-transform:uppercase;margin-bottom:6px;text-align:center}
+  .day-head.today-lbl{color:var(--accent)}
+  .day-block{background:var(--surface2);border-radius:var(--r);padding:3px 6px;margin-bottom:4px;font-size:11px;line-height:1.3;cursor:pointer;position:relative}
+  .day-block:active{opacity:.7}
+  .db-time{font-size:10px;color:var(--muted)}
+  .db-del{position:absolute;top:2px;right:4px;color:var(--muted2);font-size:12px;cursor:pointer;display:none}
+  .day-block:hover .db-del{display:block}
+  .sched-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+  .sched-date{font-size:12px;font-weight:700;color:var(--accent);min-width:80px}
+  .sched-text{flex:1;background:none;border:none;color:var(--text);font:13px system-ui,sans-serif;outline:none;padding:0}
+  .sched-text:focus{color:var(--text-hi)}
 
-  /* WARDROBE SUMMARY */
-  .ward-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
-  .ward-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; text-align: center; }
-  .ward-stat-n { font-size: 22px; font-weight: 800; }
-  .ward-stat-l { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .ward-n-clean   { color: var(--green); }
-  .ward-n-worn    { color: var(--orange); }
-  .ward-n-laundry { color: var(--red); }
+  /* FINANCES */
+  .fin-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+  .fin-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center}
+  .fin-stat-n{font-size:20px;font-weight:800}
+  .fin-stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+  .fin-income-n{color:var(--green)}
+  .fin-expense-n{color:var(--red)}
+  .fin-net-pos{color:var(--teal)}
+  .fin-net-neg{color:var(--red)}
+  .fin-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+  .fin-name{flex:1;background:none;border:none;color:var(--text);font:13px system-ui,sans-serif;outline:none;padding:0;font-weight:600}
+  .fin-name:focus{color:var(--text-hi)}
+  .fin-amt{width:80px;background:none;border:none;color:var(--text);font:13px system-ui,sans-serif;outline:none;text-align:right;padding:0;font-weight:700}
+  .fin-amt:focus{color:var(--text-hi)}
+  .fin-cat{font-size:11px;color:var(--muted);min-width:50px}
+  .fin-type-i{color:var(--green)}
+  .fin-type-e{color:var(--red)}
+  .fin-goal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+  .fin-goal-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+  .fin-goal-bar-wrap{background:var(--surface2);border-radius:3px;height:6px;margin-top:6px}
+  .fin-goal-bar{height:6px;border-radius:3px;background:var(--accent);transition:width .3s}
+  .fin-goal-text{font-size:11px;color:var(--muted);margin-top:4px}
 
-  /* VERSIONS */
-  details { margin-top: 28px; }
-  summary { font-size: 11px; color: var(--muted2); cursor: pointer; list-style: none; }
-  summary::-webkit-details-marker { display: none; }
-  .ver-row { display: flex; gap: 8px; align-items: baseline; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
-  .ver-n { color: var(--accent); font-weight: 700; min-width: 28px; }
-  .ver-title { flex: 1; }
-  .ver-sp { color: var(--muted); font-size: 11px; }
+  /* SHARED */
+  .inline-add{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .sel-input{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font:13px system-ui,sans-serif;padding:0 10px;height:30px;outline:none}
+  .sel-input:focus{border-color:var(--border2)}
+  .sel-input::placeholder{color:var(--muted2)}
 
-  /* INLINE ADD */
-  .inline-add { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-  .sel-input { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); color: var(--text); font: 13px system-ui, sans-serif; padding: 0 10px; height: 30px; outline: none; }
-  .sel-input:focus { border-color: var(--border2); }
-  .sel-input::placeholder { color: var(--muted2); }
+  details{margin-top:28px}
+  summary{font-size:11px;color:var(--muted2);cursor:pointer;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  .ver-row{display:flex;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .ver-n{color:var(--accent);font-weight:700;min-width:28px}
+  .ver-title{flex:1}
+  .ver-sp{color:var(--muted);font-size:11px}
 </style>
 </head>
 <body>
@@ -194,7 +229,8 @@
   <span class="nav-name">Adomas</span>
   <div class="nav-right">
     <span class="nav-status">● Open to clients</span>
-    <span class="nav-ver">v6</span>
+    <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
+    <span class="nav-ver">v8</span>
   </div>
 </nav>
 
@@ -202,11 +238,12 @@
   <div class="tab active" data-tab="tasks">Tasks</div>
   <div class="tab" data-tab="diet">Diet & Food</div>
   <div class="tab" data-tab="wardrobe">Wardrobe</div>
+  <div class="tab" data-tab="schedule">Schedule</div>
+  <div class="tab" data-tab="finances">Finances</div>
 </div>
 
-<!-- ═══════════════════════════ TASKS ═══════════════════════════ -->
-<div class="panel active" id="panel-tasks">
-<main>
+<!-- ══════════════ TASKS ══════════════ -->
+<div class="panel active" id="panel-tasks"><main>
   <div id="focus-wrap"></div>
   <div class="cols">
     <div>
@@ -214,7 +251,7 @@
         <div class="sec-head"><span class="sec-label">Tasks</span></div>
         <div id="task-list"></div>
         <div class="add-row">
-          <input class="add-input" id="add-input" placeholder="New task…" />
+          <input class="add-input" id="add-input" placeholder="New task…"/>
           <button class="pill add-btn" id="add-btn">+ Add</button>
         </div>
       </div>
@@ -227,12 +264,10 @@
       </div>
     </div>
   </div>
-</main>
-</div>
+</main></div>
 
-<!-- ═══════════════════════════ DIET ═══════════════════════════ -->
-<div class="panel" id="panel-diet">
-<main>
+<!-- ══════════════ DIET ══════════════ -->
+<div class="panel" id="panel-diet"><main>
   <div class="diet-profiles">
     <div class="diet-card">
       <div class="diet-card-name" style="color:var(--blue)">● Adomas</div>
@@ -246,18 +281,15 @@
       <div class="diet-card-name" style="color:var(--purple)">● GF</div>
       <div class="diet-tags">
         <span class="diet-tag gf">Acne-friendly</span>
-        <span class="diet-tag gf">Dermatologist diet</span>
+        <span class="diet-tag gf">Dermatologist</span>
         <span class="diet-tag gf">Low glycemic</span>
       </div>
     </div>
   </div>
-
   <div class="cols">
     <div>
       <div class="sec">
-        <div class="sec-head">
-          <span class="sec-label">Food at home</span>
-        </div>
+        <div class="sec-head"><span class="sec-label">Food at home</span></div>
         <div class="who-filter" id="food-filter">
           <button class="pill who-pill on-both" data-who="both">Both</button>
           <button class="pill who-pill off" data-who="me">Adomas</button>
@@ -265,14 +297,13 @@
           <button class="pill who-pill off" data-who="all">All</button>
         </div>
         <div id="food-list"></div>
-        <div class="inline-add" id="food-add-row">
-          <input class="sel-input" id="food-add-name" placeholder="Food name…" style="flex:1;min-width:120px" />
-          <input class="sel-input" id="food-add-unit" placeholder="unit (e.g. portions)" style="width:130px" />
+        <div class="inline-add">
+          <input class="sel-input" id="food-add-name" placeholder="Food name…" style="flex:1;min-width:100px"/>
+          <input class="sel-input" id="food-add-unit" placeholder="unit" style="width:90px"/>
           <button class="pill pill-sm add-btn" id="food-add-btn">+ Add</button>
         </div>
       </div>
     </div>
-
     <div>
       <div class="sec">
         <div class="sec-head"><span class="sec-label">Shopping list</span></div>
@@ -284,166 +315,334 @@
       </div>
     </div>
   </div>
-</main>
-</div>
+</main></div>
 
-<!-- ═══════════════════════════ WARDROBE ═══════════════════════════ -->
-<div class="panel" id="panel-wardrobe">
-<main>
+<!-- ══════════════ WARDROBE ══════════════ -->
+<div class="panel" id="panel-wardrobe"><main>
   <div class="ward-summary">
-    <div class="ward-stat"><div class="ward-stat-n ward-n-clean" id="w-clean-n">0</div><div class="ward-stat-l">Clean items</div></div>
-    <div class="ward-stat"><div class="ward-stat-n ward-n-worn"  id="w-worn-n">0</div><div class="ward-stat-l">Worn / unwashed</div></div>
+    <div class="ward-stat"><div class="ward-stat-n ward-n-clean" id="w-clean-n">0</div><div class="ward-stat-l">Clean</div></div>
+    <div class="ward-stat"><div class="ward-stat-n ward-n-worn" id="w-worn-n">0</div><div class="ward-stat-l">Worn</div></div>
     <div class="ward-stat"><div class="ward-stat-n ward-n-laundry" id="w-laundry-n">0</div><div class="ward-stat-l">In laundry</div></div>
   </div>
-
   <div class="cols">
     <div>
       <div class="sec">
         <div class="sec-head"><span class="sec-label">Wardrobe</span></div>
         <div id="cloth-list"></div>
         <div class="inline-add">
-          <input class="sel-input" id="cloth-add-name" placeholder="Item name…" style="flex:1;min-width:120px" />
-          <input class="sel-input" id="cloth-add-cat" placeholder="category (e.g. tops)" style="width:140px" />
+          <input class="sel-input" id="cloth-add-name" placeholder="Item name…" style="flex:1"/>
+          <input class="sel-input" id="cloth-add-cat" placeholder="category" style="width:110px"/>
           <button class="pill pill-sm add-btn" id="cloth-add-btn">+ Add</button>
         </div>
       </div>
     </div>
-
     <div>
       <div class="sec">
         <div class="sec-head"><span class="sec-label">Laundry plan</span></div>
-        <div class="sugg-box" id="laundry-plan" style="position:sticky;top:98px;margin-bottom:10px"></div>
-        <div class="inline-add" style="margin-top:8px">
-          <input class="sel-input" type="date" id="laundry-add-date" style="width:140px" />
-          <input class="sel-input" id="laundry-add-note" placeholder="What to wash…" style="flex:1" />
+        <div id="laundry-plan" style="margin-bottom:10px"></div>
+        <div class="inline-add">
+          <input class="sel-input" type="date" id="laundry-add-date" style="width:130px"/>
+          <input class="sel-input" id="laundry-add-note" placeholder="What to wash…" style="flex:1"/>
           <button class="pill pill-sm add-btn" id="laundry-add-btn">+ Add</button>
         </div>
       </div>
       <div class="sec">
-        <div class="sec-head"><span class="sec-label">Wardrobe tips</span></div>
+        <div class="sec-head"><span class="sec-label">Tips</span></div>
         <div class="sugg-box" id="ward-tips" style="position:static"></div>
       </div>
     </div>
   </div>
-</main>
-</div>
+</main></div>
+
+<!-- ══════════════ SCHEDULE ══════════════ -->
+<div class="panel" id="panel-schedule"><main>
+  <div class="cols">
+    <div>
+      <div class="sec">
+        <div class="sec-head"><span class="sec-label">This week</span></div>
+        <div class="week-grid" id="week-grid"></div>
+        <div class="inline-add" id="block-add-row">
+          <select class="sel-input" id="block-day" style="width:100px">
+            <option value="0">Mon</option><option value="1">Tue</option>
+            <option value="2">Wed</option><option value="3">Thu</option>
+            <option value="4">Fri</option><option value="5">Sat</option>
+            <option value="6">Sun</option>
+          </select>
+          <input class="sel-input" id="block-time" placeholder="Time (e.g. 9:00)" style="width:100px"/>
+          <input class="sel-input" id="block-text" placeholder="What…" style="flex:1"/>
+          <button class="pill pill-sm add-btn" id="block-add-btn">+ Add</button>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-head"><span class="sec-label">Upcoming events</span></div>
+        <div id="events-list"></div>
+        <div class="inline-add">
+          <input class="sel-input" type="date" id="evt-date" style="width:130px"/>
+          <input class="sel-input" id="evt-text" placeholder="Event…" style="flex:1"/>
+          <button class="pill pill-sm add-btn" id="evt-add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="sec">
+        <div class="sec-head"><span class="sec-label">Schedule tips</span></div>
+        <div class="sugg-box" id="sched-tips" style="position:sticky;top:98px"></div>
+      </div>
+    </div>
+  </div>
+</main></div>
+
+<!-- ══════════════ FINANCES ══════════════ -->
+<div class="panel" id="panel-finances"><main>
+  <div class="fin-summary">
+    <div class="fin-stat"><div class="fin-stat-n fin-income-n" id="fin-income-n">€0</div><div class="fin-stat-l">Monthly income</div></div>
+    <div class="fin-stat"><div class="fin-stat-n fin-expense-n" id="fin-expense-n">€0</div><div class="fin-stat-l">Monthly expenses</div></div>
+    <div class="fin-stat"><div class="fin-stat-n" id="fin-net-n">€0</div><div class="fin-stat-l">Net / month</div></div>
+  </div>
+  <div class="cols">
+    <div>
+      <div class="sec">
+        <div class="sec-head"><span class="sec-label">Income</span></div>
+        <div id="income-list"></div>
+        <div class="inline-add">
+          <input class="sel-input" id="inc-add-name" placeholder="Source…" style="flex:1"/>
+          <input class="sel-input" id="inc-add-amt" placeholder="€/mo" type="number" style="width:80px"/>
+          <button class="pill pill-sm add-btn" id="inc-add-btn">+ Add</button>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-head"><span class="sec-label">Expenses</span></div>
+        <div id="expense-list"></div>
+        <div class="inline-add">
+          <input class="sel-input" id="exp-add-name" placeholder="Expense…" style="flex:1"/>
+          <input class="sel-input" id="exp-add-amt" placeholder="€/mo" type="number" style="width:80px"/>
+          <button class="pill pill-sm add-btn" id="exp-add-btn">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="sec">
+        <div class="sec-head"><span class="sec-label">Goals</span></div>
+        <div id="fin-goals-list" style="margin-bottom:10px"></div>
+        <div class="inline-add">
+          <input class="sel-input" id="fg-add-name" placeholder="Goal…" style="flex:1"/>
+          <input class="sel-input" id="fg-add-target" placeholder="Target €" type="number" style="width:90px"/>
+          <input class="sel-input" id="fg-add-saved" placeholder="Saved €" type="number" style="width:90px"/>
+          <button class="pill pill-sm add-btn" id="fg-add-btn">+ Add</button>
+        </div>
+      </div>
+      <div class="sec" style="margin-top:12px">
+        <div class="sec-head"><span class="sec-label">Financial tips</span></div>
+        <div class="sugg-box" id="fin-tips" style="position:static"></div>
+      </div>
+    </div>
+  </div>
+</main></div>
 
 <script>
-// ═══════════════════════════ DATA DEFAULTS ════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+// DATA DEFAULTS
+// NOTE: key changed to _v2 so fresh defaults load (clears old 3-task cache)
+// ══════════════════════════════════════════════════════════════════
 
 const DEFAULT_TASKS = [
-  { id:"T1",  proj:"Colosseum",        title:"Make usable by customers",             detail:"Ship the features customers need to use it independently",          status:"active", priority:"high" },
-  { id:"T2",  proj:"Science curriculum",title:"Develop science curriculum",           detail:"Build personal science learning system in the language repo",       status:"active", priority:"med"  },
-  { id:"T3",  proj:"Market analytics", title:"Supabase integration",                 detail:"Connect VZ dashboard to Supabase for persistent data",              status:"active", priority:"high" },
-  { id:"T4",  proj:"Market analytics", title:"LT translate",                         detail:"Lithuanian translations for all user-facing text",                  status:"active", priority:"high" },
-  { id:"T5",  proj:"Market analytics", title:"All info checkable",                   detail:"Every stat/number links to its source so it can be verified",       status:"active", priority:"med"  },
-  { id:"T6",  proj:"Market analytics", title:"Other sources of info",                detail:"Pull in additional data sources beyond the current export",          status:"active", priority:"med"  },
-  { id:"T7",  proj:"Market analytics", title:"Predicting values",                    detail:"Forecast future financials based on historical trends",              status:"active", priority:"med"  },
-  { id:"T8",  proj:"Market analytics", title:"Error margins",                        detail:"Show confidence intervals / uncertainty on all estimates",           status:"active", priority:"med"  },
-  { id:"T9",  proj:"Market analytics", title:"More grouping options",                detail:"Group by employee count, company age, or city",                     status:"active", priority:"low"  },
-  { id:"T10", proj:"Colosseum",        title:"Tags editable",                        detail:"Let users create and edit exercise tags in the UI",                 status:"active", priority:"med"  },
-  { id:"T11", proj:"Colosseum",        title:"Strength-based view: sets weight reps 1RM %", detail:"View sets in terms of 1RM percentage alongside weight and reps", status:"active", priority:"high" },
-  { id:"T12", proj:"Colosseum",        title:"Projection curve — steepness, limit, drag, coefficient", detail:"Show curve steepness and ceiling; top-drag control + coefficient view", status:"active", priority:"med" },
-  { id:"T13", proj:"Colosseum",        title:"Merged exercises strength from both",  detail:"Combine strength scores across merged/equivalent exercises",         status:"active", priority:"med"  },
-  { id:"T14", proj:"Colosseum",        title:"Failed exercises don't register",      detail:"Exclude failed sets from PR and strength calculations",             status:"active", priority:"high" },
-  { id:"T15", proj:"Colosseum",        title:"Convert all weights to RM in history", detail:"Show historical sets as 1RM equivalents throughout",               status:"active", priority:"med"  },
-  { id:"T16", proj:"Colosseum",        title:"% CSA muscle gain — grams — looks",   detail:"Estimate muscle cross-sectional area gain as % / grams / visual",   status:"active", priority:"low"  }
+  {id:"T1", proj:"Colosseum",        title:"Make usable by customers",                      detail:"Ship the features customers need to use it independently",           status:"active", priority:"high"},
+  {id:"T2", proj:"Science curriculum",title:"Develop science curriculum",                   detail:"Build personal science learning system in the language repo",        status:"active", priority:"med"},
+  {id:"T3", proj:"Market analytics", title:"Supabase integration",                          detail:"Connect VZ dashboard to Supabase for persistent data",               status:"active", priority:"high"},
+  {id:"T4", proj:"Market analytics", title:"LT translate",                                  detail:"Lithuanian translations for all user-facing text",                   status:"active", priority:"high"},
+  {id:"T5", proj:"Market analytics", title:"All info checkable",                            detail:"Every stat/number links to its source so it can be verified",        status:"active", priority:"med"},
+  {id:"T6", proj:"Market analytics", title:"Other sources of info",                         detail:"Pull in additional data sources beyond the current export",           status:"active", priority:"med"},
+  {id:"T7", proj:"Market analytics", title:"Predicting values",                             detail:"Forecast future financials based on historical trends",               status:"active", priority:"med"},
+  {id:"T8", proj:"Market analytics", title:"Error margins",                                 detail:"Show confidence intervals / uncertainty on all estimates",            status:"active", priority:"med"},
+  {id:"T9", proj:"Market analytics", title:"More grouping options",                         detail:"Group by employee count, company age, or city",                      status:"active", priority:"low"},
+  {id:"T10",proj:"Colosseum",        title:"Tags editable",                                 detail:"Let users create and edit exercise tags in the UI",                  status:"active", priority:"med"},
+  {id:"T11",proj:"Colosseum",        title:"Strength-based view: sets weight reps 1RM %",  detail:"View sets in terms of 1RM percentage alongside weight and reps",      status:"active", priority:"high"},
+  {id:"T12",proj:"Colosseum",        title:"Projection curve — steepness, limit, drag",     detail:"Show curve steepness and ceiling; top-drag control + coefficient view",status:"active",priority:"med"},
+  {id:"T13",proj:"Colosseum",        title:"Merged exercises strength from both",           detail:"Combine strength scores across merged/equivalent exercises",          status:"active", priority:"med"},
+  {id:"T14",proj:"Colosseum",        title:"Failed exercises don't register",               detail:"Exclude failed sets from PR and strength calculations",              status:"active", priority:"high"},
+  {id:"T15",proj:"Colosseum",        title:"Convert all weights to RM in history",          detail:"Show historical sets as 1RM equivalents throughout",                 status:"active", priority:"med"},
+  {id:"T16",proj:"Colosseum",        title:"% CSA muscle gain — grams — looks",            detail:"Estimate muscle cross-sectional area gain as % / grams / visual",    status:"active", priority:"low"}
 ];
 
-// who: "me" | "gf" | "both"
-// threshold: qty at which item appears in shopping list
 const DEFAULT_FOODS = [
-  { id:"F1",  name:"Chicken breast",      qty:2, unit:"portions", who:"both", threshold:2 },
-  { id:"F2",  name:"Eggs",                qty:6, unit:"eggs",     who:"both", threshold:4 },
-  { id:"F3",  name:"Salmon",              qty:1, unit:"fillets",  who:"both", threshold:1 },
-  { id:"F4",  name:"Greek yogurt (LF)",   qty:1, unit:"tubs",     who:"me",   threshold:1 },
-  { id:"F5",  name:"Oats",                qty:1, unit:"bags",     who:"me",   threshold:1 },
-  { id:"F6",  name:"Rice",                qty:1, unit:"bags",     who:"both", threshold:1 },
-  { id:"F7",  name:"Spinach",             qty:1, unit:"bags",     who:"both", threshold:1 },
-  { id:"F8",  name:"Zucchini",            qty:2, unit:"pcs",      who:"both", threshold:2 },
-  { id:"F9",  name:"Carrots",             qty:3, unit:"pcs",      who:"both", threshold:3 },
-  { id:"F10", name:"Potatoes",            qty:4, unit:"pcs",      who:"both", threshold:3 },
-  { id:"F11", name:"Cottage cheese (LF)", qty:1, unit:"tubs",     who:"me",   threshold:1 },
-  { id:"F12", name:"Olive oil",           qty:1, unit:"bottles",  who:"both", threshold:1 },
-  { id:"F13", name:"Blueberries",         qty:0, unit:"boxes",    who:"gf",   threshold:1 },
-  { id:"F14", name:"Lentils",             qty:0, unit:"cans",     who:"gf",   threshold:1 },
-  { id:"F15", name:"Tuna (canned)",       qty:2, unit:"cans",     who:"me",   threshold:2 }
+  {id:"F1", name:"Chicken breast",    qty:2,unit:"portions",who:"both",threshold:2},
+  {id:"F2", name:"Eggs",              qty:6,unit:"eggs",    who:"both",threshold:4},
+  {id:"F3", name:"Salmon",            qty:1,unit:"fillets", who:"both",threshold:1},
+  {id:"F4", name:"Greek yogurt (LF)", qty:1,unit:"tubs",    who:"me",  threshold:1},
+  {id:"F5", name:"Oats",              qty:1,unit:"bags",    who:"me",  threshold:1},
+  {id:"F6", name:"Rice",              qty:1,unit:"bags",    who:"both",threshold:1},
+  {id:"F7", name:"Spinach",           qty:1,unit:"bags",    who:"both",threshold:1},
+  {id:"F8", name:"Zucchini",          qty:2,unit:"pcs",     who:"both",threshold:2},
+  {id:"F9", name:"Carrots",           qty:3,unit:"pcs",     who:"both",threshold:3},
+  {id:"F10",name:"Potatoes",          qty:4,unit:"pcs",     who:"both",threshold:3},
+  {id:"F11",name:"Cottage cheese (LF)",qty:1,unit:"tubs",   who:"me",  threshold:1},
+  {id:"F12",name:"Olive oil",         qty:1,unit:"bottles", who:"both",threshold:1},
+  {id:"F13",name:"Blueberries",       qty:0,unit:"boxes",   who:"gf",  threshold:1},
+  {id:"F14",name:"Lentils",           qty:0,unit:"cans",    who:"gf",  threshold:1},
+  {id:"F15",name:"Tuna (canned)",     qty:2,unit:"cans",    who:"me",  threshold:2}
 ];
 
-// status: "clean" | "worn" | "laundry"
-// counts reflect how many of each item are in each state
 const DEFAULT_CLOTHES = [
-  { id:"C1", name:"White tee",       cat:"tops",    clean:3, worn:1, laundry:0 },
-  { id:"C2", name:"Black tee",       cat:"tops",    clean:2, worn:0, laundry:1 },
-  { id:"C3", name:"Hoodie",          cat:"tops",    clean:1, worn:1, laundry:0 },
-  { id:"C4", name:"Jeans",           cat:"bottoms", clean:1, worn:1, laundry:0 },
-  { id:"C5", name:"Sweatpants",      cat:"bottoms", clean:2, worn:0, laundry:0 },
-  { id:"C6", name:"Underwear",       cat:"underwear",clean:5,worn:0, laundry:2 },
-  { id:"C7", name:"Socks (pairs)",   cat:"socks",   clean:5, worn:0, laundry:2 },
-  { id:"C8", name:"Gym shorts",      cat:"gym",     clean:2, worn:1, laundry:0 },
-  { id:"C9", name:"Gym tee",         cat:"gym",     clean:1, worn:0, laundry:2 }
+  {id:"C1",name:"White tee",    cat:"tops",     clean:3,worn:1,laundry:0},
+  {id:"C2",name:"Black tee",    cat:"tops",     clean:2,worn:0,laundry:1},
+  {id:"C3",name:"Hoodie",       cat:"tops",     clean:1,worn:1,laundry:0},
+  {id:"C4",name:"Jeans",        cat:"bottoms",  clean:1,worn:1,laundry:0},
+  {id:"C5",name:"Sweatpants",   cat:"bottoms",  clean:2,worn:0,laundry:0},
+  {id:"C6",name:"Underwear",    cat:"underwear",clean:5,worn:0,laundry:2},
+  {id:"C7",name:"Socks (pairs)",cat:"socks",    clean:5,worn:0,laundry:2},
+  {id:"C8",name:"Gym shorts",   cat:"gym",      clean:2,worn:1,laundry:0},
+  {id:"C9",name:"Gym tee",      cat:"gym",      clean:1,worn:0,laundry:2}
 ];
 
 const DEFAULT_LAUNDRY = [
-  { id:"L1", date:"2026-06-29", note:"Gym clothes + underwear + socks", done:false },
-  { id:"L2", date:"2026-07-03", note:"Tops + bottoms full wash", done:false }
+  {id:"L1",date:"2026-06-29",note:"Gym clothes + underwear + socks",done:false},
+  {id:"L2",date:"2026-07-03",note:"Tops + bottoms full wash",done:false}
+];
+
+// day 0=Mon…6=Sun; blocks are recurring weekly
+const DEFAULT_WEEK_BLOCKS = [
+  {id:"B1",day:0,time:"09:00",text:"Deep work — Colosseum"},
+  {id:"B2",day:1,time:"09:00",text:"Deep work — VZ"},
+  {id:"B3",day:2,time:"18:00",text:"Gym"},
+  {id:"B4",day:3,time:"09:00",text:"Science curriculum"},
+  {id:"B5",day:4,time:"18:00",text:"Gym"},
+  {id:"B6",day:5,time:"10:00",text:"Admin + client outreach"},
+  {id:"B7",day:6,time:"11:00",text:"Rest / learning"}
+];
+
+const DEFAULT_EVENTS = [
+  {id:"E1",date:"2026-06-30",text:"VZ project review"},
+  {id:"E2",date:"2026-07-05",text:"Colosseum milestone check"}
+];
+
+const DEFAULT_INCOME = [
+  {id:"I1",name:"Freelance programming",amt:0,note:"variable"},
+  {id:"I2",name:"Coaching / teaching",  amt:0,note:"variable"}
+];
+
+const DEFAULT_EXPENSES = [
+  {id:"X1",name:"Rent",          amt:0},
+  {id:"X2",name:"Food",          amt:0},
+  {id:"X3",name:"Subscriptions", amt:0},
+  {id:"X4",name:"Transport",     amt:0}
+];
+
+const DEFAULT_FIN_GOALS = [
+  {id:"G1",name:"Emergency fund",target:3000,saved:0},
+  {id:"G2",name:"First client retainer",target:1000,saved:0}
 ];
 
 const VERSIONS = [
-  { v:6, title:"Diet, food inventory, wardrobe + laundry", sp:6,
-    note:"Three-tab app: Tasks · Diet & Food (SIBO/acne diets, pantry, shopping) · Wardrobe (inventory, laundry plan)." },
-  { v:5, title:"Colosseum tasks added", sp:1, note:"7 Colosseum tasks." },
-  { v:4, title:"Market analytics tasks added", sp:1, note:"7 VZ market analytics tasks." },
-  { v:3, title:"Editable tasks + suggestion engine", sp:4, note:"Inline edit, add/delete, localStorage, suggestions." },
-  { v:2, title:"Personal assistant — profile, tasks, goals", sp:3, note:"Data layer: roles, traits, interests, tasks, goals." },
-  { v:1, title:"Initial scaffold", sp:2, note:"Project skeleton with rules, hooks, starter template." }
+  {v:8, title:"White theme + SVG icons", sp:4,
+   note:"Light theme default (toggle ☀/🌙), dark theme preserved. SVG drawings for food items and wardrobe categories."},
+  {v:7, title:"Schedule + Finances tabs", sp:5,
+   note:"5-tab app: Tasks · Diet · Wardrobe · Schedule (weekly blocks + events) · Finances (income/expenses/goals). Fixed task cache (key v2)."},
+  {v:6, title:"Diet, food, wardrobe, laundry", sp:6, note:"Three-tab app with food inventory, shopping list, wardrobe inventory, laundry plan."},
+  {v:5, title:"Colosseum tasks added", sp:1, note:"7 Colosseum tasks."},
+  {v:4, title:"Market analytics tasks", sp:1, note:"7 VZ market analytics tasks."},
+  {v:3, title:"Editable tasks + suggestions", sp:4, note:"Inline edit, add/delete, localStorage, smart suggestions."},
+  {v:2, title:"Personal assistant — profile, tasks, goals", sp:3, note:"Roles, traits, interests, tasks, goals."},
+  {v:1, title:"Initial scaffold", sp:2, note:"Project skeleton with rules, hooks, template."}
 ];
 
-// ═══════════════════════════ STATE ═══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+// STATE  (key bumped to _v2 to reset old 3-task localStorage)
+// ══════════════════════════════════════════════════════════════════
+function ls(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}}
+function lsSave(k,v){localStorage.setItem(k,JSON.stringify(v))}
 
-function ls(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; } }
-function lsSave(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
-
-let tasks   = ls("wat_tasks_v1",   DEFAULT_TASKS.map(t => ({...t})));
-let foods   = ls("wat_foods_v1",   DEFAULT_FOODS.map(f => ({...f})));
-let clothes = ls("wat_clothes_v1", DEFAULT_CLOTHES.map(c => ({...c})));
-let laundry = ls("wat_laundry_v1", DEFAULT_LAUNDRY.map(l => ({...l})));
+let tasks      = ls("wat_tasks_v2",   DEFAULT_TASKS.map(t=>({...t})));
+let foods      = ls("wat_foods_v1",   DEFAULT_FOODS.map(f=>({...f})));
+let clothes    = ls("wat_clothes_v1", DEFAULT_CLOTHES.map(c=>({...c})));
+let laundry    = ls("wat_laundry_v1", DEFAULT_LAUNDRY.map(l=>({...l})));
+let weekBlocks = ls("wat_blocks_v1",  DEFAULT_WEEK_BLOCKS.map(b=>({...b})));
+let events     = ls("wat_events_v1",  DEFAULT_EVENTS.map(e=>({...e})));
+let income     = ls("wat_income_v1",  DEFAULT_INCOME.map(i=>({...i})));
+let expenses   = ls("wat_expenses_v1",DEFAULT_EXPENSES.map(x=>({...x})));
+let finGoals   = ls("wat_fingoals_v1",DEFAULT_FIN_GOALS.map(g=>({...g})));
 let foodFilter = "both";
 
-function nextId(arr, prefix) {
-  const nums = arr.map(x => parseInt(x.id.replace(/\D/g,"")) || 0);
-  return prefix + (Math.max(0,...nums) + 1);
+function nextId(arr,p){const n=arr.map(x=>parseInt(x.id.replace(/\D/g,""))||0);return p+(Math.max(0,...n)+1)}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+
+// ── THEME ──────────────────────────────────────────────────────────
+let darkMode = localStorage.getItem("wat_theme")==="dark";
+function applyTheme(){
+  document.body.classList.toggle("dark",darkMode);
+  const btn=document.getElementById("theme-btn");
+  if(btn)btn.textContent=darkMode?"🌙":"☀";
+}
+applyTheme();
+document.addEventListener("click",e=>{if(e.target.id==="theme-btn"){darkMode=!darkMode;localStorage.setItem("wat_theme",darkMode?"dark":"light");applyTheme()}});
+
+// ── SVG ICONS ──────────────────────────────────────────────────────
+const SVG_ATTR='viewBox="0 0 32 32" width="32" height="32" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"';
+function clothSvg(cat){
+  const m={
+    tops:   `<svg ${SVG_ATTR}><path d="M11 5L6 9l3 2v16h14V11l3-2-5-4c-1 3-9 3-10 0Z"/></svg>`,
+    bottoms:`<svg ${SVG_ATTR}><path d="M6 7h20l-2 18h-5l-3-8-3 8H8Z"/><line x1="6" y1="7" x2="26" y2="7"/></svg>`,
+    underwear:`<svg ${SVG_ATTR}><path d="M6 9h20v6q-10 9-20 0Z"/><line x1="6" y1="9" x2="26" y2="9"/><path d="M6 15q5-4 10 4 5-8 10-4"/></svg>`,
+    socks:  `<svg ${SVG_ATTR}><path d="M11 4v16q0 8 8 8 8 0 8-6 0-4-5-4h-3V4Z"/><line x1="11" y1="8" x2="19" y2="8"/></svg>`,
+    gym:    `<svg ${SVG_ATTR}><path d="M5 7h22l-3 18H18l-2-8-2 8h-6Z"/><line x1="5" y1="7" x2="27" y2="7"/><line x1="5" y1="11" x2="27" y2="11"/></svg>`,
+  };
+  return m[cat]||m.tops;
+}
+function foodSvg(name){
+  const n=name.toLowerCase();
+  if(n.includes("chicken")||n.includes("breast"))
+    return`<svg ${SVG_ATTR}><ellipse cx="18" cy="14" rx="8" ry="6"/><line x1="12" y1="18" x2="8" y2="26"/><path d="M6 25l2 2M8 24l2 3"/></svg>`;
+  if(n.includes("egg"))
+    return`<svg ${SVG_ATTR}><ellipse cx="16" cy="18" rx="8" ry="10"/></svg>`;
+  if(n.includes("salmon")||n.includes("fish"))
+    return`<svg ${SVG_ATTR}><ellipse cx="13" cy="16" rx="9" ry="5"/><path d="M22 16l7-6v12Z"/><circle cx="9" cy="14" r="1" fill="currentColor"/></svg>`;
+  if(n.includes("tuna"))
+    return`<svg ${SVG_ATTR}><ellipse cx="16" cy="10" rx="9" ry="3"/><ellipse cx="16" cy="22" rx="9" ry="3"/><line x1="7" y1="10" x2="7" y2="22"/><line x1="25" y1="10" x2="25" y2="22"/><line x1="7" y1="16" x2="25" y2="16"/></svg>`;
+  if(n.includes("yogurt")||n.includes("cottage"))
+    return`<svg ${SVG_ATTR}><path d="M9 8l1 18h12l1-18Z"/><line x1="8" y1="8" x2="24" y2="8"/><line x1="9" y1="12" x2="23" y2="12"/></svg>`;
+  if(n.includes("oat"))
+    return`<svg ${SVG_ATTR}><path d="M6 18q0 10 10 10 10 0 10-10"/><ellipse cx="16" cy="18" rx="10" ry="3"/><path d="M14 8q-1-4 2-5M18 6q0-3 2-4"/></svg>`;
+  if(n.includes("rice")||n.includes("lentil")||n.includes("can"))
+    return`<svg ${SVG_ATTR}><ellipse cx="16" cy="10" rx="9" ry="3"/><ellipse cx="16" cy="22" rx="9" ry="3"/><line x1="7" y1="10" x2="7" y2="22"/><line x1="25" y1="10" x2="25" y2="22"/></svg>`;
+  if(n.includes("spinach")||n.includes("greens"))
+    return`<svg ${SVG_ATTR}><path d="M16 28q0-8-6-14-4-4-2-9 5-2 8 5 3-7 8-5 2 5-2 9-6 6-6 14Z"/><line x1="16" y1="28" x2="16" y2="15"/></svg>`;
+  if(n.includes("zucchini")||n.includes("carrot"))
+    return`<svg ${SVG_ATTR}><ellipse cx="16" cy="19" rx="4" ry="10"/><path d="M14 9q-2-4 2-6 4 2 2 6"/></svg>`;
+  if(n.includes("potato"))
+    return`<svg ${SVG_ATTR}><ellipse cx="16" cy="17" rx="9" ry="7" transform="rotate(-15 16 17)"/><line x1="20" y1="9" x2="21" y2="6"/></svg>`;
+  if(n.includes("olive oil")||n.includes("oil"))
+    return`<svg ${SVG_ATTR}><path d="M13 6v4l-3 4v14h12V14l-3-4V6Z"/><line x1="13" y1="6" x2="19" y2="6"/><line x1="14" y1="4" x2="18" y2="4"/><line x1="10" y1="16" x2="22" y2="16"/></svg>`;
+  if(n.includes("blueberr"))
+    return`<svg ${SVG_ATTR}><circle cx="12" cy="16" r="4"/><circle cx="20" cy="16" r="4"/><circle cx="16" cy="22" r="4"/><circle cx="16" cy="10" r="3"/></svg>`;
+  return`<svg ${SVG_ATTR}><circle cx="16" cy="16" r="10"/><circle cx="16" cy="16" r="4"/></svg>`;
 }
 
-// ═══════════════════════════ TASKS ═══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+// TASKS
+// ══════════════════════════════════════════════════════════════════
+const STC=["active","paused","blocked","done"], PRC=["high","med","low"];
+function cycle(a,v){return a[(a.indexOf(v)+1)%a.length]}
+const SL={active:"ACTIVE",paused:"PAUSED",blocked:"BLOCKED",done:"DONE"};
+const SC={active:"s-active",paused:"s-paused",blocked:"s-blocked",done:"s-done"};
+const PL={high:"HIGH",med:"MED",low:"LOW"};
+const PC={high:"p-high",med:"p-med",low:"p-low"};
 
-const STATUS_CYCLE   = ["active","paused","blocked","done"];
-const PRIORITY_CYCLE = ["high","med","low"];
-function cycle(arr,v){ return arr[(arr.indexOf(v)+1)%arr.length]; }
-const SL = { active:"ACTIVE", paused:"PAUSED", blocked:"BLOCKED", done:"DONE" };
-const SC = { active:"s-active", paused:"s-paused", blocked:"s-blocked", done:"s-done" };
-const PL = { high:"HIGH", med:"MED", low:"LOW" };
-const PC = { high:"p-high", med:"p-med", low:"p-low" };
-
-function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-
-function renderFocus() {
-  const f = tasks.find(t=>t.status==="active"&&t.priority==="high") || tasks.find(t=>t.status==="active");
-  const el = document.getElementById("focus-wrap");
-  if (!f) { el.innerHTML=""; return; }
-  el.innerHTML = `<div class="focus"><div class="focus-lbl">▶ Focus now</div><div class="focus-title">${esc(f.title)}</div><div class="focus-sub">${esc(f.proj||"")}${f.proj&&f.detail?" · ":""}${esc(f.detail||"")}</div></div>`;
+function renderFocus(){
+  const f=tasks.find(t=>t.status==="active"&&t.priority==="high")||tasks.find(t=>t.status==="active");
+  const el=document.getElementById("focus-wrap");
+  if(!f){el.innerHTML="";return}
+  el.innerHTML=`<div class="focus"><div class="focus-lbl">▶ Focus now</div><div class="focus-title">${esc(f.title)}</div><div class="focus-sub">${esc(f.proj||"")}${f.proj&&f.detail?" · ":""}${esc(f.detail||"")}</div></div>`;
 }
 
-function renderTasks() {
-  const el = document.getElementById("task-list");
-  if (!tasks.length) { el.innerHTML=`<div style="color:var(--muted);padding:12px 0;font-size:13px">No tasks.</div>`; return; }
-  el.innerHTML = tasks.map((t,i) => `
+function renderTasks(){
+  const el=document.getElementById("task-list");
+  if(!tasks.length){el.innerHTML=`<div style="color:var(--muted);padding:12px 0;font-size:13px">No tasks.</div>`;return}
+  el.innerHTML=tasks.map((t,i)=>`
     <div class="task${t.status==="done"?" is-done":""}" data-i="${i}">
       <div class="task-row1">
-        <div class="task-title-wrap"><input class="task-title" value="${esc(t.title)}" placeholder="Task title" data-field="title" data-i="${i}" /></div>
+        <div class="task-title-wrap"><input class="task-title" value="${esc(t.title)}" placeholder="Task title" data-field="title" data-i="${i}"/></div>
         <button class="pill pill-sm pill-icon pill-del" data-del="${i}">✕</button>
       </div>
-      <input class="task-detail" value="${esc(t.detail||"")}" placeholder="Detail / project…" data-field="detail" data-i="${i}" />
+      <input class="task-detail" value="${esc(t.detail||"")}" placeholder="Detail / project…" data-field="detail" data-i="${i}"/>
       <div class="task-pills">
         <button class="pill pill-sm ${SC[t.status]}" data-cycle="status" data-i="${i}">${SL[t.status]}</button>
         <button class="pill pill-sm ${PC[t.priority]}" data-cycle="priority" data-i="${i}">${PL[t.priority]}</button>
@@ -452,73 +651,61 @@ function renderTasks() {
     </div>`).join("");
 }
 
-function suggestTasks(tasks) {
-  const active=tasks.filter(t=>t.status==="active"), blocked=tasks.filter(t=>t.status==="blocked");
-  const highAct=active.filter(t=>t.priority==="high"), paused=tasks.filter(t=>t.status==="paused");
+function renderSuggestions(){
+  const active=tasks.filter(t=>t.status==="active"),blocked=tasks.filter(t=>t.status==="blocked");
+  const highAct=active.filter(t=>t.priority==="high"),paused=tasks.filter(t=>t.status==="paused");
   const s=[];
-  if (!active.length && tasks.length) s.push({icon:"🎯",head:"Nothing active",text:"Pick one task and mark it active."});
-  if (blocked.length) s.push({icon:"🚧",head:`${blocked.length} blocked`,text:blocked.map(t=>t.title).join(", ")+" — unblock or park."});
-  if (highAct.length>2) s.push({icon:"⚡",head:"Too many HIGHs",text:`${highAct.length} active HIGHs = decision paralysis. Demote all but one.`});
-  const f=highAct[0]||active[0]; if(f) s.push({icon:"▶",head:"Start here",text:`"${f.title}" (${f.proj||f.detail||""}).`});
-  if (paused.length>=2) s.push({icon:"🗄",head:`${paused.length} paused`,text:"Resume, delete, or accept they're low priority."});
-  const col=tasks.find(t=>t.proj==="Colosseum"&&t.status!=="done"); if(col) s.push({icon:"👥",head:"Colosseum → clients",text:"Finishing Colosseum is your strongest portfolio piece."});
-  return s.slice(0,5);
+  if(!active.length&&tasks.length) s.push({icon:"🎯",head:"Nothing active",text:"Pick one task and mark it active."});
+  if(blocked.length) s.push({icon:"🚧",head:`${blocked.length} blocked`,text:blocked.map(t=>t.title).join(", ")+" — unblock or park."});
+  if(highAct.length>2) s.push({icon:"⚡",head:"Too many HIGHs",text:`${highAct.length} active HIGHs = decision paralysis. Demote all but one.`});
+  const f=highAct[0]||active[0]; if(f) s.push({icon:"▶",head:"Start here",text:`"${esc(f.title)}" (${esc(f.proj||f.detail||"")}).`});
+  if(paused.length>=2) s.push({icon:"🗄",head:`${paused.length} paused`,text:"Resume, delete, or accept they're low priority."});
+  if(tasks.find(t=>t.proj==="Colosseum"&&t.status!=="done")) s.push({icon:"👥",head:"Colosseum → clients",text:"Finishing Colosseum is your strongest portfolio piece."});
+  document.getElementById("sugg-box").innerHTML=s.length
+    ?s.slice(0,5).map(x=>`<div class="sugg-item"><div class="sugg-icon">${x.icon}</div><div class="sugg-body"><div class="sugg-head">${x.head}</div><div class="sugg-text">${x.text}</div></div></div>`).join("")
+    :`<div class="sugg-empty">No issues detected.</div>`;
 }
 
-function renderSuggestions() {
-  const suggs=suggestTasks(tasks);
-  document.getElementById("sugg-box").innerHTML = suggs.length
-    ? suggs.map(s=>`<div class="sugg-item"><div class="sugg-icon">${s.icon}</div><div class="sugg-body"><div class="sugg-head">${s.head}</div><div class="sugg-text">${s.text}</div></div></div>`).join("")
-    : `<div class="sugg-empty">No issues detected.</div>`;
-}
+function renderTasksTab(){renderFocus();renderTasks();renderSuggestions()}
 
-function renderVersions() {
-  document.getElementById("ver-list").innerHTML = VERSIONS.map(v=>`<div class="ver-row"><span class="ver-n">v${v.v}</span><span class="ver-title">${v.title}</span><span class="ver-sp">${v.sp} sp</span></div>`).join("");
-}
-
-function renderTasksTab() { renderFocus(); renderTasks(); renderSuggestions(); }
-
-document.getElementById("task-list").addEventListener("input", e=>{
-  const f=e.target.dataset.field, i=parseInt(e.target.dataset.i);
-  if (!f||isNaN(i)) return;
-  tasks[i][f]=e.target.value; lsSave("wat_tasks_v1",tasks);
-  requestAnimationFrame(()=>{ renderFocus(); renderSuggestions(); });
+document.getElementById("task-list").addEventListener("input",e=>{
+  const f=e.target.dataset.field,i=parseInt(e.target.dataset.i);
+  if(!f||isNaN(i))return;
+  tasks[i][f]=e.target.value;lsSave("wat_tasks_v2",tasks);
+  requestAnimationFrame(()=>{renderFocus();renderSuggestions()});
 });
-document.getElementById("task-list").addEventListener("click", e=>{
+document.getElementById("task-list").addEventListener("click",e=>{
   const cb=e.target.closest("[data-cycle]");
-  if (cb) { const f=cb.dataset.cycle,i=parseInt(cb.dataset.i); tasks[i][f]=cycle(f==="status"?STATUS_CYCLE:PRIORITY_CYCLE,tasks[i][f]); lsSave("wat_tasks_v1",tasks); renderTasksTab(); return; }
+  if(cb){const f=cb.dataset.cycle,i=parseInt(cb.dataset.i);tasks[i][f]=cycle(f==="status"?STC:PRC,tasks[i][f]);lsSave("wat_tasks_v2",tasks);renderTasksTab();return}
   const db=e.target.closest("[data-del]");
-  if (db) { tasks.splice(parseInt(db.dataset.del),1); lsSave("wat_tasks_v1",tasks); renderTasksTab(); }
+  if(db){tasks.splice(parseInt(db.dataset.del),1);lsSave("wat_tasks_v2",tasks);renderTasksTab()}
 });
-function addTask(){ const inp=document.getElementById("add-input"),t=inp.value.trim(); if(!t) return; tasks.push({id:nextId(tasks,"T"),title:t,detail:"",proj:"",status:"active",priority:"med"}); lsSave("wat_tasks_v1",tasks); inp.value=""; renderTasksTab(); }
+function addTask(){const inp=document.getElementById("add-input"),t=inp.value.trim();if(!t)return;tasks.push({id:nextId(tasks,"T"),title:t,detail:"",proj:"",status:"active",priority:"med"});lsSave("wat_tasks_v2",tasks);inp.value="";renderTasksTab()}
 document.getElementById("add-btn").addEventListener("click",addTask);
-document.getElementById("add-input").addEventListener("keydown",e=>{ if(e.key==="Enter") addTask(); });
+document.getElementById("add-input").addEventListener("keydown",e=>{if(e.key==="Enter")addTask()});
 
-// ═══════════════════════════ DIET ════════════════════════════════════════════
-
-const WHO_LABEL = { me:"Adomas", gf:"GF", both:"Both" };
-
-function whoMatch(food, filter) {
-  if (filter==="all") return true;
-  if (filter==="both") return food.who==="both";
-  if (filter==="me")   return food.who==="me"||food.who==="both";
-  if (filter==="gf")   return food.who==="gf"||food.who==="both";
-  return true;
+function renderVersions(){
+  document.getElementById("ver-list").innerHTML=VERSIONS.map(v=>`<div class="ver-row"><span class="ver-n">v${v.v}</span><span class="ver-title">${v.title}</span><span class="ver-sp">${v.sp} sp</span></div>`).join("");
 }
 
-function renderFoods() {
-  const visible = foods.filter(f=>whoMatch(f,foodFilter));
-  const el = document.getElementById("food-list");
-  if (!visible.length) { el.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:12px 0">No food items for this filter.</div>`; return; }
-  el.innerHTML = visible.map(f => {
-    const idx = foods.indexOf(f);
-    const low = f.qty>0 && f.qty<=f.threshold;
-    const out = f.qty===0;
-    const whoColor = f.who==="me"?"var(--blue)":f.who==="gf"?"var(--purple)":"var(--teal)";
+// ══════════════════════════════════════════════════════════════════
+// DIET
+// ══════════════════════════════════════════════════════════════════
+const WL={me:"Adomas",gf:"GF",both:"Both"};
+function whoMatch(f,filter){if(filter==="all")return true;if(filter==="both")return f.who==="both";if(filter==="me")return f.who==="me"||f.who==="both";if(filter==="gf")return f.who==="gf"||f.who==="both";return true}
+
+function renderFoods(){
+  const vis=foods.filter(f=>whoMatch(f,foodFilter));
+  const el=document.getElementById("food-list");
+  if(!vis.length){el.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:12px 0">No items for this filter.</div>`;return}
+  el.innerHTML=vis.map(f=>{
+    const idx=foods.indexOf(f),low=f.qty>0&&f.qty<=f.threshold,out=f.qty===0;
+    const wc=f.who==="me"?"var(--blue)":f.who==="gf"?"var(--purple)":"var(--teal)";
     return `<div class="food-item${low?" food-low":""}${out?" food-out":""}" data-fi="${idx}">
+      <div style="color:var(--muted);flex-shrink:0">${foodSvg(f.name)}</div>
       <div class="food-name-wrap">
-        <input class="food-name" value="${esc(f.name)}" data-fi="${idx}" data-ff="name" />
-        <div class="food-sub">${WHO_LABEL[f.who]||f.who} · <span style="cursor:pointer;color:${whoColor}" data-who-cycle="${idx}">${f.who}</span></div>
+        <input class="food-name" value="${esc(f.name)}" data-fi="${idx}" data-ff="name"/>
+        <div class="food-sub"><span style="cursor:pointer;color:${wc}" data-who-cycle="${idx}">${WL[f.who]||f.who}</span></div>
       </div>
       <div class="food-qty">
         <button class="qty-btn" data-fdec="${idx}">−</button>
@@ -527,194 +714,306 @@ function renderFoods() {
         <button class="qty-btn" data-finc="${idx}">+</button>
       </div>
       <button class="pill pill-sm pill-icon pill-del" data-fdel="${idx}">✕</button>
-    </div>`;
-  }).join("");
+    </div>`}).join("");
 }
 
-function renderShopList() {
-  const low = foods.filter(f=>f.qty<=f.threshold);
-  const el = document.getElementById("shop-list");
-  if (!low.length) { el.innerHTML=`<div class="sugg-empty">Pantry looks good — nothing needed.</div>`; return; }
-  el.innerHTML = low.map(f=>`
-    <div class="shop-item">
-      <div class="shop-dot${f.qty===0?" out":""}"></div>
-      <span class="shop-name">${esc(f.name)}</span>
-      <span class="shop-note">${f.qty===0?"OUT":"low"} · ${WHO_LABEL[f.who]}</span>
-    </div>`).join("");
+function renderShopList(){
+  const low=foods.filter(f=>f.qty<=f.threshold);
+  const el=document.getElementById("shop-list");
+  if(!low.length){el.innerHTML=`<div class="sugg-empty">Pantry looks good.</div>`;return}
+  el.innerHTML=low.map(f=>`<div class="shop-item"><div class="shop-dot${f.qty===0?" out":""}"></div><span class="shop-name">${esc(f.name)}</span><span class="shop-note">${f.qty===0?"OUT":"low"} · ${WL[f.who]}</span></div>`).join("");
 }
 
-const MEAL_IDEAS = [
-  { icon:"🍗", head:"Chicken + rice bowl", text:"Lean protein + SIBO-safe carb. Add zucchini or carrots. Works for both." },
-  { icon:"🥚", head:"Egg scramble", text:"Eggs + spinach + olive oil. High protein, low FODMAP, acne-safe." },
-  { icon:"🐟", head:"Salmon + potatoes", text:"Omega-3 (anti-inflammatory for acne), filling, SIBO-friendly." },
-  { icon:"🥣", head:"Oats + blueberries", text:"Adomas: oats for morning. GF: blueberries are low-GI and antioxidant-rich." },
-  { icon:"🥗", head:"Tuna + greens", text:"High protein, near-zero carb. SIBO and acne safe." }
+const MEAL_IDEAS=[
+  {icon:"🍗",head:"Chicken + rice bowl",text:"Lean protein + SIBO-safe carb. Zucchini or carrots on the side. Works for both."},
+  {icon:"🥚",head:"Egg scramble",text:"Eggs + spinach + olive oil. High protein, low FODMAP, acne-safe."},
+  {icon:"🐟",head:"Salmon + potatoes",text:"Omega-3 (anti-inflammatory for acne), filling, SIBO-friendly."},
+  {icon:"🥣",head:"Oats + blueberries",text:"Adomas: oats for morning. GF: blueberries low-GI + antioxidant."},
+  {icon:"🥗",head:"Tuna + greens",text:"High protein, near-zero carb. SIBO and acne safe."}
 ];
 
-function renderMealIdeas() {
-  document.getElementById("meal-ideas").innerHTML = MEAL_IDEAS.map(m=>`
-    <div class="sugg-item"><div class="sugg-icon">${m.icon}</div><div class="sugg-body"><div class="sugg-head">${m.head}</div><div class="sugg-text">${m.text}</div></div></div>`).join("");
+function renderDietTab(){
+  renderFoods();renderShopList();
+  document.getElementById("meal-ideas").innerHTML=MEAL_IDEAS.map(m=>`<div class="sugg-item"><div class="sugg-icon">${m.icon}</div><div class="sugg-body"><div class="sugg-head">${m.head}</div><div class="sugg-text">${m.text}</div></div></div>`).join("");
 }
 
-function renderDietTab() { renderFoods(); renderShopList(); renderMealIdeas(); }
-
-// food filter pills
-document.getElementById("food-filter").addEventListener("click", e=>{
-  const btn=e.target.closest("[data-who]"); if(!btn) return;
+document.getElementById("food-filter").addEventListener("click",e=>{
+  const btn=e.target.closest("[data-who]");if(!btn)return;
   foodFilter=btn.dataset.who;
-  document.querySelectorAll("#food-filter [data-who]").forEach(b=>{
-    const w=b.dataset.who;
-    b.className=`pill who-pill ${foodFilter===w?"on-"+w:"off"}`;
-    if(w==="both"&&foodFilter===w) b.className="pill who-pill on-both";
-  });
+  document.querySelectorAll("#food-filter [data-who]").forEach(b=>{b.className=`pill who-pill ${foodFilter===b.dataset.who?"on-"+b.dataset.who:"off"}`});
   renderFoods();
 });
-
-document.getElementById("food-list").addEventListener("input", e=>{
-  const fi=parseInt(e.target.dataset.fi), ff=e.target.dataset.ff;
-  if(isNaN(fi)||!ff) return;
-  foods[fi][ff]=e.target.value; lsSave("wat_foods_v1",foods);
-  requestAnimationFrame(()=>renderShopList());
+document.getElementById("food-list").addEventListener("input",e=>{
+  const fi=parseInt(e.target.dataset.fi),ff=e.target.dataset.ff;if(isNaN(fi)||!ff)return;
+  foods[fi][ff]=e.target.value;lsSave("wat_foods_v1",foods);requestAnimationFrame(renderShopList);
 });
-
-document.getElementById("food-list").addEventListener("click", e=>{
-  const inc=e.target.closest("[data-finc]"); if(inc){ const i=parseInt(inc.dataset.finc); foods[i].qty++; lsSave("wat_foods_v1",foods); renderDietTab(); return; }
-  const dec=e.target.closest("[data-fdec]"); if(dec){ const i=parseInt(dec.dataset.fdec); if(foods[i].qty>0) foods[i].qty--; lsSave("wat_foods_v1",foods); renderDietTab(); return; }
-  const del=e.target.closest("[data-fdel]"); if(del){ foods.splice(parseInt(del.dataset.fdel),1); lsSave("wat_foods_v1",foods); renderDietTab(); return; }
-  const wc=e.target.closest("[data-who-cycle]"); if(wc){ const i=parseInt(wc.dataset.whoHycle||wc.getAttribute("data-who-cycle")); const W=["both","me","gf"]; foods[i].who=W[(W.indexOf(foods[i].who)+1)%W.length]; lsSave("wat_foods_v1",foods); renderDietTab(); }
+document.getElementById("food-list").addEventListener("click",e=>{
+  const inc=e.target.closest("[data-finc]");if(inc){const i=parseInt(inc.dataset.finc);foods[i].qty++;lsSave("wat_foods_v1",foods);renderDietTab();return}
+  const dec=e.target.closest("[data-fdec]");if(dec){const i=parseInt(dec.dataset.fdec);if(foods[i].qty>0)foods[i].qty--;lsSave("wat_foods_v1",foods);renderDietTab();return}
+  const del=e.target.closest("[data-fdel]");if(del){foods.splice(parseInt(del.dataset.fdel),1);lsSave("wat_foods_v1",foods);renderDietTab();return}
+  const wc=e.target.closest("[data-who-cycle]");if(wc){const i=parseInt(wc.getAttribute("data-who-cycle")),W=["both","me","gf"];foods[i].who=W[(W.indexOf(foods[i].who)+1)%W.length];lsSave("wat_foods_v1",foods);renderDietTab()}
 });
-
 document.getElementById("food-add-btn").addEventListener("click",()=>{
-  const n=document.getElementById("food-add-name").value.trim();
-  const u=document.getElementById("food-add-unit").value.trim()||"pcs";
-  if(!n) return;
-  foods.push({id:nextId(foods,"F"),name:n,qty:1,unit:u,who:"both",threshold:1});
-  lsSave("wat_foods_v1",foods);
-  document.getElementById("food-add-name").value="";
-  document.getElementById("food-add-unit").value="";
-  renderDietTab();
+  const n=document.getElementById("food-add-name").value.trim(),u=document.getElementById("food-add-unit").value.trim()||"pcs";
+  if(!n)return;foods.push({id:nextId(foods,"F"),name:n,qty:1,unit:u,who:"both",threshold:1});lsSave("wat_foods_v1",foods);
+  document.getElementById("food-add-name").value="";document.getElementById("food-add-unit").value="";renderDietTab();
 });
 
-// ═══════════════════════════ WARDROBE ════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+// WARDROBE
+// ══════════════════════════════════════════════════════════════════
+function wardSummary(){let c=0,w=0,l=0;clothes.forEach(x=>{c+=x.clean;w+=x.worn;l+=x.laundry});document.getElementById("w-clean-n").textContent=c;document.getElementById("w-worn-n").textContent=w;document.getElementById("w-laundry-n").textContent=l}
 
-function wardSummary() {
-  let clean=0,worn=0,wash=0;
-  clothes.forEach(c=>{ clean+=c.clean; worn+=c.worn; wash+=c.laundry; });
-  document.getElementById("w-clean-n").textContent=clean;
-  document.getElementById("w-worn-n").textContent=worn;
-  document.getElementById("w-laundry-n").textContent=wash;
-}
-
-function renderClothes() {
+function renderClothes(){
   const el=document.getElementById("cloth-list");
-  if(!clothes.length){ el.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:12px 0">No items — add below.</div>`; return; }
+  if(!clothes.length){el.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:12px 0">No items.</div>`;return}
   el.innerHTML=clothes.map((c,i)=>`
     <div class="cloth-item">
       <div class="cloth-row1">
+        <div style="color:var(--muted);flex-shrink:0">${clothSvg(c.cat)}</div>
         <div class="cloth-name-wrap">
-          <input class="cloth-name" value="${esc(c.name)}" data-ci="${i}" data-cf="name" />
-          <div class="cloth-cat"><input style="background:none;border:none;color:var(--muted);font:11px system-ui;outline:none;width:100%;padding:0" value="${esc(c.cat)}" data-ci="${i}" data-cf="cat" placeholder="category" /></div>
+          <input class="cloth-name" value="${esc(c.name)}" data-ci="${i}" data-cf="name"/>
+          <div class="cloth-cat"><input style="background:none;border:none;color:var(--muted);font:11px system-ui;outline:none;width:100%;padding:0" value="${esc(c.cat)}" data-ci="${i}" data-cf="cat" placeholder="category"/></div>
         </div>
         <button class="pill pill-sm pill-icon pill-del" data-cdel="${i}">✕</button>
       </div>
       <div class="cloth-counts">
-        <button class="count-pill cp-clean" data-cuse="${i}" title="Tap to move one clean → worn">
-          <span>${c.clean}</span><span class="count-label"> clean</span>
-        </button>
-        <button class="count-pill cp-worn" data-cwash="${i}" title="Tap to move one worn → laundry">
-          <span>${c.worn}</span><span class="count-label"> worn</span>
-        </button>
-        <button class="count-pill cp-laundry" data-cdone="${i}" title="Tap to move one laundry → clean">
-          <span>${c.laundry}</span><span class="count-label"> laundry</span>
-        </button>
-        <button class="pill pill-sm" style="margin-left:auto;background:var(--surface2);color:var(--muted2)" data-cadd="${i}" title="Add +1 clean item">+1 clean</button>
+        <button class="count-pill cp-clean" data-cuse="${i}" title="worn one"><span>${c.clean}</span><span class="count-label"> clean</span></button>
+        <button class="count-pill cp-worn" data-cwash="${i}" title="to laundry"><span>${c.worn}</span><span class="count-label"> worn</span></button>
+        <button class="count-pill cp-laundry" data-cdone="${i}" title="washed → clean"><span>${c.laundry}</span><span class="count-label"> laundry</span></button>
+        <button class="pill pill-sm" style="margin-left:auto;background:var(--surface2);color:var(--muted2)" data-cadd="${i}">+1</button>
       </div>
     </div>`).join("");
 }
 
-function wardTips() {
-  const tips=[];
-  let totalWorn=0, totalLaundry=0;
-  clothes.forEach(c=>{ totalWorn+=c.worn; totalLaundry+=c.laundry; });
-  if(totalLaundry>=5) tips.push({icon:"🧺",head:"Laundry pile building",text:`${totalLaundry} items waiting — schedule a wash soon.`});
-  const lowClean=clothes.filter(c=>c.clean<2&&c.cat!=="socks"&&c.cat!=="underwear");
-  if(lowClean.length) tips.push({icon:"👕",head:"Running low on clean",text:lowClean.map(c=>c.name).join(", ")+" — wash or add more."});
-  const gymLow=clothes.filter(c=>c.cat==="gym"&&c.clean<1);
-  if(gymLow.length) tips.push({icon:"🏋️",head:"No clean gym wear",text:"Wash your gym clothes before the next workout."});
-  const nextWash=laundry.filter(l=>!l.done).sort((a,b)=>a.date.localeCompare(b.date))[0];
-  if(nextWash) tips.push({icon:"📅",head:"Next laundry",text:`${nextWash.date} — ${nextWash.note}`});
-  if(!tips.length) tips.push({icon:"✅",head:"Wardrobe in order",text:"Everything looks clean and organised."});
-  document.getElementById("ward-tips").innerHTML=tips.map(t=>`<div class="sugg-item"><div class="sugg-icon">${t.icon}</div><div class="sugg-body"><div class="sugg-head">${t.head}</div><div class="sugg-text">${t.text}</div></div></div>`).join("");
+function wardTips(){
+  const t=[];let tl=0;clothes.forEach(c=>tl+=c.laundry);
+  if(tl>=5)t.push({icon:"🧺",head:"Laundry pile building",text:`${tl} items waiting — schedule a wash.`});
+  const lc=clothes.filter(c=>c.clean<2&&c.cat!=="socks"&&c.cat!=="underwear");
+  if(lc.length)t.push({icon:"👕",head:"Running low on clean",text:lc.map(c=>c.name).join(", ")});
+  if(clothes.find(c=>c.cat==="gym"&&c.clean<1))t.push({icon:"🏋️",head:"No clean gym wear",text:"Wash gym clothes before next workout."});
+  const nw=laundry.filter(l=>!l.done).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  if(nw)t.push({icon:"📅",head:"Next laundry",text:`${nw.date} — ${nw.note}`});
+  if(!t.length)t.push({icon:"✅",head:"Wardrobe in order",text:"Everything looks good."});
+  document.getElementById("ward-tips").innerHTML=t.map(x=>`<div class="sugg-item"><div class="sugg-icon">${x.icon}</div><div class="sugg-body"><div class="sugg-head">${x.head}</div><div class="sugg-text">${x.text}</div></div></div>`).join("");
 }
 
-function renderLaundryPlan() {
-  const sorted=[...laundry].sort((a,b)=>a.date.localeCompare(b.date));
+function renderLaundryPlan(){
+  const s=[...laundry].sort((a,b)=>a.date.localeCompare(b.date));
   const el=document.getElementById("laundry-plan");
-  if(!sorted.length){ el.innerHTML=`<div class="sugg-empty">No laundry planned.</div>`; return; }
-  el.innerHTML=sorted.map(l=>{
-    const idx=laundry.indexOf(l);
-    return `<div class="laundry-item${l.done?" laundry-done":""}">
-      <span class="laundry-date">${l.date}</span>
-      <input class="laundry-note" value="${esc(l.note)}" placeholder="What to wash…" data-li="${idx}" />
-      <button class="pill pill-sm ${l.done?"s-done":"s-paused"}" data-ltoggle="${idx}">${l.done?"DONE":"TODO"}</button>
-      <button class="pill pill-sm pill-icon pill-del" data-ldel="${idx}">✕</button>
-    </div>`;
-  }).join("");
+  if(!s.length){el.innerHTML=`<div class="sugg-empty">No laundry planned.</div>`;return}
+  el.innerHTML=s.map(l=>{const i=laundry.indexOf(l);return`<div class="laundry-item">
+    <span class="laundry-date">${l.date}</span>
+    <input class="laundry-note" value="${esc(l.note)}" placeholder="What to wash…" data-li="${i}"/>
+    <button class="pill pill-sm ${l.done?"s-done":"s-paused"}" data-ltoggle="${i}">${l.done?"DONE":"TODO"}</button>
+    <button class="pill pill-sm pill-icon pill-del" data-ldel="${i}">✕</button>
+  </div>`}).join("");
 }
 
-function renderWardrobeTab() { wardSummary(); renderClothes(); renderLaundryPlan(); wardTips(); }
+function renderWardrobeTab(){wardSummary();renderClothes();renderLaundryPlan();wardTips()}
 
-document.getElementById("cloth-list").addEventListener("input", e=>{
-  const ci=parseInt(e.target.dataset.ci), cf=e.target.dataset.cf;
-  if(isNaN(ci)||!cf) return;
-  clothes[ci][cf]=e.target.value; lsSave("wat_clothes_v1",clothes);
+document.getElementById("cloth-list").addEventListener("input",e=>{
+  const ci=parseInt(e.target.dataset.ci),cf=e.target.dataset.cf;if(isNaN(ci)||!cf)return;
+  clothes[ci][cf]=e.target.value;lsSave("wat_clothes_v1",clothes);
 });
-
-document.getElementById("cloth-list").addEventListener("click", e=>{
-  const use=e.target.closest("[data-cuse]");
-  if(use){ const i=parseInt(use.dataset.cuse); if(clothes[i].clean>0){ clothes[i].clean--; clothes[i].worn++; } lsSave("wat_clothes_v1",clothes); renderWardrobeTab(); return; }
-  const wash=e.target.closest("[data-cwash]");
-  if(wash){ const i=parseInt(wash.dataset.cwash); if(clothes[i].worn>0){ clothes[i].worn--; clothes[i].laundry++; } lsSave("wat_clothes_v1",clothes); renderWardrobeTab(); return; }
-  const done=e.target.closest("[data-cdone]");
-  if(done){ const i=parseInt(done.dataset.cdone); if(clothes[i].laundry>0){ clothes[i].laundry--; clothes[i].clean++; } lsSave("wat_clothes_v1",clothes); renderWardrobeTab(); return; }
-  const add=e.target.closest("[data-cadd]");
-  if(add){ const i=parseInt(add.dataset.cadd); clothes[i].clean++; lsSave("wat_clothes_v1",clothes); renderWardrobeTab(); return; }
-  const del=e.target.closest("[data-cdel]");
-  if(del){ clothes.splice(parseInt(del.dataset.cdel),1); lsSave("wat_clothes_v1",clothes); renderWardrobeTab(); }
+document.getElementById("cloth-list").addEventListener("click",e=>{
+  const use=e.target.closest("[data-cuse]");if(use){const i=parseInt(use.dataset.cuse);if(clothes[i].clean>0){clothes[i].clean--;clothes[i].worn++}lsSave("wat_clothes_v1",clothes);renderWardrobeTab();return}
+  const wash=e.target.closest("[data-cwash]");if(wash){const i=parseInt(wash.dataset.cwash);if(clothes[i].worn>0){clothes[i].worn--;clothes[i].laundry++}lsSave("wat_clothes_v1",clothes);renderWardrobeTab();return}
+  const done=e.target.closest("[data-cdone]");if(done){const i=parseInt(done.dataset.cdone);if(clothes[i].laundry>0){clothes[i].laundry--;clothes[i].clean++}lsSave("wat_clothes_v1",clothes);renderWardrobeTab();return}
+  const add=e.target.closest("[data-cadd]");if(add){const i=parseInt(add.dataset.cadd);clothes[i].clean++;lsSave("wat_clothes_v1",clothes);renderWardrobeTab();return}
+  const del=e.target.closest("[data-cdel]");if(del){clothes.splice(parseInt(del.dataset.cdel),1);lsSave("wat_clothes_v1",clothes);renderWardrobeTab()}
 });
-
 document.getElementById("cloth-add-btn").addEventListener("click",()=>{
-  const n=document.getElementById("cloth-add-name").value.trim();
-  const c=document.getElementById("cloth-add-cat").value.trim()||"misc";
-  if(!n) return;
-  clothes.push({id:nextId(clothes,"C"),name:n,cat:c,clean:1,worn:0,laundry:0});
-  lsSave("wat_clothes_v1",clothes);
-  document.getElementById("cloth-add-name").value="";
-  document.getElementById("cloth-add-cat").value="";
-  renderWardrobeTab();
+  const n=document.getElementById("cloth-add-name").value.trim(),c=document.getElementById("cloth-add-cat").value.trim()||"misc";
+  if(!n)return;clothes.push({id:nextId(clothes,"C"),name:n,cat:c,clean:1,worn:0,laundry:0});lsSave("wat_clothes_v1",clothes);
+  document.getElementById("cloth-add-name").value="";document.getElementById("cloth-add-cat").value="";renderWardrobeTab();
 });
-
-document.getElementById("laundry-plan").addEventListener("input", e=>{
-  const li=parseInt(e.target.dataset.li); if(isNaN(li)) return;
-  laundry[li].note=e.target.value; lsSave("wat_laundry_v1",laundry);
-});
-document.getElementById("laundry-plan").addEventListener("click", e=>{
-  const tog=e.target.closest("[data-ltoggle]"); if(tog){ const i=parseInt(tog.dataset.ltoggle); laundry[i].done=!laundry[i].done; lsSave("wat_laundry_v1",laundry); renderWardrobeTab(); return; }
-  const del=e.target.closest("[data-ldel]"); if(del){ laundry.splice(parseInt(del.dataset.ldel),1); lsSave("wat_laundry_v1",laundry); renderWardrobeTab(); }
+document.getElementById("laundry-plan").addEventListener("input",e=>{const li=parseInt(e.target.dataset.li);if(isNaN(li))return;laundry[li].note=e.target.value;lsSave("wat_laundry_v1",laundry)});
+document.getElementById("laundry-plan").addEventListener("click",e=>{
+  const tog=e.target.closest("[data-ltoggle]");if(tog){const i=parseInt(tog.dataset.ltoggle);laundry[i].done=!laundry[i].done;lsSave("wat_laundry_v1",laundry);renderWardrobeTab();return}
+  const del=e.target.closest("[data-ldel]");if(del){laundry.splice(parseInt(del.dataset.ldel),1);lsSave("wat_laundry_v1",laundry);renderWardrobeTab()}
 });
 document.getElementById("laundry-add-btn").addEventListener("click",()=>{
-  const d=document.getElementById("laundry-add-date").value;
-  const n=document.getElementById("laundry-add-note").value.trim();
-  if(!d) return;
-  laundry.push({id:nextId(laundry,"L"),date:d,note:n||"Laundry",done:false});
-  lsSave("wat_laundry_v1",laundry);
-  document.getElementById("laundry-add-date").value="";
-  document.getElementById("laundry-add-note").value="";
-  renderWardrobeTab();
+  const d=document.getElementById("laundry-add-date").value,n=document.getElementById("laundry-add-note").value.trim();
+  if(!d)return;laundry.push({id:nextId(laundry,"L"),date:d,note:n||"Laundry",done:false});lsSave("wat_laundry_v1",laundry);
+  document.getElementById("laundry-add-date").value="";document.getElementById("laundry-add-note").value="";renderWardrobeTab();
 });
 
-// ═══════════════════════════ TABS ════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+// SCHEDULE
+// ══════════════════════════════════════════════════════════════════
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
+function todayDow(){const d=new Date().getDay();return d===0?6:d-1} // 0=Mon
+
+function renderWeekGrid(){
+  const tod=todayDow();
+  document.getElementById("week-grid").innerHTML=DAYS.map((day,di)=>{
+    const blocks=weekBlocks.filter(b=>b.day===di).sort((a,b)=>a.time.localeCompare(b.time));
+    return`<div class="day-col${di===tod?" today":""}">
+      <div class="day-head${di===tod?" today-lbl":""}">${day}</div>
+      ${blocks.map(b=>{const i=weekBlocks.indexOf(b);return`<div class="day-block"><div>${esc(b.text)}</div><div class="db-time">${b.time||""}</div><span class="db-del" data-bdel="${i}">✕</span></div>`}).join("")}
+    </div>`}).join("");
+}
+
+function renderEvents(){
+  const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
+  const el=document.getElementById("events-list");
+  if(!sorted.length){el.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:8px 0">No upcoming events.</div>`;return}
+  el.innerHTML=sorted.map(ev=>{const i=events.indexOf(ev);return`<div class="sched-item">
+    <span class="sched-date">${ev.date}</span>
+    <input class="sched-text" value="${esc(ev.text)}" data-ei="${i}"/>
+    <button class="pill pill-sm pill-icon pill-del" data-edel="${i}">✕</button>
+  </div>`}).join("");
+}
+
+function schedTips(){
+  const tod=todayDow();
+  const todayBlocks=weekBlocks.filter(b=>b.day===tod).sort((a,b)=>a.time.localeCompare(b.time));
+  const t=[];
+  if(todayBlocks.length)t.push({icon:"📌",head:"Today",text:todayBlocks.map(b=>`${b.time} ${b.text}`).join(" · ")});
+  const next=events.filter(e=>e.date>=new Date().toISOString().slice(0,10)).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  if(next)t.push({icon:"🗓",head:"Next event",text:`${next.date} — ${next.text}`});
+  t.push({icon:"⏰",head:"ADHD tip",text:"Work in 90-min deep-work blocks. Set a timer. Stop when it ends."});
+  t.push({icon:"🔋",head:"Energy management",text:"Schedule hardest cognitive work for your peak hours; leave admin for low-energy slots."});
+  document.getElementById("sched-tips").innerHTML=t.map(x=>`<div class="sugg-item"><div class="sugg-icon">${x.icon}</div><div class="sugg-body"><div class="sugg-head">${x.head}</div><div class="sugg-text">${x.text}</div></div></div>`).join("");
+}
+
+function renderScheduleTab(){renderWeekGrid();renderEvents();schedTips()}
+
+document.getElementById("week-grid").addEventListener("click",e=>{
+  const bd=e.target.closest("[data-bdel]");if(bd){weekBlocks.splice(parseInt(bd.dataset.bdel),1);lsSave("wat_blocks_v1",weekBlocks);renderScheduleTab()}
+});
+document.getElementById("events-list").addEventListener("input",e=>{
+  const i=parseInt(e.target.dataset.ei);if(isNaN(i))return;events[i].text=e.target.value;lsSave("wat_events_v1",events);
+});
+document.getElementById("events-list").addEventListener("click",e=>{
+  const del=e.target.closest("[data-edel]");if(del){events.splice(parseInt(del.dataset.edel),1);lsSave("wat_events_v1",events);renderEvents()}
+});
+document.getElementById("block-add-btn").addEventListener("click",()=>{
+  const d=parseInt(document.getElementById("block-day").value);
+  const ti=document.getElementById("block-time").value.trim();
+  const tx=document.getElementById("block-text").value.trim();
+  if(!tx)return;weekBlocks.push({id:nextId(weekBlocks,"B"),day:d,time:ti,text:tx});lsSave("wat_blocks_v1",weekBlocks);
+  document.getElementById("block-time").value="";document.getElementById("block-text").value="";renderWeekGrid();
+});
+document.getElementById("evt-add-btn").addEventListener("click",()=>{
+  const d=document.getElementById("evt-date").value,t=document.getElementById("evt-text").value.trim();
+  if(!d||!t)return;events.push({id:nextId(events,"E"),date:d,text:t});lsSave("wat_events_v1",events);
+  document.getElementById("evt-date").value="";document.getElementById("evt-text").value="";renderEvents();
+});
+
+// ══════════════════════════════════════════════════════════════════
+// FINANCES
+// ══════════════════════════════════════════════════════════════════
+function finTotals(){
+  const inc=income.reduce((s,i)=>s+(parseFloat(i.amt)||0),0);
+  const exp=expenses.reduce((s,x)=>s+(parseFloat(x.amt)||0),0);
+  return{inc,exp,net:inc-exp};
+}
+
+function renderFinSummary(){
+  const {inc,exp,net}=finTotals();
+  document.getElementById("fin-income-n").textContent="€"+Math.round(inc);
+  document.getElementById("fin-expense-n").textContent="€"+Math.round(exp);
+  const nn=document.getElementById("fin-net-n");
+  nn.textContent=(net>=0?"€":"−€")+Math.round(Math.abs(net));
+  nn.className="fin-stat-n "+(net>=0?"fin-net-pos":"fin-net-neg");
+}
+
+function renderIncomeList(){
+  const el=document.getElementById("income-list");
+  if(!income.length){el.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:8px 0">No income sources yet.</div>`;return}
+  el.innerHTML=income.map((it,i)=>`<div class="fin-item">
+    <input class="fin-name" value="${esc(it.name)}" data-iidx="${i}" data-if="name" placeholder="Source…"/>
+    <span class="fin-cat fin-type-i">€/mo</span>
+    <input class="fin-amt" value="${it.amt||""}" type="number" data-iidx="${i}" data-if="amt" placeholder="0"/>
+    <button class="pill pill-sm pill-icon pill-del" data-idel="${i}">✕</button>
+  </div>`).join("");
+}
+
+function renderExpenseList(){
+  const el=document.getElementById("expense-list");
+  if(!expenses.length){el.innerHTML=`<div style="color:var(--muted);font-size:13px;padding:8px 0">No expenses yet.</div>`;return}
+  el.innerHTML=expenses.map((x,i)=>`<div class="fin-item">
+    <input class="fin-name" value="${esc(x.name)}" data-xidx="${i}" data-xf="name" placeholder="Expense…"/>
+    <span class="fin-cat fin-type-e">€/mo</span>
+    <input class="fin-amt" value="${x.amt||""}" type="number" data-xidx="${i}" data-xf="amt" placeholder="0"/>
+    <button class="pill pill-sm pill-icon pill-del" data-xdel="${i}">✕</button>
+  </div>`).join("");
+}
+
+function renderFinGoals(){
+  const el=document.getElementById("fin-goals-list");
+  if(!finGoals.length){el.innerHTML="";return}
+  el.innerHTML=finGoals.map((g,i)=>{
+    const pct=g.target>0?Math.min(100,Math.round((g.saved/g.target)*100)):0;
+    return`<div class="fin-goal">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:600">${esc(g.name)}</span>
+        <button class="pill pill-sm pill-icon pill-del" data-gdel="${i}">✕</button>
+      </div>
+      <div class="fin-goal-label">€${g.saved||0} / €${g.target||0}</div>
+      <div class="fin-goal-bar-wrap"><div class="fin-goal-bar" style="width:${pct}%"></div></div>
+      <div class="fin-goal-text">${pct}% — <input style="background:none;border:none;color:var(--muted);font:11px system-ui;outline:none;width:60px;text-align:right" type="number" value="${g.saved||0}" data-gidx="${i}" data-gf="saved" placeholder="saved"/> saved</div>
+    </div>`}).join("");
+}
+
+function finTips(){
+  const {inc,exp,net}=finTotals();
+  const t=[];
+  if(inc===0)t.push({icon:"💼",head:"No income recorded",text:"Add your income sources — even €0 placeholders help track the gap."});
+  if(net<0&&inc>0)t.push({icon:"🔴",head:"Spending more than earning",text:`Deficit of €${Math.round(Math.abs(net))}/mo — cut expenses or close a client fast.`});
+  if(net>=0&&inc>0)t.push({icon:"✅",head:`Net positive: €${Math.round(net)}/mo`,text:"Good. Put surplus toward savings goals."});
+  t.push({icon:"🎯",head:"Client goal",text:"One coaching client at €200/mo covers groceries. Two = rent. Focus on Colosseum as the pitch."});
+  t.push({icon:"📊",head:"Runway tip",text:"Know your monthly burn rate so you know how long you can operate before income is critical."});
+  document.getElementById("fin-tips").innerHTML=t.slice(0,4).map(x=>`<div class="sugg-item"><div class="sugg-icon">${x.icon}</div><div class="sugg-body"><div class="sugg-head">${x.head}</div><div class="sugg-text">${x.text}</div></div></div>`).join("");
+}
+
+function renderFinancesTab(){renderFinSummary();renderIncomeList();renderExpenseList();renderFinGoals();finTips()}
+
+document.getElementById("income-list").addEventListener("input",e=>{
+  const i=parseInt(e.target.dataset.iidx),f=e.target.dataset.if;if(isNaN(i)||!f)return;
+  income[i][f]=f==="amt"?parseFloat(e.target.value)||0:e.target.value;lsSave("wat_income_v1",income);requestAnimationFrame(()=>{renderFinSummary();finTips()});
+});
+document.getElementById("income-list").addEventListener("click",e=>{
+  const del=e.target.closest("[data-idel]");if(del){income.splice(parseInt(del.dataset.idel),1);lsSave("wat_income_v1",income);renderFinancesTab()}
+});
+document.getElementById("expense-list").addEventListener("input",e=>{
+  const i=parseInt(e.target.dataset.xidx),f=e.target.dataset.xf;if(isNaN(i)||!f)return;
+  expenses[i][f]=f==="amt"?parseFloat(e.target.value)||0:e.target.value;lsSave("wat_expenses_v1",expenses);requestAnimationFrame(()=>{renderFinSummary();finTips()});
+});
+document.getElementById("expense-list").addEventListener("click",e=>{
+  const del=e.target.closest("[data-xdel]");if(del){expenses.splice(parseInt(del.dataset.xdel),1);lsSave("wat_expenses_v1",expenses);renderFinancesTab()}
+});
+document.getElementById("fin-goals-list").addEventListener("input",e=>{
+  const i=parseInt(e.target.dataset.gidx),f=e.target.dataset.gf;if(isNaN(i)||!f)return;
+  finGoals[i][f]=parseFloat(e.target.value)||0;lsSave("wat_fingoals_v1",finGoals);requestAnimationFrame(renderFinGoals);
+});
+document.getElementById("fin-goals-list").addEventListener("click",e=>{
+  const del=e.target.closest("[data-gdel]");if(del){finGoals.splice(parseInt(del.dataset.gdel),1);lsSave("wat_fingoals_v1",finGoals);renderFinancesTab()}
+});
+document.getElementById("inc-add-btn").addEventListener("click",()=>{
+  const n=document.getElementById("inc-add-name").value.trim(),a=parseFloat(document.getElementById("inc-add-amt").value)||0;
+  if(!n)return;income.push({id:nextId(income,"I"),name:n,amt:a});lsSave("wat_income_v1",income);
+  document.getElementById("inc-add-name").value="";document.getElementById("inc-add-amt").value="";renderFinancesTab();
+});
+document.getElementById("exp-add-btn").addEventListener("click",()=>{
+  const n=document.getElementById("exp-add-name").value.trim(),a=parseFloat(document.getElementById("exp-add-amt").value)||0;
+  if(!n)return;expenses.push({id:nextId(expenses,"X"),name:n,amt:a});lsSave("wat_expenses_v1",expenses);
+  document.getElementById("exp-add-name").value="";document.getElementById("exp-add-amt").value="";renderFinancesTab();
+});
+document.getElementById("fg-add-btn").addEventListener("click",()=>{
+  const n=document.getElementById("fg-add-name").value.trim();
+  const t=parseFloat(document.getElementById("fg-add-target").value)||0;
+  const s=parseFloat(document.getElementById("fg-add-saved").value)||0;
+  if(!n)return;finGoals.push({id:nextId(finGoals,"G"),name:n,target:t,saved:s});lsSave("wat_fingoals_v1",finGoals);
+  document.getElementById("fg-add-name").value="";document.getElementById("fg-add-target").value="";document.getElementById("fg-add-saved").value="";renderFinancesTab();
+});
+
+// ══════════════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════════════
 document.querySelectorAll(".tab").forEach(tab=>{
   tab.addEventListener("click",()=>{
     document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
@@ -724,12 +1023,15 @@ document.querySelectorAll(".tab").forEach(tab=>{
   });
 });
 
-// ═══════════════════════════ INIT ════════════════════════════════════════════
-
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
 renderTasksTab();
 renderVersions();
 renderDietTab();
 renderWardrobeTab();
+renderScheduleTab();
+renderFinancesTab();
 </script>
 </body>
 </html>
