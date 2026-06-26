@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v9</title>
+<title>Adomas · v10</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -236,6 +236,7 @@
   .ver-title{flex:1}
   .ver-sp{color:var(--muted);font-size:11px}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -243,8 +244,9 @@
   <span class="nav-name">Adomas</span>
   <div class="nav-right">
     <span class="nav-status">● Open to clients</span>
+    <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v9</span>
+    <span class="nav-ver">v10</span>
   </div>
 </nav>
 
@@ -548,6 +550,8 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:10, title:"Supabase cloud sync", sp:5,
+   note:"Offline-first: localStorage loads instantly, Supabase syncs in background. Dot in nav = green synced / amber syncing / red offline. All 9 data types persisted. Seeds DB from localStorage on first run."},
   {v:9, title:"Task grouping, sort, filter", sp:3,
    note:"Group tasks by project (collapsible), filter by status (All/Active/Paused/Blocked/Done), sort by Priority/Status/Added. All view prefs persisted."},
   {v:8, title:"White theme + SVG icons", sp:4,
@@ -567,6 +571,71 @@ const VERSIONS = [
 // ══════════════════════════════════════════════════════════════════
 function ls(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}}
 function lsSave(k,v){localStorage.setItem(k,JSON.stringify(v))}
+
+// ── SUPABASE ───────────────────────────────────────────────────────
+const SUPA_URL="https://nbjgwqytwkkuarxlkmnj.supabase.co";
+const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iamd3cXl0d2trdWFyeGxrbW5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjgxMDMsImV4cCI6MjA5Njc0NDEwM30.ipByiSzhYQWd12LjwD1twavR1YkoU0vEGaxjpJMH5ko";
+const DB_USER="adomas"; // single-user personal assistant
+let db=null;
+
+function setSyncStatus(s){
+  const d=document.getElementById("sync-dot");if(!d)return;
+  d.style.background=s==="synced"?"var(--green)":s==="syncing"?"var(--accent)":"var(--red)";
+  d.title=s==="synced"?"Supabase: synced":s==="syncing"?"Supabase: syncing…":"Supabase: offline/error";
+}
+
+async function dbPush(table,rows){
+  if(!db)return;
+  try{
+    const payload=rows.map(r=>({...r,user_id:DB_USER}));
+    const{error}=await db.from(table).upsert(payload,{onConflict:"user_id,id"});
+    if(error)throw error;
+    setSyncStatus("synced");
+  }catch(e){setSyncStatus("error");console.warn("Supabase push failed:",e.message)}
+}
+
+async function dbLoad(table){
+  const{data,error}=await db.from(table).select("*").eq("user_id",DB_USER);
+  if(error)throw error;
+  return(data||[]).map(({user_id,...rest})=>rest);
+}
+
+// Save wrappers: localStorage (instant) + Supabase (async background)
+function saveTasks()   {saveTasks();   dbPush("wat_tasks",tasks)}
+function saveFoods()   {saveFoods();   dbPush("wat_foods",foods)}
+function saveClothes() {saveClothes();dbPush("wat_clothes",clothes)}
+function saveLaundry() {saveLaundry();dbPush("wat_laundry",laundry)}
+function saveBlocks()  {saveBlocks();dbPush("wat_blocks",weekBlocks)}
+function saveEvents()  {saveEvents(); dbPush("wat_events",events)}
+function saveIncome()  {saveIncome(); dbPush("wat_income",income)}
+function saveExpenses(){saveExpenses();dbPush("wat_expenses",expenses)}
+function saveFinGoals(){saveFinGoals();dbPush("wat_fingoals",finGoals)}
+
+async function initSupabase(){
+  setSyncStatus("syncing");
+  try{
+    db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+    // Load all tables in parallel; DB wins over localStorage if it has data
+    const [t,f,c,l,b,e,inc,exp,fg]=await Promise.all([
+      dbLoad("wat_tasks"),dbLoad("wat_foods"),dbLoad("wat_clothes"),
+      dbLoad("wat_laundry"),dbLoad("wat_blocks"),dbLoad("wat_events"),
+      dbLoad("wat_income"),dbLoad("wat_expenses"),dbLoad("wat_fingoals")
+    ]);
+    // If DB has rows, use them; otherwise seed DB from localStorage defaults
+    if(t.length){tasks=t;      saveTasks()}      else dbPush("wat_tasks",tasks);
+    if(f.length){foods=f;      saveFoods()}      else dbPush("wat_foods",foods);
+    if(c.length){clothes=c;    saveClothes()}  else dbPush("wat_clothes",clothes);
+    if(l.length){laundry=l;    saveLaundry()} else dbPush("wat_laundry",laundry);
+    if(b.length){weekBlocks=b; saveBlocks()}else dbPush("wat_blocks",weekBlocks);
+    if(e.length){events=e;     saveEvents()}    else dbPush("wat_events",events);
+    if(inc.length){income=inc; saveIncome()}    else dbPush("wat_income",income);
+    if(exp.length){expenses=exp;saveExpenses()}else dbPush("wat_expenses",expenses);
+    if(fg.length){finGoals=fg; saveFinGoals()}else dbPush("wat_fingoals",finGoals);
+    // Re-render everything with cloud data
+    renderTasksTab();renderDietTab();renderWardrobeTab();renderScheduleTab();renderFinancesTab();
+    setSyncStatus("synced");
+  }catch(e){setSyncStatus("error");console.warn("Supabase init failed:",e.message)}
+}
 
 let tasks      = ls("wat_tasks_v2",   DEFAULT_TASKS.map(t=>({...t})));
 let foods      = ls("wat_foods_v1",   DEFAULT_FOODS.map(f=>({...f})));
@@ -758,7 +827,7 @@ document.getElementById("task-controls").addEventListener("click",e=>{
 document.getElementById("task-list").addEventListener("input",e=>{
   const f=e.target.dataset.field,i=parseInt(e.target.dataset.i);
   if(!f||isNaN(i))return;
-  tasks[i][f]=e.target.value;lsSave("wat_tasks_v2",tasks);
+  tasks[i][f]=e.target.value;saveTasks();
   requestAnimationFrame(()=>{renderFocus();renderSuggestions()});
 });
 document.getElementById("task-list").addEventListener("click",e=>{
@@ -766,11 +835,11 @@ document.getElementById("task-list").addEventListener("click",e=>{
   const tog=e.target.closest("[data-toggle-proj]");
   if(tog){const p=tog.dataset.toggleProj;collapsedProjs.has(p)?collapsedProjs.delete(p):collapsedProjs.add(p);lsSave("wat_task_collapsed",[...collapsedProjs]);renderTasks();return}
   const cb=e.target.closest("[data-cycle]");
-  if(cb){const f=cb.dataset.cycle,i=parseInt(cb.dataset.i);tasks[i][f]=cycle(f==="status"?STC:PRC,tasks[i][f]);lsSave("wat_tasks_v2",tasks);renderTasksTab();return}
+  if(cb){const f=cb.dataset.cycle,i=parseInt(cb.dataset.i);tasks[i][f]=cycle(f==="status"?STC:PRC,tasks[i][f]);saveTasks();renderTasksTab();return}
   const db=e.target.closest("[data-del]");
-  if(db){tasks.splice(parseInt(db.dataset.del),1);lsSave("wat_tasks_v2",tasks);renderTasksTab()}
+  if(db){tasks.splice(parseInt(db.dataset.del),1);saveTasks();renderTasksTab()}
 });
-function addTask(){const inp=document.getElementById("add-input"),t=inp.value.trim();if(!t)return;tasks.push({id:nextId(tasks,"T"),title:t,detail:"",proj:"",status:"active",priority:"med"});lsSave("wat_tasks_v2",tasks);inp.value="";renderTasksTab()}
+function addTask(){const inp=document.getElementById("add-input"),t=inp.value.trim();if(!t)return;tasks.push({id:nextId(tasks,"T"),title:t,detail:"",proj:"",status:"active",priority:"med"});saveTasks();inp.value="";renderTasksTab()}
 document.getElementById("add-btn").addEventListener("click",addTask);
 document.getElementById("add-input").addEventListener("keydown",e=>{if(e.key==="Enter")addTask()});
 
@@ -835,17 +904,17 @@ document.getElementById("food-filter").addEventListener("click",e=>{
 });
 document.getElementById("food-list").addEventListener("input",e=>{
   const fi=parseInt(e.target.dataset.fi),ff=e.target.dataset.ff;if(isNaN(fi)||!ff)return;
-  foods[fi][ff]=e.target.value;lsSave("wat_foods_v1",foods);requestAnimationFrame(renderShopList);
+  foods[fi][ff]=e.target.value;saveFoods();requestAnimationFrame(renderShopList);
 });
 document.getElementById("food-list").addEventListener("click",e=>{
-  const inc=e.target.closest("[data-finc]");if(inc){const i=parseInt(inc.dataset.finc);foods[i].qty++;lsSave("wat_foods_v1",foods);renderDietTab();return}
-  const dec=e.target.closest("[data-fdec]");if(dec){const i=parseInt(dec.dataset.fdec);if(foods[i].qty>0)foods[i].qty--;lsSave("wat_foods_v1",foods);renderDietTab();return}
-  const del=e.target.closest("[data-fdel]");if(del){foods.splice(parseInt(del.dataset.fdel),1);lsSave("wat_foods_v1",foods);renderDietTab();return}
-  const wc=e.target.closest("[data-who-cycle]");if(wc){const i=parseInt(wc.getAttribute("data-who-cycle")),W=["both","me","gf"];foods[i].who=W[(W.indexOf(foods[i].who)+1)%W.length];lsSave("wat_foods_v1",foods);renderDietTab()}
+  const inc=e.target.closest("[data-finc]");if(inc){const i=parseInt(inc.dataset.finc);foods[i].qty++;saveFoods();renderDietTab();return}
+  const dec=e.target.closest("[data-fdec]");if(dec){const i=parseInt(dec.dataset.fdec);if(foods[i].qty>0)foods[i].qty--;saveFoods();renderDietTab();return}
+  const del=e.target.closest("[data-fdel]");if(del){foods.splice(parseInt(del.dataset.fdel),1);saveFoods();renderDietTab();return}
+  const wc=e.target.closest("[data-who-cycle]");if(wc){const i=parseInt(wc.getAttribute("data-who-cycle")),W=["both","me","gf"];foods[i].who=W[(W.indexOf(foods[i].who)+1)%W.length];saveFoods();renderDietTab()}
 });
 document.getElementById("food-add-btn").addEventListener("click",()=>{
   const n=document.getElementById("food-add-name").value.trim(),u=document.getElementById("food-add-unit").value.trim()||"pcs";
-  if(!n)return;foods.push({id:nextId(foods,"F"),name:n,qty:1,unit:u,who:"both",threshold:1});lsSave("wat_foods_v1",foods);
+  if(!n)return;foods.push({id:nextId(foods,"F"),name:n,qty:1,unit:u,who:"both",threshold:1});saveFoods();
   document.getElementById("food-add-name").value="";document.getElementById("food-add-unit").value="";renderDietTab();
 });
 
@@ -904,28 +973,28 @@ function renderWardrobeTab(){wardSummary();renderClothes();renderLaundryPlan();w
 
 document.getElementById("cloth-list").addEventListener("input",e=>{
   const ci=parseInt(e.target.dataset.ci),cf=e.target.dataset.cf;if(isNaN(ci)||!cf)return;
-  clothes[ci][cf]=e.target.value;lsSave("wat_clothes_v1",clothes);
+  clothes[ci][cf]=e.target.value;saveClothes();
 });
 document.getElementById("cloth-list").addEventListener("click",e=>{
-  const use=e.target.closest("[data-cuse]");if(use){const i=parseInt(use.dataset.cuse);if(clothes[i].clean>0){clothes[i].clean--;clothes[i].worn++}lsSave("wat_clothes_v1",clothes);renderWardrobeTab();return}
-  const wash=e.target.closest("[data-cwash]");if(wash){const i=parseInt(wash.dataset.cwash);if(clothes[i].worn>0){clothes[i].worn--;clothes[i].laundry++}lsSave("wat_clothes_v1",clothes);renderWardrobeTab();return}
-  const done=e.target.closest("[data-cdone]");if(done){const i=parseInt(done.dataset.cdone);if(clothes[i].laundry>0){clothes[i].laundry--;clothes[i].clean++}lsSave("wat_clothes_v1",clothes);renderWardrobeTab();return}
-  const add=e.target.closest("[data-cadd]");if(add){const i=parseInt(add.dataset.cadd);clothes[i].clean++;lsSave("wat_clothes_v1",clothes);renderWardrobeTab();return}
-  const del=e.target.closest("[data-cdel]");if(del){clothes.splice(parseInt(del.dataset.cdel),1);lsSave("wat_clothes_v1",clothes);renderWardrobeTab()}
+  const use=e.target.closest("[data-cuse]");if(use){const i=parseInt(use.dataset.cuse);if(clothes[i].clean>0){clothes[i].clean--;clothes[i].worn++}saveClothes();renderWardrobeTab();return}
+  const wash=e.target.closest("[data-cwash]");if(wash){const i=parseInt(wash.dataset.cwash);if(clothes[i].worn>0){clothes[i].worn--;clothes[i].laundry++}saveClothes();renderWardrobeTab();return}
+  const done=e.target.closest("[data-cdone]");if(done){const i=parseInt(done.dataset.cdone);if(clothes[i].laundry>0){clothes[i].laundry--;clothes[i].clean++}saveClothes();renderWardrobeTab();return}
+  const add=e.target.closest("[data-cadd]");if(add){const i=parseInt(add.dataset.cadd);clothes[i].clean++;saveClothes();renderWardrobeTab();return}
+  const del=e.target.closest("[data-cdel]");if(del){clothes.splice(parseInt(del.dataset.cdel),1);saveClothes();renderWardrobeTab()}
 });
 document.getElementById("cloth-add-btn").addEventListener("click",()=>{
   const n=document.getElementById("cloth-add-name").value.trim(),c=document.getElementById("cloth-add-cat").value.trim()||"misc";
-  if(!n)return;clothes.push({id:nextId(clothes,"C"),name:n,cat:c,clean:1,worn:0,laundry:0});lsSave("wat_clothes_v1",clothes);
+  if(!n)return;clothes.push({id:nextId(clothes,"C"),name:n,cat:c,clean:1,worn:0,laundry:0});saveClothes();
   document.getElementById("cloth-add-name").value="";document.getElementById("cloth-add-cat").value="";renderWardrobeTab();
 });
-document.getElementById("laundry-plan").addEventListener("input",e=>{const li=parseInt(e.target.dataset.li);if(isNaN(li))return;laundry[li].note=e.target.value;lsSave("wat_laundry_v1",laundry)});
+document.getElementById("laundry-plan").addEventListener("input",e=>{const li=parseInt(e.target.dataset.li);if(isNaN(li))return;laundry[li].note=e.target.value;saveLaundry()});
 document.getElementById("laundry-plan").addEventListener("click",e=>{
-  const tog=e.target.closest("[data-ltoggle]");if(tog){const i=parseInt(tog.dataset.ltoggle);laundry[i].done=!laundry[i].done;lsSave("wat_laundry_v1",laundry);renderWardrobeTab();return}
-  const del=e.target.closest("[data-ldel]");if(del){laundry.splice(parseInt(del.dataset.ldel),1);lsSave("wat_laundry_v1",laundry);renderWardrobeTab()}
+  const tog=e.target.closest("[data-ltoggle]");if(tog){const i=parseInt(tog.dataset.ltoggle);laundry[i].done=!laundry[i].done;saveLaundry();renderWardrobeTab();return}
+  const del=e.target.closest("[data-ldel]");if(del){laundry.splice(parseInt(del.dataset.ldel),1);saveLaundry();renderWardrobeTab()}
 });
 document.getElementById("laundry-add-btn").addEventListener("click",()=>{
   const d=document.getElementById("laundry-add-date").value,n=document.getElementById("laundry-add-note").value.trim();
-  if(!d)return;laundry.push({id:nextId(laundry,"L"),date:d,note:n||"Laundry",done:false});lsSave("wat_laundry_v1",laundry);
+  if(!d)return;laundry.push({id:nextId(laundry,"L"),date:d,note:n||"Laundry",done:false});saveLaundry();
   document.getElementById("laundry-add-date").value="";document.getElementById("laundry-add-note").value="";renderWardrobeTab();
 });
 
@@ -972,24 +1041,24 @@ function schedTips(){
 function renderScheduleTab(){renderWeekGrid();renderEvents();schedTips()}
 
 document.getElementById("week-grid").addEventListener("click",e=>{
-  const bd=e.target.closest("[data-bdel]");if(bd){weekBlocks.splice(parseInt(bd.dataset.bdel),1);lsSave("wat_blocks_v1",weekBlocks);renderScheduleTab()}
+  const bd=e.target.closest("[data-bdel]");if(bd){weekBlocks.splice(parseInt(bd.dataset.bdel),1);saveBlocks();renderScheduleTab()}
 });
 document.getElementById("events-list").addEventListener("input",e=>{
-  const i=parseInt(e.target.dataset.ei);if(isNaN(i))return;events[i].text=e.target.value;lsSave("wat_events_v1",events);
+  const i=parseInt(e.target.dataset.ei);if(isNaN(i))return;events[i].text=e.target.value;saveEvents();
 });
 document.getElementById("events-list").addEventListener("click",e=>{
-  const del=e.target.closest("[data-edel]");if(del){events.splice(parseInt(del.dataset.edel),1);lsSave("wat_events_v1",events);renderEvents()}
+  const del=e.target.closest("[data-edel]");if(del){events.splice(parseInt(del.dataset.edel),1);saveEvents();renderEvents()}
 });
 document.getElementById("block-add-btn").addEventListener("click",()=>{
   const d=parseInt(document.getElementById("block-day").value);
   const ti=document.getElementById("block-time").value.trim();
   const tx=document.getElementById("block-text").value.trim();
-  if(!tx)return;weekBlocks.push({id:nextId(weekBlocks,"B"),day:d,time:ti,text:tx});lsSave("wat_blocks_v1",weekBlocks);
+  if(!tx)return;weekBlocks.push({id:nextId(weekBlocks,"B"),day:d,time:ti,text:tx});saveBlocks();
   document.getElementById("block-time").value="";document.getElementById("block-text").value="";renderWeekGrid();
 });
 document.getElementById("evt-add-btn").addEventListener("click",()=>{
   const d=document.getElementById("evt-date").value,t=document.getElementById("evt-text").value.trim();
-  if(!d||!t)return;events.push({id:nextId(events,"E"),date:d,text:t});lsSave("wat_events_v1",events);
+  if(!d||!t)return;events.push({id:nextId(events,"E"),date:d,text:t});saveEvents();
   document.getElementById("evt-date").value="";document.getElementById("evt-text").value="";renderEvents();
 });
 
@@ -1064,40 +1133,40 @@ function renderFinancesTab(){renderFinSummary();renderIncomeList();renderExpense
 
 document.getElementById("income-list").addEventListener("input",e=>{
   const i=parseInt(e.target.dataset.iidx),f=e.target.dataset.if;if(isNaN(i)||!f)return;
-  income[i][f]=f==="amt"?parseFloat(e.target.value)||0:e.target.value;lsSave("wat_income_v1",income);requestAnimationFrame(()=>{renderFinSummary();finTips()});
+  income[i][f]=f==="amt"?parseFloat(e.target.value)||0:e.target.value;saveIncome();requestAnimationFrame(()=>{renderFinSummary();finTips()});
 });
 document.getElementById("income-list").addEventListener("click",e=>{
-  const del=e.target.closest("[data-idel]");if(del){income.splice(parseInt(del.dataset.idel),1);lsSave("wat_income_v1",income);renderFinancesTab()}
+  const del=e.target.closest("[data-idel]");if(del){income.splice(parseInt(del.dataset.idel),1);saveIncome();renderFinancesTab()}
 });
 document.getElementById("expense-list").addEventListener("input",e=>{
   const i=parseInt(e.target.dataset.xidx),f=e.target.dataset.xf;if(isNaN(i)||!f)return;
-  expenses[i][f]=f==="amt"?parseFloat(e.target.value)||0:e.target.value;lsSave("wat_expenses_v1",expenses);requestAnimationFrame(()=>{renderFinSummary();finTips()});
+  expenses[i][f]=f==="amt"?parseFloat(e.target.value)||0:e.target.value;saveExpenses();requestAnimationFrame(()=>{renderFinSummary();finTips()});
 });
 document.getElementById("expense-list").addEventListener("click",e=>{
-  const del=e.target.closest("[data-xdel]");if(del){expenses.splice(parseInt(del.dataset.xdel),1);lsSave("wat_expenses_v1",expenses);renderFinancesTab()}
+  const del=e.target.closest("[data-xdel]");if(del){expenses.splice(parseInt(del.dataset.xdel),1);saveExpenses();renderFinancesTab()}
 });
 document.getElementById("fin-goals-list").addEventListener("input",e=>{
   const i=parseInt(e.target.dataset.gidx),f=e.target.dataset.gf;if(isNaN(i)||!f)return;
-  finGoals[i][f]=parseFloat(e.target.value)||0;lsSave("wat_fingoals_v1",finGoals);requestAnimationFrame(renderFinGoals);
+  finGoals[i][f]=parseFloat(e.target.value)||0;saveFinGoals();requestAnimationFrame(renderFinGoals);
 });
 document.getElementById("fin-goals-list").addEventListener("click",e=>{
-  const del=e.target.closest("[data-gdel]");if(del){finGoals.splice(parseInt(del.dataset.gdel),1);lsSave("wat_fingoals_v1",finGoals);renderFinancesTab()}
+  const del=e.target.closest("[data-gdel]");if(del){finGoals.splice(parseInt(del.dataset.gdel),1);saveFinGoals();renderFinancesTab()}
 });
 document.getElementById("inc-add-btn").addEventListener("click",()=>{
   const n=document.getElementById("inc-add-name").value.trim(),a=parseFloat(document.getElementById("inc-add-amt").value)||0;
-  if(!n)return;income.push({id:nextId(income,"I"),name:n,amt:a});lsSave("wat_income_v1",income);
+  if(!n)return;income.push({id:nextId(income,"I"),name:n,amt:a});saveIncome();
   document.getElementById("inc-add-name").value="";document.getElementById("inc-add-amt").value="";renderFinancesTab();
 });
 document.getElementById("exp-add-btn").addEventListener("click",()=>{
   const n=document.getElementById("exp-add-name").value.trim(),a=parseFloat(document.getElementById("exp-add-amt").value)||0;
-  if(!n)return;expenses.push({id:nextId(expenses,"X"),name:n,amt:a});lsSave("wat_expenses_v1",expenses);
+  if(!n)return;expenses.push({id:nextId(expenses,"X"),name:n,amt:a});saveExpenses();
   document.getElementById("exp-add-name").value="";document.getElementById("exp-add-amt").value="";renderFinancesTab();
 });
 document.getElementById("fg-add-btn").addEventListener("click",()=>{
   const n=document.getElementById("fg-add-name").value.trim();
   const t=parseFloat(document.getElementById("fg-add-target").value)||0;
   const s=parseFloat(document.getElementById("fg-add-saved").value)||0;
-  if(!n)return;finGoals.push({id:nextId(finGoals,"G"),name:n,target:t,saved:s});lsSave("wat_fingoals_v1",finGoals);
+  if(!n)return;finGoals.push({id:nextId(finGoals,"G"),name:n,target:t,saved:s});saveFinGoals();
   document.getElementById("fg-add-name").value="";document.getElementById("fg-add-target").value="";document.getElementById("fg-add-saved").value="";renderFinancesTab();
 });
 
@@ -1122,6 +1191,8 @@ renderDietTab();
 renderWardrobeTab();
 renderScheduleTab();
 renderFinancesTab();
+// Connect to Supabase after local render (offline-first: local shows first)
+initSupabase();
 </script>
 </body>
 </html>
