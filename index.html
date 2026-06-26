@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v26</title>
+<title>Adomas · v27</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -290,7 +290,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v26</span>
+    <span class="nav-ver">v27</span>
   </div>
 </nav>
 
@@ -641,7 +641,7 @@
 <!-- Version history FAB + popup: MUST be before the init script so it can wire them (PB-1) -->
 <div id="ver-overlay"></div>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v26</button>
+<button id="ver-fab">📋 v27</button>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -742,6 +742,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:27, title:"YT fetch: 3-proxy fallback chain", sp:1, note:"corsproxy.io returned 429 (rate-limited). Now tries corsproxy.io → allorigins.win/raw → thingproxy.freeboard.io in sequence; skips to next on 429/5xx/timeout. First proxy to respond 200 wins."},
   {v:26, title:"Fix YT transcript: page-scrape approach", sp:2, note:"Old approach guessed lang codes → empty JSON → parse error. New: fetch video page via proxy, extract all real captionTrack baseUrls YouTube embeds in HTML, pick best English track, fetch it. Handles JSON3 and XML formats. Falls back clearly on failure."},
   {v:25, title:"YouTube transcript auto-fetch", sp:3, note:"Language → Import now has a YouTube URL/ID field. Fetches captions via corsproxy.io → YouTube's timedtext JSON3 API. Tries lang=en then a.en (auto-generated). On success dumps lines into the paste area for review before splitting. Falls back gracefully to manual paste on CORS/proxy failure."},
   {v:24, title:"Add Ningyo no Kuni task", sp:0.5, note:"T21 Read Ningyo no Kuni by Tsutomu Nihei added to Reading project."},
@@ -1913,12 +1914,33 @@ function ytSetStatus(msg,color){
   el.textContent=msg;
 }
 
-function ytProxy(url){return`https://corsproxy.io/?url=${encodeURIComponent(url)}`;}
+// Proxy fallback chain — tries each in order, skips on 429/5xx/timeout
+const YT_PROXIES=[
+  url=>`https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url=>`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url=>`https://thingproxy.freeboard.io/fetch/${url}`,
+];
+async function ytProxy(url,timeout=15000){
+  let lastErr="all proxies failed";
+  for(const make of YT_PROXIES){
+    try{
+      const r=await fetch(make(url),{signal:AbortSignal.timeout(timeout)});
+      if(r.ok)return r;
+      lastErr="HTTP "+r.status;
+      if(r.status===429||r.status>=500)continue;
+      throw new Error(lastErr);
+    }catch(e){
+      lastErr=e.message;
+      if(e.name==="AbortError"||e.message.includes("429")||e.message.includes("NetworkError")||e.message.includes("Failed to fetch"))continue;
+      throw e;
+    }
+  }
+  throw new Error(lastErr);
+}
 
 async function ytGetCaptionUrls(videoId){
   // Fetch the video page — YouTube embeds all caption track URLs in the HTML
-  const r=await fetch(ytProxy(`https://www.youtube.com/watch?v=${videoId}`),{signal:AbortSignal.timeout(15000)});
-  if(!r.ok)throw new Error("page HTTP "+r.status);
+  const r=await ytProxy(`https://www.youtube.com/watch?v=${videoId}`);
   const html=await r.text();
   if(!html.includes("captionTracks"))throw new Error("no captions on this video");
   // Extract all timedtext baseUrl values (JSON-encoded in the page)
@@ -1933,8 +1955,7 @@ async function ytGetCaptionUrls(videoId){
 }
 
 async function ytFetchCaption(url){
-  const r=await fetch(ytProxy(url+"&fmt=json3"),{signal:AbortSignal.timeout(10000)});
-  if(!r.ok)throw new Error("caption HTTP "+r.status);
+  const r=await ytProxy(url+"&fmt=json3",10000);
   const text=await r.text();
   if(!text.trim())throw new Error("empty caption response");
   if(text.trim().startsWith("{")){return ytParseJson3(JSON.parse(text));}
@@ -1947,7 +1968,7 @@ document.getElementById("yt-fetch-btn").addEventListener("click",async()=>{
   if(!videoId){ytSetStatus("⚠ Couldn't find a video ID in that URL","var(--orange)");return;}
   const btn=document.getElementById("yt-fetch-btn");
   btn.textContent="Fetching…";btn.disabled=true;
-  ytSetStatus("Loading video page to find captions…");
+  ytSetStatus("Loading video page (trying proxies)…");
   try{
     const urls=await ytGetCaptionUrls(videoId);
     // Prefer English manual, then English auto, then anything
