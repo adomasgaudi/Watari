@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v27</title>
+<title>Adomas · v28</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -290,7 +290,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v27</span>
+    <span class="nav-ver">v28</span>
   </div>
 </nav>
 
@@ -641,7 +641,7 @@
 <!-- Version history FAB + popup: MUST be before the init script so it can wire them (PB-1) -->
 <div id="ver-overlay"></div>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v27</button>
+<button id="ver-fab">📋 v28</button>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -742,6 +742,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:28, title:"Seed 'Beyond the Basics · Claude Code' deck", sp:3, note:"Language tab ships a 19-card deck distilled from the agentic-engineering talk + the worktrees setup slide: Access/Memory/Tooling levers, in-context learning vs fine-tuning, the Bitter Lesson, Post-Tool-Use hooks, subagents, and the ~16-worktree no-cherry-picking setup. Seeded once into wat_lang_v1 (SC1–SC19); user cards untouched, deletions stick."},
   {v:27, title:"YT fetch: 3-proxy fallback chain", sp:1, note:"corsproxy.io returned 429 (rate-limited). Now tries corsproxy.io → allorigins.win/raw → thingproxy.freeboard.io in sequence; skips to next on 429/5xx/timeout. First proxy to respond 200 wins."},
   {v:26, title:"Fix YT transcript: page-scrape approach", sp:2, note:"Old approach guessed lang codes → empty JSON → parse error. New: fetch video page via proxy, extract all real captionTrack baseUrls YouTube embeds in HTML, pick best English track, fetch it. Handles JSON3 and XML formats. Falls back clearly on failure."},
   {v:25, title:"YouTube transcript auto-fetch", sp:3, note:"Language → Import now has a YouTube URL/ID field. Fetches captions via corsproxy.io → YouTube's timedtext JSON3 API. Tries lang=en then a.en (auto-generated). On success dumps lines into the paste area for review before splitting. Falls back gracefully to manual paste on CORS/proxy failure."},
@@ -1623,9 +1624,44 @@ document.getElementById("fg-add-btn").addEventListener("click",()=>{
 // ══════════════════════════════════════════════════════════════════
 const LANG_KEY = "wat_lang_v1";
 
+// Shipped deck: "Beyond the Basics with Claude Code" — distilled from the
+// agentic-engineering talk + the "My actual setup" worktrees slide. Seeded once
+// (see langLoad); deleting a seed card sticks, and your own cards are untouched.
+const LANG_SEED = [
+  {id:"SC1", front:'What is "agentic engineering"?', back:"Engineering the system around the agent — not just coding with it", note:"Set up access, memory & tooling so agents handle complex work. Agentic engineering ≠ agentic coding."},
+  {id:"SC2", front:"The three levers for customising an agent", back:"Access · Memory · Tooling", note:"The three categories where customising an agent pays off most."},
+  {id:"SC3", front:"Your job as an engineer with agents", back:"Make many clones of yourself — parallelise across agents", note:"Scale your abilities to many agents instead of doing one task at a time."},
+  {id:"SC4", front:"The one takeaway about Access", back:"If Claude can't access something, it can't do its job", note:"Give it access to everything you can reach — not just code: Slack, email, CI/CD, dashboards."},
+  {id:"SC5", front:"Why feed Slack threads & emails to Claude?", back:"They hold the 'why' that lives only in people's heads", note:"e.g. why a strategy won't work — context the model can't otherwise know."},
+  {id:"SC6", front:"Why wire agents into CI/CD?", back:"CI is always critical — never merge on red", note:"Agents are good at reading CI and fixing failures fast."},
+  {id:"SC7", front:"Why give agents dashboards / observability?", back:"So they can diagnose production issues", note:"When something breaks in prod, the agent needs the same info you'd look at."},
+  {id:"SC8", front:"Why not fine-tune a model for your codebase?", back:"Fine-tuning a frontier model isn't cost-efficient", note:"Even big companies rarely do it for something small; steer with in-context learning instead."},
+  {id:"SC9", front:"What is in-context learning (ICL)?", back:"Steering the model with context instead of retraining weights", note:"Your main lever now that fine-tuning a frontier model is impractical."},
+  {id:"SC10", front:"What does the Bitter Lesson imply here?", back:"General methods that scale beat hand-specialised ones", note:"Bet on steering the general model with context, not building narrow specialised models."},
+  {id:"SC11", front:"Main knobs for in-context learning", back:"CLAUDE.md and other context files", note:"The files you write to steer the model toward good results."},
+  {id:"SC12", front:"Is a bigger context window always better?", back:"No — polluting context hurts, even at ~1M tokens", note:"Keep context efficient; feed what's needed, not everything."},
+  {id:"SC13", front:"How does Claude edit code (vs an IDE)?", back:"A string-replace edit tool (ed-like) — no LSP/autocomplete", note:"It matches exact text and replaces it. Hard to do well; an opening to add better tools."},
+  {id:"SC14", front:"An opportunity in agent tooling", back:"Give agents agentic versions of LSP, completion & search", note:"IDE features re-imagined as tools the agent can call."},
+  {id:"SC15", front:"Why are Post-Tool-Use hooks powerful?", back:"They run a check after each edit and feed the result back", note:"e.g. a linter/LSP runs after an edit — a tight, deterministic feedback loop for the agent."},
+  {id:"SC16", front:"Why use subagents?", back:"To parallelise work and isolate context", note:"Spin up clones so the main thread stays focused and efficient."},
+  {id:"SC17", front:"How do you package & share customisations?", back:"Plugins, slash commands & a plugin marketplace", note:"Reusable agent customisations others can install."},
+  {id:"SC18", front:"Daisy's setup for parallel work", back:"~16 permanent git worktrees of the repo, one branch each", note:"claude-code-{0..9,a..f} — many agents run at once, each parked on its own branch."},
+  {id:"SC19", front:'Why "No cherry-picking" with worktrees?', back:"Each worktree/branch is independent — work stays isolated", note:"Separate pools per repo: claude-code (~16), anthropic (4), apps (9), cc-marketplace (3)."},
+];
+
 function langLoad(){
-  try{return JSON.parse(localStorage.getItem(LANG_KEY))||{cards:[],srs:{}};}
-  catch{return{cards:[],srs:{}};}
+  let d;
+  try{d=JSON.parse(localStorage.getItem(LANG_KEY))||{cards:[],srs:{}};}
+  catch{d={cards:[],srs:{}};}
+  if(!Array.isArray(d.cards))d.cards=[];
+  if(!d.srs||typeof d.srs!=="object")d.srs={};
+  // Seed the shipped deck once. The flag means user deletions stick.
+  if(!d.seededCC){
+    const have=new Set(d.cards.map(c=>c.id));
+    for(const s of LANG_SEED)if(!have.has(s.id))d.cards.push({...s});
+    d.seededCC=1; langSave(d);
+  }
+  return d;
 }
 function langSave(d){try{localStorage.setItem(LANG_KEY,JSON.stringify(d));}catch{}}
 
