@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v31</title>
+<title>Adomas · v32</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -318,7 +318,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v31</span>
+    <span class="nav-ver">v32</span>
   </div>
 </nav>
 
@@ -824,6 +824,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:32, title:"Finances: parse Revolut multi-account statement CSV", sp:2, note:"Importer now scans the whole file for transaction tables (Revolut's consolidated statement has one per account/currency, each with a Total row that's now skipped), reads the signed 'Money in/out' column, and parses 'Jan 1, 2026'-style dates. Verified against a real 831-transaction export."},
   {v:31, title:"Finances: CSV statement import + charts", sp:5, note:"New in Finances tab: load a bank/Revolut CSV export → auto-detects amount/date/description columns, then shows Money in/out/net, a monthly in-vs-out bar chart, and top spending — all client-side SVG, data kept in localStorage. v1 draft, ready for feedback."},
   {v:30, title:"Notes & Other pages — Notion-style nested outline", sp:6, note:"New top-level page switcher: Notes | Other. The entire previous dashboard (all tabs) now lives under 'Other'. 'Notes' is a minimalist Notion-style nested outline — type to write, Enter for a new line, Tab/Shift+Tab to nest/unnest, Backspace on an empty line to delete/merge, arrows to move between lines. Title + body persist to localStorage (wat_notes_v1 / wat_notes_title_v1). Notes is the default landing page."},
   {v:29, title:"Remember tab (notes list)", sp:2, note:"New Remember tab: an editable list of things to keep around (title + note/link, inline add, delete). Links auto-detected and clickable. Seeded once into wat_remember_v1 with SearXNG (privacy metasearch) and the vivamokykla contacts page."},
@@ -1834,40 +1835,46 @@ function parseAmount(s){
   else if(lc>-1){s=(s.length-lc-1)<=2?s.replace(",","."):s.replace(/,/g,"")}
   const n=parseFloat(s);return isNaN(n)?NaN:n;
 }
+const FIN_MONTHS={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
 function normDate(s){
-  s=(""+s).trim();if(!s)return"";
+  s=(""+s).trim();if(!s)return"";const p=n=>(""+n).padStart(2,"0");
   let m=s.match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
-  if(m)return m[1]+"-"+m[2].padStart(2,"0")+"-"+m[3].padStart(2,"0");
+  if(m)return m[1]+"-"+p(m[2])+"-"+p(m[3]);
+  m=s.match(/([A-Za-z]{3,})\.?\s+(\d{1,2}),?\s+(\d{4})/); // "Jan 1, 2026" (Revolut statement)
+  if(m){const mo=FIN_MONTHS[m[1].slice(0,3).toLowerCase()];if(mo)return m[3]+"-"+p(mo)+"-"+p(m[2])}
   m=s.match(/(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/); // assume DD/MM/YYYY (EU)
-  if(m)return m[3]+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0");
+  if(m)return m[3]+"-"+p(m[2])+"-"+p(m[1]);
   return"";
 }
+// Scans the whole file for transaction tables (Revolut's consolidated statement has
+// many, one per account, each with its own header + a Total row we must skip).
 function importCSV(text){
-  const rows=text.split(/\r?\n/).filter(r=>r.trim().length).map(parseCSVLine);
-  if(rows.length<2)return{tx:[],err:"File looks empty."};
-  const hdr=rows[0].map(h=>h.trim().toLowerCase());
-  const find=re=>hdr.findIndex(h=>re.test(h));
-  let amtI=find(/^amount$/);if(amtI<0)amtI=find(/amount|value|sum/);
-  const inI=find(/paid.?in|money.?in|credit/),outI=find(/paid.?out|money.?out|debit/);
-  let dateI=find(/complet.*date|date.*complet/);
-  if(dateI<0)dateI=find(/start.*date|date.*start/);
-  if(dateI<0)dateI=find(/date/);
-  let descI=find(/description|reference|narrative|details|payee|merchant|name/);
-  if(descI<0)descI=find(/type|category/);
-  const tx=[];
-  for(let r=1;r<rows.length;r++){
-    const row=rows[r];if(!row.length)continue;
-    let amt=amtI>-1?parseAmount(row[amtI]):NaN;
-    if(isNaN(amt)&&(inI>-1||outI>-1)){
-      const pin=inI>-1?parseAmount(row[inI]):0,pout=outI>-1?parseAmount(row[outI]):0;
+  const rows=text.split(/\r?\n/).map(parseCSVLine);
+  const low=c=>c.map(x=>x.trim().toLowerCase());
+  const isHeader=c=>{const L=low(c),has=re=>L.some(h=>re.test(h));
+    return has(/date/)&&has(/description|merchant|payee|name/)&&has(/money in\/out|money out|money in|amount|value|paid ?(in|out)|debit|credit/)};
+  const mapCols=c=>{const L=low(c),find=(...rx)=>{for(const r of rx){const i=L.findIndex(h=>r.test(h));if(i>-1)return i}return -1};
+    return{amtI:find(/^amount$/,/money in\/out/,/amount|value|sum/),
+      dateI:find(/^date$/,/complet.*date/,/start.*date/,/date/),
+      descI:find(/^description$/,/description|merchant|payee|reference|name/),
+      inI:find(/money in$/,/paid ?in/,/^credit$/),
+      outI:find(/money out$/,/paid ?out/,/^debit$/)}};
+  const tx=[];let cols=null;
+  for(const c of rows){
+    if(!c.length||c.every(x=>!x.trim())){cols=null;continue}        // blank line ends a table
+    if(isHeader(c)){cols=mapCols(c);continue}
+    if(!cols)continue;
+    let amt=cols.amtI>-1?parseAmount(c[cols.amtI]):NaN;
+    if(isNaN(amt)&&(cols.inI>-1||cols.outI>-1)){
+      const pin=cols.inI>-1?parseAmount(c[cols.inI]):0,pout=cols.outI>-1?parseAmount(c[cols.outI]):0;
       amt=(isNaN(pin)?0:pin)-(isNaN(pout)?0:Math.abs(pout));
     }
-    if(isNaN(amt))continue;
-    const date=normDate(dateI>-1?row[dateI]:"");
-    const desc=((descI>-1?row[descI]:"")||"").trim()||"(no description)";
+    const date=normDate(cols.dateI>-1?c[cols.dateI]:"");
+    if(isNaN(amt)||!date)continue;                                  // skips Total/summary rows (no parseable date)
+    const desc=((cols.descI>-1?c[cols.descI]:"")||"").trim()||"(no description)";
     tx.push({date,desc,amt});
   }
-  return{tx,err:tx.length?"":"Couldn't find an amount/date column — check the CSV header."};
+  return{tx,err:tx.length?"":"No transactions found — export a Revolut statement (or transactions) CSV."};
 }
 function ftxTotals(){let i=0,o=0;finTx.forEach(t=>{t.amt>=0?i+=t.amt:o+=-t.amt});return{inS:i,outS:o,net:i-o}}
 function renderFinImport(){
