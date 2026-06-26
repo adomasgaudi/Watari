@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v12</title>
+<title>Adomas · v13</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -228,13 +228,14 @@
   .proj-group.collapsed .proj-arrow{transform:rotate(-90deg)}
   .proj-group.collapsed .proj-tasks{display:none}
 
-  details{margin-top:28px}
-  summary{font-size:11px;color:var(--muted2);cursor:pointer;list-style:none}
-  summary::-webkit-details-marker{display:none}
   .ver-row{display:flex;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
   .ver-n{color:var(--accent);font-weight:700;min-width:28px}
   .ver-title{flex:1}
   .ver-sp{color:var(--muted);font-size:11px}
+  #ver-fab{position:fixed;bottom:16px;right:16px;z-index:200;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--muted);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  #ver-fab:hover{color:var(--text)}
+  #ver-popup{position:fixed;bottom:48px;right:16px;z-index:201;background:var(--surface);border:1px solid var(--border2);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);width:260px;max-height:60vh;overflow-y:auto;padding:10px 12px;display:none}
+  #ver-popup.open{display:block}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -246,7 +247,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v12</span>
+    <span class="nav-ver">v13</span>
   </div>
 </nav>
 
@@ -272,7 +273,6 @@
           <button class="pill add-btn" id="add-btn">+ Add</button>
         </div>
       </div>
-      <details><summary>📋 Version history</summary><div id="ver-list" style="margin-top:8px"></div></details>
     </div>
     <div>
       <div class="sec">
@@ -550,6 +550,8 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:13, title:"Version history popup bottom-right", sp:1,
+   note:"Moved version history out of Tasks panel into a fixed bottom-right FAB popup."},
   {v:12, title:"Projects collapsed by default", sp:1,
    note:"Tasks open grouped by project, all collapsed — tap a project to expand. Resets old flat/open localStorage state."},
   {v:11, title:"Watari Supabase project", sp:1,
@@ -851,6 +853,10 @@ document.getElementById("add-input").addEventListener("keydown",e=>{if(e.key==="
 
 function renderVersions(){
   document.getElementById("ver-list").innerHTML=VERSIONS.map(v=>`<div class="ver-row"><span class="ver-n">v${v.v}</span><span class="ver-title">${v.title}</span><span class="ver-sp">${v.sp} sp</span></div>`).join("");
+  const fab=document.getElementById("ver-fab");
+  const vpop=document.getElementById("ver-popup");
+  fab.addEventListener("click",e=>{e.stopPropagation();vpop.classList.toggle("open")});
+  document.addEventListener("click",()=>vpop.classList.remove("open"));
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1200,5 +1206,7 @@ renderFinancesTab();
 // Connect to Supabase after local render (offline-first: local shows first)
 initSupabase();
 </script>
+<div id="ver-popup"><div id="ver-list"></div></div>
+<button id="ver-fab">📋 v13</button>
 </body>
 </html>
