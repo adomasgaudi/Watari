@@ -3,64 +3,320 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Watari v1</title>
+<title>Adomas · v2</title>
 <style>
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --text: #e8e8e8;
-    --muted: #888;
+    --bg: #0d0d0d;
+    --surface: #181818;
+    --surface2: #222;
+    --border: #2a2a2a;
+    --text: #e4e4e4;
+    --muted: #777;
+    --muted2: #555;
     --accent: #c8a84b;
-    --r-pill: 6px;
-    --tap-min: 32px;
+    --accent-dim: #2a2200;
+    --green: #4caf7d;
+    --green-dim: #0d2016;
+    --blue: #5b9bd5;
+    --blue-dim: #0d1a2a;
+    --red: #c0614a;
+    --red-dim: #2a0f0a;
+    --orange: #d4874a;
+    --orange-dim: #2a1800;
+    --r: 6px;
+    --tap: 32px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; min-height: 100vh; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, sans-serif; min-height: 100vh; }
+
+  /* NAV */
   nav {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 16px; background: var(--surface); border-bottom: 1px solid #2a2a2a;
+    padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
   }
-  .nav-title { font-weight: 600; letter-spacing: .04em; }
-  .nav-version { font-size: 11px; color: var(--accent); background: #2a2200; border-radius: var(--r-pill); padding: 2px 7px; }
-  main { max-width: 900px; margin: 0 auto; padding: 32px 16px; }
-  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-  h1 .version { font-size: 12px; color: var(--muted); margin-left: 8px; font-weight: 400; }
-  p.lead { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
-  .card {
-    background: var(--surface); border-radius: var(--r-pill);
-    padding: 16px; margin-bottom: 12px;
+  .nav-left { display: flex; align-items: center; gap: 10px; }
+  .nav-name { font-weight: 700; font-size: 15px; }
+  .nav-status { font-size: 11px; color: var(--green); background: var(--green-dim); border-radius: var(--r); padding: 2px 8px; }
+  .nav-ver { font-size: 11px; color: var(--muted); }
+
+  /* LAYOUT */
+  main { max-width: 680px; margin: 0 auto; padding: 20px 14px 60px; }
+
+  /* SECTION */
+  .section { margin-bottom: 28px; }
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--muted2);
+    text-transform: uppercase; margin-bottom: 10px;
   }
-  .card h2 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-  .card p { font-size: 13px; color: var(--muted); }
+
+  /* FOCUS CARD — the NOW */
+  .focus-card {
+    background: linear-gradient(135deg, #1a1600 0%, #181818 100%);
+    border: 1px solid #3a2e00;
+    border-radius: var(--r); padding: 14px 16px; margin-bottom: 10px;
+  }
+  .focus-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; }
+  .focus-task { font-size: 16px; font-weight: 700; }
+  .focus-proj { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* TASK CARDS */
+  .task {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 12px 14px; margin-bottom: 8px;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .task-left { flex: 1; min-width: 0; }
+  .task-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .task-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .task-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+  .pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: var(--tap); min-height: var(--tap); padding: 0 10px;
+    border-radius: var(--r); font-size: 11px; font-weight: 600;
+    cursor: pointer; border: none; user-select: none; white-space: nowrap;
+    transition: opacity .12s;
+  }
+  .pill:active { opacity: .7; }
+  .pill-status { height: 22px; min-height: 22px; padding: 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+  .s-active    { background: var(--blue-dim);   color: var(--blue);   }
+  .s-done      { background: var(--green-dim);  color: var(--green);  }
+  .s-blocked   { background: var(--red-dim);    color: var(--red);    }
+  .s-paused    { background: var(--surface2);   color: var(--muted);  }
+  .p-high  { background: var(--red-dim);    color: var(--red);    }
+  .p-med   { background: var(--orange-dim); color: var(--orange); }
+  .p-low   { background: var(--surface2);   color: var(--muted);  }
+
+  /* GOALS */
+  .goal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 11px 14px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .goal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-now    { background: var(--red); }
+  .dot-soon   { background: var(--orange); }
+  .dot-later  { background: var(--muted2); }
+  .goal-text { flex: 1; }
+  .goal-title { font-size: 13px; font-weight: 600; }
+  .goal-detail { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .goal-when { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: var(--r); flex-shrink: 0; }
+  .when-now   { background: var(--red-dim);    color: var(--red); }
+  .when-soon  { background: var(--orange-dim); color: var(--orange); }
+  .when-later { background: var(--surface2);   color: var(--muted); }
+
+  /* PROFILE CHIPS */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--r); font-size: 12px; padding: 4px 10px; color: var(--text);
+  }
+  .chip-role  { border-color: var(--blue-dim); color: var(--blue); background: var(--blue-dim); }
+  .chip-trait { border-color: var(--border); color: var(--muted); }
+  .chip-interest { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-dim); }
+
+  /* VERSIONS */
+  details { margin-top: 32px; }
+  summary { font-size: 11px; color: var(--muted2); cursor: pointer; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  .ver-list { margin-top: 8px; }
+  .ver-row { display: flex; gap: 8px; align-items: baseline; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .ver-n { color: var(--accent); font-weight: 700; min-width: 28px; }
+  .ver-title { flex: 1; }
+  .ver-sp { color: var(--muted); font-size: 11px; }
 </style>
 </head>
 <body>
 
 <nav>
-  <span class="nav-title">Watari</span>
-  <span class="nav-version">v1</span>
+  <div class="nav-left">
+    <span class="nav-name">Adomas</span>
+    <span class="nav-status">● Open to clients</span>
+  </div>
+  <span class="nav-ver">v2</span>
 </nav>
 
 <main>
-  <h1>Watari <span class="version">v1</span></h1>
-  <p class="lead">Project starter — edit src/template.html to build this out.</p>
 
-  <div class="card">
-    <h2>Getting started</h2>
-    <p>Edit <code>src/template.html</code>, then run <code>python3 src/build_site.py</code> to rebuild <code>index.html</code>.</p>
+  <!-- FOCUS NOW -->
+  <div class="section">
+    <div class="section-label">Focus now</div>
+    <div class="focus-card">
+      <div class="focus-label">▶ Active</div>
+      <div class="focus-task" id="focus-task">Make Colosseum customer-ready</div>
+      <div class="focus-proj" id="focus-proj">Colosseum · highest leverage on getting clients</div>
+    </div>
   </div>
 
-  <div class="card">
-    <h2>Rules &amp; hooks</h2>
-    <p>See <code>CLAUDE.md</code> for all AI rules. Hooks live in <code>.claude/hooks/</code> and <code>.githooks/</code>.</p>
+  <!-- TASKS -->
+  <div class="section">
+    <div class="section-label">Tasks</div>
+    <div id="tasks-list"></div>
   </div>
+
+  <!-- GOALS -->
+  <div class="section">
+    <div class="section-label">Goals</div>
+    <div id="goals-list"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="section">
+    <div class="section-label">Roles</div>
+    <div class="chips" id="roles-chips"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Traits</div>
+    <div class="chips" id="traits-chips"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Interests</div>
+    <div class="chips" id="interests-chips"></div>
+  </div>
+
+  <!-- VERSION HISTORY -->
+  <details>
+    <summary>📋 Version history</summary>
+    <div class="ver-list" id="ver-list"></div>
+  </details>
+
 </main>
 
 <script>
-// VERSIONS array — newest first. Format: { v, title, sp, note }
-const VERSIONS = [
-  { v: 1, title: "Initial scaffold", sp: 2, note: "Project skeleton with rules, hooks, and starter template." }
+// ── DATA ──────────────────────────────────────────────────────────────────────
+
+const ME = {
+  roles:     ["Coach", "Teacher", "Programmer"],
+  traits:    ["Scientific", "ADHD", "Social anxiety"],
+  interests: ["Science", "Learning", "Systems thinking", "Strength training",
+              "Curriculum design", "Data visualisation", "Psychology"]
+};
+
+// status: active | done | blocked | paused
+// priority: high | med | low
+const TASKS = [
+  {
+    id: "T1", proj: "Colosseum", priority: "high", status: "active",
+    title: "Make usable by customers",
+    detail: "Ship the features customers need to use it independently"
+  },
+  {
+    id: "T2", proj: "VZ", priority: "high", status: "active",
+    title: "Finish new tasks",
+    detail: "Work through the open VZ backlog items"
+  },
+  {
+    id: "T3", proj: "Science curriculum", priority: "med", status: "active",
+    title: "Develop science curriculum",
+    detail: "Build personal science learning system in the language repo"
+  }
 ];
+
+// urgency: now | soon | later
+const GOALS = [
+  {
+    title: "Find clients",
+    detail: "Coaching · teaching · programming",
+    urgency: "now"
+  },
+  {
+    title: "Ship Colosseum v1 for customers",
+    detail: "Strength dashboard ready for real users",
+    urgency: "now"
+  },
+  {
+    title: "Complete VZ project",
+    detail: "All planned features shipped and live",
+    urgency: "soon"
+  },
+  {
+    title: "Launch science curriculum",
+    detail: "Personal structured learning system live",
+    urgency: "later"
+  }
+];
+
+const VERSIONS = [
+  { v: 2, title: "Personal assistant — profile, tasks, goals", sp: 3,
+    note: "Full data layer: roles, traits, interests, tasks, goals." },
+  { v: 1, title: "Initial scaffold", sp: 2,
+    note: "Project skeleton with rules, hooks, starter template." }
+];
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+
+function statusPill(s) {
+  const map = { active:"s-active", done:"s-done", blocked:"s-blocked", paused:"s-paused" };
+  const label = { active:"ACTIVE", done:"DONE", blocked:"BLOCKED", paused:"PAUSED" };
+  return `<span class="pill pill-status ${map[s]||'s-paused'}">${label[s]||s.toUpperCase()}</span>`;
+}
+function priorityPill(p) {
+  const map = { high:"p-high", med:"p-med", low:"p-low" };
+  const label = { high:"HIGH", med:"MED", low:"LOW" };
+  return `<span class="pill pill-status ${map[p]||'p-low'}">${label[p]||p.toUpperCase()}</span>`;
+}
+function urgencyBadge(u) {
+  const cls = { now:"when-now", soon:"when-soon", later:"when-later" };
+  return `<span class="goal-when ${cls[u]||'when-later'}">${u.toUpperCase()}</span>`;
+}
+function dotClass(u) {
+  return { now:"dot-now", soon:"dot-soon", later:"dot-later" }[u] || "dot-later";
+}
+
+function render() {
+  // focus — first high-priority active task
+  const focus = TASKS.find(t => t.status === "active" && t.priority === "high")
+             || TASKS.find(t => t.status === "active")
+             || TASKS[0];
+  if (focus) {
+    document.getElementById("focus-task").textContent = focus.title;
+    document.getElementById("focus-proj").textContent = focus.proj + " · " + focus.detail;
+  }
+
+  // tasks
+  document.getElementById("tasks-list").innerHTML = TASKS.map(t => `
+    <div class="task">
+      <div class="task-left">
+        <div class="task-title">${t.title}</div>
+        <div class="task-meta">${t.proj} · ${t.detail}</div>
+      </div>
+      <div class="task-right">
+        ${statusPill(t.status)}
+        ${priorityPill(t.priority)}
+      </div>
+    </div>`).join("");
+
+  // goals
+  document.getElementById("goals-list").innerHTML = GOALS.map(g => `
+    <div class="goal">
+      <div class="goal-dot ${dotClass(g.urgency)}"></div>
+      <div class="goal-text">
+        <div class="goal-title">${g.title}</div>
+        <div class="goal-detail">${g.detail}</div>
+      </div>
+      ${urgencyBadge(g.urgency)}
+    </div>`).join("");
+
+  // chips
+  document.getElementById("roles-chips").innerHTML =
+    ME.roles.map(r => `<span class="chip chip-role">${r}</span>`).join("");
+  document.getElementById("traits-chips").innerHTML =
+    ME.traits.map(t => `<span class="chip chip-trait">${t}</span>`).join("");
+  document.getElementById("interests-chips").innerHTML =
+    ME.interests.map(i => `<span class="chip chip-interest">${i}</span>`).join("");
+
+  // versions
+  document.getElementById("ver-list").innerHTML = VERSIONS.map(v => `
+    <div class="ver-row">
+      <span class="ver-n">v${v.v}</span>
+      <span class="ver-title">${v.title}</span>
+      <span class="ver-sp">${v.sp} sp</span>
+    </div>`).join("");
+}
+
+render();
 </script>
 
 </body>
