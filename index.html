@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v8</title>
+<title>Adomas · v9</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -214,6 +214,20 @@
   .sel-input:focus{border-color:var(--border2)}
   .sel-input::placeholder{color:var(--muted2)}
 
+  /* TASK GROUPS */
+  .task-controls{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px;padding-bottom:2px;align-items:center}
+  .task-controls::-webkit-scrollbar{display:none}
+  .tc-sep{width:1px;height:18px;background:var(--border);flex-shrink:0;margin:0 2px}
+  .tc-pill{height:24px;padding:0 9px;font-size:11px}
+  .tc-on{background:var(--accent-dim);color:var(--accent)}
+  .proj-header{display:flex;align-items:center;gap:6px;padding:7px 0 3px;cursor:pointer;user-select:none;border-top:1px solid var(--border)}
+  .proj-header:first-child{border-top:none}
+  .proj-name{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);flex:1}
+  .proj-meta{font-size:11px;color:var(--muted2)}
+  .proj-arrow{font-size:10px;color:var(--muted2);transition:transform .15s}
+  .proj-group.collapsed .proj-arrow{transform:rotate(-90deg)}
+  .proj-group.collapsed .proj-tasks{display:none}
+
   details{margin-top:28px}
   summary{font-size:11px;color:var(--muted2);cursor:pointer;list-style:none}
   summary::-webkit-details-marker{display:none}
@@ -230,7 +244,7 @@
   <div class="nav-right">
     <span class="nav-status">● Open to clients</span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v8</span>
+    <span class="nav-ver">v9</span>
   </div>
 </nav>
 
@@ -249,6 +263,7 @@
     <div>
       <div class="sec">
         <div class="sec-head"><span class="sec-label">Tasks</span></div>
+        <div class="task-controls" id="task-controls"></div>
         <div id="task-list"></div>
         <div class="add-row">
           <input class="add-input" id="add-input" placeholder="New task…"/>
@@ -533,6 +548,8 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:9, title:"Task grouping, sort, filter", sp:3,
+   note:"Group tasks by project (collapsible), filter by status (All/Active/Paused/Blocked/Done), sort by Priority/Status/Added. All view prefs persisted."},
   {v:8, title:"White theme + SVG icons", sp:4,
    note:"Light theme default (toggle ☀/🌙), dark theme preserved. SVG drawings for food items and wardrobe categories."},
   {v:7, title:"Schedule + Finances tabs", sp:5,
@@ -625,6 +642,59 @@ const SL={active:"ACTIVE",paused:"PAUSED",blocked:"BLOCKED",done:"DONE"};
 const SC={active:"s-active",paused:"s-paused",blocked:"s-blocked",done:"s-done"};
 const PL={high:"HIGH",med:"MED",low:"LOW"};
 const PC={high:"p-high",med:"p-med",low:"p-low"};
+const PRIORITY_ORD={high:0,med:1,low:2};
+const STATUS_ORD={active:0,paused:1,blocked:2,done:3};
+
+let taskSort   = ls("wat_task_sort","priority");  // priority | status | added
+let taskGroup  = ls("wat_task_group","project");  // flat | project
+let taskFilter = ls("wat_task_filter","all");     // all | active | paused | blocked | done
+let collapsedProjs = new Set(ls("wat_task_collapsed",[]));
+
+function sortedTasks(list){
+  const s=[...list];
+  if(taskSort==="priority") s.sort((a,b)=>PRIORITY_ORD[a.priority]-PRIORITY_ORD[b.priority]||STATUS_ORD[a.status]-STATUS_ORD[b.status]);
+  else if(taskSort==="status") s.sort((a,b)=>STATUS_ORD[a.status]-STATUS_ORD[b.status]||PRIORITY_ORD[a.priority]-PRIORITY_ORD[b.priority]);
+  // "added" = original tasks[] index order (default)
+  return s;
+}
+
+function filteredTasks(){
+  if(taskFilter==="all") return tasks;
+  return tasks.filter(t=>t.status===taskFilter);
+}
+
+function taskCard(t){
+  const i=tasks.indexOf(t);
+  return`<div class="task${t.status==="done"?" is-done":""}" data-i="${i}">
+    <div class="task-row1">
+      <div class="task-title-wrap"><input class="task-title" value="${esc(t.title)}" placeholder="Task title" data-field="title" data-i="${i}"/></div>
+      <button class="pill pill-sm pill-icon pill-del" data-del="${i}">✕</button>
+    </div>
+    <input class="task-detail" value="${esc(t.detail||"")}" placeholder="Detail…" data-field="detail" data-i="${i}"/>
+    <div class="task-pills">
+      <button class="pill pill-sm ${SC[t.status]}" data-cycle="status" data-i="${i}">${SL[t.status]}</button>
+      <button class="pill pill-sm ${PC[t.priority]}" data-cycle="priority" data-i="${i}">${PL[t.priority]}</button>
+      ${t.proj&&taskGroup==="flat"?`<span style="font-size:11px;color:var(--muted);margin-left:2px">${esc(t.proj)}</span>`:""}
+    </div>
+  </div>`;
+}
+
+function renderTaskControls(){
+  const FILTERS=["all","active","paused","blocked","done"];
+  const FL={all:"All",active:"Active",paused:"Paused",blocked:"Blocked",done:"Done"};
+  const filterPills=FILTERS.map(f=>{
+    const on=taskFilter===f;
+    const cls=on?(f==="all"?"tc-on":f==="active"?"s-active":f==="paused"?"s-paused":f==="blocked"?"s-blocked":"s-done"):"";
+    return`<button class="pill tc-pill ${cls}" data-tf="${f}">${FL[f]}</button>`;
+  }).join("");
+  const sortLabel={priority:"Priority",status:"Status",added:"Added"}[taskSort];
+  const groupLabel=taskGroup==="project"?"By project":"Flat";
+  document.getElementById("task-controls").innerHTML=
+    filterPills+
+    `<div class="tc-sep"></div>`+
+    `<button class="pill tc-pill ${taskGroup==="project"?"tc-on":""}" id="tc-group">${groupLabel}</button>`+
+    `<button class="pill tc-pill tc-on" id="tc-sort">↕ ${sortLabel}</button>`;
+}
 
 function renderFocus(){
   const f=tasks.find(t=>t.status==="active"&&t.priority==="high")||tasks.find(t=>t.status==="active");
@@ -635,20 +705,28 @@ function renderFocus(){
 
 function renderTasks(){
   const el=document.getElementById("task-list");
-  if(!tasks.length){el.innerHTML=`<div style="color:var(--muted);padding:12px 0;font-size:13px">No tasks.</div>`;return}
-  el.innerHTML=tasks.map((t,i)=>`
-    <div class="task${t.status==="done"?" is-done":""}" data-i="${i}">
-      <div class="task-row1">
-        <div class="task-title-wrap"><input class="task-title" value="${esc(t.title)}" placeholder="Task title" data-field="title" data-i="${i}"/></div>
-        <button class="pill pill-sm pill-icon pill-del" data-del="${i}">✕</button>
+  const vis=sortedTasks(filteredTasks());
+  if(!vis.length){el.innerHTML=`<div style="color:var(--muted);padding:12px 0;font-size:13px">${taskFilter==="all"?"No tasks.":"No "+taskFilter+" tasks."}</div>`;return}
+  if(taskGroup==="flat"){
+    el.innerHTML=vis.map(taskCard).join("");
+    return;
+  }
+  // group by project
+  const groups={};
+  vis.forEach(t=>{const p=t.proj||"No project";(groups[p]=groups[p]||[]).push(t)});
+  el.innerHTML=Object.entries(groups).map(([proj,list])=>{
+    const col=collapsedProjs.has(proj);
+    const active=list.filter(t=>t.status==="active").length;
+    const total=list.length;
+    return`<div class="proj-group${col?" collapsed":""}" data-proj="${esc(proj)}">
+      <div class="proj-header" data-toggle-proj="${esc(proj)}">
+        <span class="proj-name">${esc(proj)}</span>
+        <span class="proj-meta">${active}/${total} active</span>
+        <span class="proj-arrow">▾</span>
       </div>
-      <input class="task-detail" value="${esc(t.detail||"")}" placeholder="Detail / project…" data-field="detail" data-i="${i}"/>
-      <div class="task-pills">
-        <button class="pill pill-sm ${SC[t.status]}" data-cycle="status" data-i="${i}">${SL[t.status]}</button>
-        <button class="pill pill-sm ${PC[t.priority]}" data-cycle="priority" data-i="${i}">${PL[t.priority]}</button>
-        ${t.proj?`<span style="font-size:11px;color:var(--muted);margin-left:2px">${esc(t.proj)}</span>`:""}
-      </div>
-    </div>`).join("");
+      <div class="proj-tasks">${list.map(taskCard).join("")}</div>
+    </div>`;
+  }).join("");
 }
 
 function renderSuggestions(){
@@ -666,8 +744,17 @@ function renderSuggestions(){
     :`<div class="sugg-empty">No issues detected.</div>`;
 }
 
-function renderTasksTab(){renderFocus();renderTasks();renderSuggestions()}
+function renderTasksTab(){renderFocus();renderTaskControls();renderTasks();renderSuggestions()}
 
+// task-controls events
+document.getElementById("task-controls").addEventListener("click",e=>{
+  const tf=e.target.closest("[data-tf]");
+  if(tf){taskFilter=tf.dataset.tf;lsSave("wat_task_filter",taskFilter);renderTaskControls();renderTasks();return}
+  if(e.target.id==="tc-group"){taskGroup=taskGroup==="project"?"flat":"project";lsSave("wat_task_group",taskGroup);renderTaskControls();renderTasks();return}
+  if(e.target.id==="tc-sort"){taskSort=cycle(["priority","status","added"],taskSort);lsSave("wat_task_sort",taskSort);renderTaskControls();renderTasks()}
+});
+
+// task-list events
 document.getElementById("task-list").addEventListener("input",e=>{
   const f=e.target.dataset.field,i=parseInt(e.target.dataset.i);
   if(!f||isNaN(i))return;
@@ -675,6 +762,9 @@ document.getElementById("task-list").addEventListener("input",e=>{
   requestAnimationFrame(()=>{renderFocus();renderSuggestions()});
 });
 document.getElementById("task-list").addEventListener("click",e=>{
+  // group collapse toggle
+  const tog=e.target.closest("[data-toggle-proj]");
+  if(tog){const p=tog.dataset.toggleProj;collapsedProjs.has(p)?collapsedProjs.delete(p):collapsedProjs.add(p);lsSave("wat_task_collapsed",[...collapsedProjs]);renderTasks();return}
   const cb=e.target.closest("[data-cycle]");
   if(cb){const f=cb.dataset.cycle,i=parseInt(cb.dataset.i);tasks[i][f]=cycle(f==="status"?STC:PRC,tasks[i][f]);lsSave("wat_tasks_v2",tasks);renderTasksTab();return}
   const db=e.target.closest("[data-del]");
