@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v16</title>
+<title>Adomas · v17</title>
 <style>
   :root {
     --bg:#f4f4f4; --surface:#fff; --surface2:#ebebeb; --surface3:#e2e2e2;
@@ -35,7 +35,8 @@
     --pink:#d46b8a; --pink-dim:#2a0d18;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  body{background:var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif;min-height:100vh}
+  html{overflow-x:hidden}
+  body{background:var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif;min-height:100vh;overflow-x:hidden;max-width:100%}
 
   nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
   .nav-name{font-weight:700;font-size:15px}
@@ -48,8 +49,9 @@
   .tab{padding:10px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;user-select:none}
   .tab.active{color:var(--text);border-color:var(--accent)}
 
-  .panel{display:none}.panel.active{display:block}
-  main{max-width:900px;margin:0 auto;padding:18px 14px 60px}
+  .panel{display:none}.panel.active{display:block;max-width:100%;overflow-x:hidden}
+  main{max-width:900px;margin:0 auto;padding:18px 14px 60px;width:100%}
+  .sec,.add-row,.inline-add,.task,.food-row,.cloth-row,.laundry-row,.sched-row,.fin-row{max-width:100%;min-width:0}
 
   .cols{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
   @media(max-width:760px){.cols{grid-template-columns:1fr}}
@@ -91,8 +93,8 @@
   .pill-del{background:none;color:var(--muted2);font-size:14px;margin-left:auto}
   .pill-del:hover{color:var(--red)}
 
-  .add-row{display:flex;gap:8px;margin-top:4px}
-  .add-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font:14px/1 system-ui,sans-serif;padding:0 12px;height:var(--tap);outline:none}
+  .add-row{display:flex;gap:8px;margin-top:4px;width:100%}
+  .add-input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font:14px/1 system-ui,sans-serif;padding:0 12px;height:var(--tap);outline:none}
   .add-input:focus{border-color:var(--border2)}
   .add-input::placeholder{color:var(--muted2)}
   .add-btn{background:var(--surface2);color:var(--text)}
@@ -247,7 +249,7 @@
     <span class="nav-status">● Open to clients</span>
     <span id="sync-dot" title="Supabase: connecting…" style="width:8px;height:8px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0"></span>
     <button class="pill pill-sm" id="theme-btn" style="font-size:14px;padding:0 8px" title="Toggle dark/light">☀</button>
-    <span class="nav-ver">v16</span>
+    <span class="nav-ver">v17</span>
   </div>
 </nav>
 
@@ -607,6 +609,7 @@ const DEFAULT_FIN_GOALS = [
 ];
 
 const VERSIONS = [
+  {v:17, title:"PB-1 fix: no horizontal scroll", sp:1, note:"html/body overflow-x:hidden + min-width:0 on flex children. Root fix for recurring mobile horizontal overflow."},
   {v:16, title:"Sleep + ADHD tabs + weight tracking", sp:5, note:"New Sleep tab (log with duration/quality), ADHD tab (Pomodoro timer, meds log, daily wins), weight tracking section in Diet."},
   {v:15, title:"Mobile layout + ver popup fix", sp:1, note:"Stack to single column below 760px; fix ver-popup close-on-open bug; safe-area insets for FAB."},
   {v:14, title:"Project pill + add-to-project", sp:2, note:"Task cards show tappable project pill (cycles through projects). Project headers have + button to add task to that project."},
@@ -1004,7 +1007,191 @@ const MEAL_IDEAS=[
 function renderDietTab(){
   renderFoods();renderShopList();
   document.getElementById("meal-ideas").innerHTML=MEAL_IDEAS.map(m=>`<div class="sugg-item"><div class="sugg-icon">${m.icon}</div><div class="sugg-body"><div class="sugg-head">${m.head}</div><div class="sugg-text">${m.text}</div></div></div>`).join("");
+  renderWeightSection();
 }
+
+// ── WEIGHT ──────────────────────────────────────────────────────────
+function sleepHours(bed,wake){
+  if(!bed||!wake)return null;
+  const [bh,bm]=bed.split(":").map(Number);
+  const [wh,wm]=wake.split(":").map(Number);
+  let mins=(wh*60+wm)-(bh*60+bm);
+  if(mins<0)mins+=24*60;
+  return+(mins/60).toFixed(2);
+}
+function renderWeightSection(){
+  const today=new Date().toISOString().slice(0,10);
+  const dateEl=document.getElementById("weight-date");
+  if(dateEl&&!dateEl.value)dateEl.value=today;
+  const sorted=[...weightLog].sort((a,b)=>b.date.localeCompare(a.date));
+  // summary
+  const sumEl=document.getElementById("weight-summary");
+  if(sumEl){
+    const cur=sorted[0];
+    const ago7=sorted.find(e=>e.date<=new Date(Date.now()-7*86400000).toISOString().slice(0,10));
+    let s="";
+    if(cur){s=`Current: ${cur.kg} kg`;if(ago7&&ago7!==cur){const d=(cur.kg-ago7.kg).toFixed(1);s+=` · 7d: ${d>0?"+":""}${d} kg`}}
+    sumEl.textContent=s;
+  }
+  const listEl=document.getElementById("weight-list");
+  if(!listEl)return;
+  listEl.innerHTML=sorted.map(e=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
+    <span style="font-size:.8rem;color:var(--muted);min-width:82px">${e.date}</span>
+    <span style="font-weight:600">${e.kg} kg</span>
+    ${e.note?`<span style="font-size:.8rem;color:var(--muted);flex:1">${esc(e.note)}</span>`:`<span style="flex:1"></span>`}
+    <button class="pill pill-sm" data-del-weight="${e.id}" style="padding:2px 8px">✕</button>
+  </div>`).join("")||`<div style="color:var(--muted);font-size:.82rem">No entries yet.</div>`;
+}
+document.addEventListener("click",e=>{
+  const d=e.target.dataset.delWeight;
+  if(d){weightLog=weightLog.filter(x=>x.id!==d);saveWeightLog();renderWeightSection();}
+});
+document.addEventListener("click",e=>{
+  if(e.target.id!=="weight-add-btn")return;
+  const date=document.getElementById("weight-date").value||new Date().toISOString().slice(0,10);
+  const kg=parseFloat(document.getElementById("weight-kg").value);
+  const note=document.getElementById("weight-note").value.trim();
+  if(!kg)return;
+  weightLog.push({id:nextId(weightLog,"W"),date,kg,note});
+  saveWeightLog();
+  document.getElementById("weight-kg").value="";
+  document.getElementById("weight-note").value="";
+  renderWeightSection();
+});
+
+// ── SLEEP ──────────────────────────────────────────────────────────
+function renderSleepTab(){
+  const today=new Date().toISOString().slice(0,10);
+  const dateEl=document.getElementById("sleep-date");
+  if(dateEl&&!dateEl.value)dateEl.value=today;
+  const sorted=[...sleepLog].sort((a,b)=>b.date.localeCompare(a.date));
+  // summary last 7 days
+  const sumEl=document.getElementById("sleep-summary");
+  if(sumEl){
+    const cutoff=new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+    const recent=sorted.filter(e=>e.date>=cutoff);
+    if(recent.length){
+      const hrs=recent.map(e=>sleepHours(e.bed,e.wake)).filter(h=>h!==null);
+      const avgH=hrs.length?(hrs.reduce((a,b)=>a+b,0)/hrs.length).toFixed(1):"?";
+      const avgQ=(recent.reduce((a,e)=>a+e.quality,0)/recent.length).toFixed(1);
+      sumEl.textContent=`7d avg: ${avgH}h · quality ${avgQ}/5`;
+    }else{sumEl.textContent=""}
+  }
+  const listEl=document.getElementById("sleep-list");
+  if(!listEl)return;
+  listEl.innerHTML=sorted.map(e=>{
+    const h=sleepHours(e.bed,e.wake);
+    const stars="★".repeat(e.quality)+"☆".repeat(5-e.quality);
+    return`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
+      <span style="font-size:.8rem;color:var(--muted);min-width:82px">${e.date}</span>
+      <span>${e.bed}→${e.wake}</span>
+      ${h!==null?`<span style="font-size:.8rem;color:var(--muted)">${h}h</span>`:""}
+      <button class="pill pill-sm" data-sleep-quality="${e.id}" style="padding:2px 6px;letter-spacing:1px" title="tap to cycle quality">${stars}</button>
+      ${e.note?`<span style="font-size:.8rem;color:var(--muted);flex:1">${esc(e.note)}</span>`:`<span style="flex:1"></span>`}
+      <button class="pill pill-sm" data-del-sleep="${e.id}" style="padding:2px 8px">✕</button>
+    </div>`;
+  }).join("")||`<div style="color:var(--muted);font-size:.82rem">No entries yet.</div>`;
+}
+document.addEventListener("click",e=>{
+  const ds=e.target.dataset.delSleep;
+  if(ds){sleepLog=sleepLog.filter(x=>x.id!==ds);saveSleepLog();renderSleepTab();return;}
+  const qs=e.target.dataset.sleepQuality;
+  if(qs){const s=sleepLog.find(x=>x.id===qs);if(s){s.quality=s.quality%5+1;saveSleepLog();renderSleepTab();}return;}
+  if(e.target.id==="sleep-add-btn"){
+    const date=document.getElementById("sleep-date").value||new Date().toISOString().slice(0,10);
+    const bed=document.getElementById("sleep-bed").value;
+    const wake=document.getElementById("sleep-wake").value;
+    const note=document.getElementById("sleep-note").value.trim();
+    if(!bed||!wake)return;
+    sleepLog.push({id:nextId(sleepLog,"S"),date,bed,wake,quality:3,note});
+    saveSleepLog();
+    document.getElementById("sleep-bed").value="";
+    document.getElementById("sleep-wake").value="";
+    document.getElementById("sleep-note").value="";
+    renderSleepTab();
+  }
+});
+
+// ── ADHD / POMODORO ──────────────────────────────────────────────────────────
+let pomoSeconds=25*60,pomoRunning=false,pomoInterval=null;
+function renderPomoDisplay(){
+  const el=document.getElementById("pomo-display");if(!el)return;
+  const m=String(Math.floor(pomoSeconds/60)).padStart(2,"0");
+  const s=String(pomoSeconds%60).padStart(2,"0");
+  el.textContent=`${m}:${s}`;
+}
+document.addEventListener("click",e=>{
+  if(e.target.id==="pomo-toggle"){
+    if(pomoRunning){
+      clearInterval(pomoInterval);pomoRunning=false;e.target.textContent="Start";
+    }else{
+      if(pomoSeconds===0)return;
+      pomoRunning=true;e.target.textContent="Pause";
+      pomoInterval=setInterval(()=>{
+        pomoSeconds--;renderPomoDisplay();
+        if(pomoSeconds<=0){
+          clearInterval(pomoInterval);pomoRunning=false;
+          document.getElementById("pomo-toggle").textContent="Start";
+          const d=document.getElementById("pomo-done");if(d)d.style.display="";
+        }
+      },1000);
+    }
+  }
+  if(e.target.id==="pomo-reset"){
+    clearInterval(pomoInterval);pomoRunning=false;pomoSeconds=25*60;
+    document.getElementById("pomo-toggle").textContent="Start";
+    const d=document.getElementById("pomo-done");if(d)d.style.display="none";
+    renderPomoDisplay();
+  }
+});
+
+function renderAdhdTab(){
+  const today=new Date().toISOString().slice(0,10);
+  renderPomoDisplay();
+  // Meds
+  const medsEl=document.getElementById("meds-list");
+  if(medsEl){
+    const todayMeds=meds.filter(m=>m.date===today);
+    medsEl.innerHTML=todayMeds.map(m=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
+      <span style="min-width:60px;font-size:.8rem;color:var(--muted)">${m.time}</span>
+      <span style="flex:1">${esc(m.med)}</span>
+      <button class="pill pill-sm ${m.taken?"":"off"}" data-med-taken="${m.id}" style="padding:2px 8px">${m.taken?"✓ Taken":"Take"}</button>
+      <button class="pill pill-sm" data-del-med="${m.id}" style="padding:2px 8px">✕</button>
+    </div>`).join("")||`<div style="color:var(--muted);font-size:.82rem">No meds for today.</div>`;
+  }
+  // Wins
+  const winsEl=document.getElementById("wins-list");
+  if(winsEl){
+    const todayWins=wins.filter(w=>w.date===today);
+    winsEl.innerHTML=todayWins.map(w=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:1">${esc(w.text)}</span>
+      <button class="pill pill-sm" data-del-win="${w.id}" style="padding:2px 8px">✕</button>
+    </div>`).join("")||`<div style="color:var(--muted);font-size:.82rem">No wins yet today.</div>`;
+  }
+}
+document.addEventListener("click",e=>{
+  const dm=e.target.dataset.delMed;
+  if(dm){meds=meds.filter(x=>x.id!==dm);saveMeds();renderAdhdTab();return;}
+  const tm=e.target.dataset.medTaken;
+  if(tm){const m=meds.find(x=>x.id===tm);if(m){m.taken=!m.taken;saveMeds();renderAdhdTab();}return;}
+  if(e.target.id==="meds-add-btn"){
+    const name=document.getElementById("meds-name").value.trim();
+    const time=document.getElementById("meds-time").value;
+    if(!name)return;
+    const today=new Date().toISOString().slice(0,10);
+    meds.push({id:nextId(meds,"M"),date:today,time:time||"00:00",med:name,taken:false});
+    saveMeds();document.getElementById("meds-name").value="";document.getElementById("meds-time").value="";renderAdhdTab();return;
+  }
+  const dw=e.target.dataset.delWin;
+  if(dw){wins=wins.filter(x=>x.id!==dw);saveWins();renderAdhdTab();return;}
+  if(e.target.id==="wins-add-btn"){
+    const text=document.getElementById("wins-text").value.trim();
+    if(!text)return;
+    const today=new Date().toISOString().slice(0,10);
+    wins.push({id:nextId(wins,"W"),date:today,text});
+    saveWins();document.getElementById("wins-text").value="";renderAdhdTab();
+  }
+});
 
 document.getElementById("food-filter").addEventListener("click",e=>{
   const btn=e.target.closest("[data-who]");if(!btn)return;
@@ -1305,6 +1492,6 @@ renderFinancesTab();
 initSupabase();
 </script>
 <div id="ver-popup"><div id="ver-list"></div></div>
-<button id="ver-fab">📋 v16</button>
+<button id="ver-fab">📋 v17</button>
 </body>
 </html>
