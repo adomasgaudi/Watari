@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adomas · v4</title>
+<title>Adomas · v5</title>
 <style>
   :root {
     --bg: #0d0d0d;
@@ -163,7 +163,7 @@
   <span class="nav-name">Adomas</span>
   <div class="nav-right">
     <span class="nav-status">● Open to clients</span>
-    <span class="nav-ver">v4</span>
+    <span class="nav-ver">v5</span>
   </div>
 </nav>
 
@@ -230,10 +230,33 @@ const DEFAULT_TASKS = [
     status: "active", priority: "med" },
   { id: "T9", proj: "Market analytics", title: "More grouping options",
     detail: "Group by employee count, company age, or city",
+    status: "active", priority: "low" },
+  { id: "T10", proj: "Colosseum", title: "Tags editable",
+    detail: "Let users create and edit exercise tags in the UI",
+    status: "active", priority: "med" },
+  { id: "T11", proj: "Colosseum", title: "Strength-based view: sets weight reps 1RM %",
+    detail: "View sets in terms of 1RM percentage alongside weight and reps",
+    status: "active", priority: "high" },
+  { id: "T12", proj: "Colosseum", title: "Projection curve — steepness, limit, drag, coefficient",
+    detail: "Show curve steepness and ceiling; top-drag control + coefficient view",
+    status: "active", priority: "med" },
+  { id: "T13", proj: "Colosseum", title: "Merged exercises strength from both",
+    detail: "Combine strength scores across merged/equivalent exercises",
+    status: "active", priority: "med" },
+  { id: "T14", proj: "Colosseum", title: "Failed exercises don't register",
+    detail: "Exclude failed sets from PR and strength calculations",
+    status: "active", priority: "high" },
+  { id: "T15", proj: "Colosseum", title: "Convert all weights to RM in history",
+    detail: "Show historical sets as 1RM equivalents throughout",
+    status: "active", priority: "med" },
+  { id: "T16", proj: "Colosseum", title: "% CSA muscle gain — grams — looks",
+    detail: "Estimate muscle cross-sectional area gain as % / grams / visual",
     status: "active", priority: "low" }
 ];
 
 const VERSIONS = [
+  { v: 5, title: "Colosseum tasks added", sp: 1,
+    note: "7 Colosseum tasks: tags, strength view, projection, merged, fails, RM history, CSA." },
   { v: 4, title: "Market analytics tasks added", sp: 1,
     note: "7 VZ/market-analytics tasks: Supabase, LT, sources, predictions, margins, grouping." },
   { v: 3, title: "Editable tasks + suggestion engine", sp: 4,
